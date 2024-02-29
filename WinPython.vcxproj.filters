@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="源文件\framework">
+      <UniqueIdentifier>{743052b9-01ef-4f4a-a414-c3e91f263bae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\object">
+      <UniqueIdentifier>{661f7767-f02d-4eda-a329-538dbdb2ea04}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\util">
+      <UniqueIdentifier>{fcbec385-c468-41f0-a196-c8419a42c31c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\framework">
+      <UniqueIdentifier>{bb67f8a1-2a38-4cd1-b79e-2e3772a14319}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\util">
+      <UniqueIdentifier>{4d29d9a1-91cc-4967-9417-4154c319fa95}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\object">
+      <UniqueIdentifier>{8b6a10e9-c801-4aeb-a9d3-289be4529b18}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="arrayList.cpp">
+      <Filter>源文件\util</Filter>
+    </ClCompile>
+    <ClCompile Include="PyString.cpp">
+      <Filter>源文件\object</Filter>
+    </ClCompile>
+    <ClCompile Include="PyObject.cpp">
+      <Filter>源文件\object</Filter>
+    </ClCompile>
+    <ClCompile Include="PyInteger.cpp">
+      <Filter>源文件\object</Filter>
+    </ClCompile>
+    <ClCompile Include="CodeObject.cpp">
+      <Filter>源文件\object</Filter>
+    </ClCompile>
+    <ClCompile Include="byteCodeFileParser.cpp">
+      <Filter>源文件\framework</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>源文件\framework</Filter>
+    </ClCompile>
+    <ClCompile Include="interpreter.cpp">
+      <Filter>源文件\framework</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="byteCodeFileParser.hpp">
+      <Filter>头文件\framework</Filter>
+    </ClInclude>
+    <ClInclude Include="bufferedInputStream.hpp">
+      <Filter>头文件\util</Filter>
+    </ClInclude>
+    <ClInclude Include="arrayList.hpp">
+      <Filter>头文件\util</Filter>
+    </ClInclude>
+    <ClInclude Include="CodeObject.hpp">
+      <Filter>头文件\object</Filter>
+    </ClInclude>
+    <ClInclude Include="PyInteger.hpp">
+      <Filter>头文件\object</Filter>
+    </ClInclude>
+    <ClInclude Include="PyObject.hpp">
+      <Filter>头文件\object</Filter>
+    </ClInclude>
+    <ClInclude Include="PyString.hpp">
+      <Filter>头文件\object</Filter>
+    </ClInclude>
+    <ClInclude Include="bytecode.hpp">
+      <Filter>头文件\framework</Filter>
+    </ClInclude>
+    <ClInclude Include="interpreter.hpp">
+      <Filter>头文件\framework</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
