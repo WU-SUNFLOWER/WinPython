@@ -31,6 +31,12 @@
     <Filter Include="头文件\object">
       <UniqueIdentifier>{8b6a10e9-c801-4aeb-a9d3-289be4529b18}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\klass">
+      <UniqueIdentifier>{ea5230ff-cf11-4bc3-8637-24c4152422ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\klass">
+      <UniqueIdentifier>{27603656-c35d-42f4-8c10-6a9ded4f070c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="arrayList.cpp">
@@ -62,6 +68,15 @@
     </ClCompile>
     <ClCompile Include="map.cpp">
       <Filter>源文件\util</Filter>
+    </ClCompile>
+    <ClCompile Include="Klass.cpp">
+      <Filter>源文件\klass</Filter>
+    </ClCompile>
+    <ClCompile Include="IntegerKlass.cpp">
+      <Filter>源文件\klass</Filter>
+    </ClCompile>
+    <ClCompile Include="StringKlass.cpp">
+      <Filter>源文件\klass</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -97,6 +112,15 @@
     </ClInclude>
     <ClInclude Include="map.hpp">
       <Filter>头文件\util</Filter>
+    </ClInclude>
+    <ClInclude Include="Klass.hpp">
+      <Filter>头文件\klass</Filter>
+    </ClInclude>
+    <ClInclude Include="IntegerKlass.hpp">
+      <Filter>头文件\klass</Filter>
+    </ClInclude>
+    <ClInclude Include="StringKlass.hpp">
+      <Filter>头文件\klass</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

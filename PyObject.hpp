@@ -1,30 +1,40 @@
 #ifndef PyObject_Hpp
 #define PyObject_Hpp
+
+#include "Klass.hpp"
+#include <cassert>
+
 class PyObject {
+private:
+    // 不同类型的python对象通过klass指针的指向不同来区分
+    Klass* klass;
 public:
-    virtual void print() const {};
 
-    virtual PyObject* add(PyObject* other) const {
-        return nullptr;
-    };
+    PyObject() : klass(nullptr) {};
 
-    virtual PyObject* less(PyObject* other) const {
-        return nullptr;
-    };
-    virtual PyObject* less_equal(PyObject* other) const {
-        return nullptr;
+    void setKlass(Klass* k) {
+        klass = k;
     }
-    virtual PyObject* equal(PyObject* other) const {
-        return nullptr;
+    const Klass* getKlass() const {
+        assert(klass != nullptr);
+        return klass;
     }
-    virtual PyObject* greater_equal(PyObject* other) const {
-        return nullptr;
-    }
-    virtual PyObject* greater(PyObject* other) const {
-        return nullptr;
-    };
-    virtual PyObject* not_equal(PyObject* other) const {
-        return nullptr;
-    }
+
+    /*公用方法 Start*/
+    void print() const;
+
+    PyObject* add(PyObject* other) const;
+    PyObject* sub(PyObject* other) const;
+    PyObject* mul(PyObject* other) const;
+    PyObject* div(PyObject* other) const;
+    PyObject* mod(PyObject* other) const;
+
+    PyObject* less(PyObject* other) const;
+    PyObject* less_equal(PyObject* other) const;
+    PyObject* equal(PyObject* other) const;
+    PyObject* greater_equal(PyObject* other) const;
+    PyObject* greater(PyObject* other) const;
+    PyObject* not_equal(PyObject* other) const;
+    /*公用方法 End*/
 };
 #endif

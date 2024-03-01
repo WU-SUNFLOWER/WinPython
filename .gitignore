@@ -36,7 +36,8 @@ x64/
 .vs/
 *.vsidx
 *.ipch
-*.suo
+.suo
 *.tlog
 *.ilk
 *.pdb
+*.db
