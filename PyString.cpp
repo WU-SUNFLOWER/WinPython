@@ -1,4 +1,7 @@
 #include "PyString.hpp"
+#include <cstdio>
+#include <cstring>
+#include <cassert>
 
 PyString::PyString(char* str_source) {
     length = strlen(str_source);

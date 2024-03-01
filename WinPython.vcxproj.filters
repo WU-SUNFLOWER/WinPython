@@ -57,6 +57,12 @@
     <ClCompile Include="interpreter.cpp">
       <Filter>源文件\framework</Filter>
     </ClCompile>
+    <ClCompile Include="Universe.cpp">
+      <Filter>源文件\object</Filter>
+    </ClCompile>
+    <ClCompile Include="map.cpp">
+      <Filter>源文件\util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="byteCodeFileParser.hpp">
@@ -85,6 +91,12 @@
     </ClInclude>
     <ClInclude Include="interpreter.hpp">
       <Filter>头文件\framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Universe.hpp">
+      <Filter>头文件\object</Filter>
+    </ClInclude>
+    <ClInclude Include="map.hpp">
+      <Filter>头文件\util</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,4 +1,7 @@
 #include "PyInteger.hpp"
+#include <cstdint>
+#include <iostream>
+#include "Universe.hpp"
 
 void PyInteger::print() const {
     printf("%d", value);
@@ -13,25 +16,54 @@ PyObject* PyInteger::add(PyObject* other) const {
 }
 
 PyObject* PyInteger::less(PyObject* other) const {
-    return new PyInteger(value < static_cast<PyInteger*>(other)->value);
+    if (value < static_cast<PyInteger*>(other)->value) {
+        return Universe::PyTrue;
+    }
+    else {
+        return Universe::PyFalse;
+    }
 }
 
 PyObject* PyInteger::less_equal(PyObject* other) const {
-    return new PyInteger(value <= static_cast<PyInteger*>(other)->value);
+    if (value <= static_cast<PyInteger*>(other)->value) {
+        return Universe::PyTrue;
+    }
+    else {
+        return Universe::PyFalse;
+    }
 }
 
 PyObject* PyInteger::equal(PyObject* other) const {
-    return new PyInteger(value == static_cast<PyInteger*>(other)->value);
+    if (value == static_cast<PyInteger*>(other)->value) {
+        return Universe::PyTrue;
+    }
+    else {
+        return Universe::PyFalse;
+    }
 }
 
 PyObject* PyInteger::greater_equal(PyObject* other) const {
-    return new PyInteger(value >= static_cast<PyInteger*>(other)->value);
+    if (value >= static_cast<PyInteger*>(other)->value) {
+        return Universe::PyTrue;
+    }
+    else {
+        return Universe::PyFalse;
+    }
 }
 
 PyObject* PyInteger::greater(PyObject* other) const {
-    return new PyInteger(value > static_cast<PyInteger*>(other)->value);
+    if (value > static_cast<PyInteger*>(other)->value) {
+        return Universe::PyTrue;
+    } else {
+        return Universe::PyFalse;
+    }
 }
 
 PyObject* PyInteger::not_equal(PyObject* other) const {
-    return new PyInteger(value != static_cast<PyInteger*>(other)->value);
+    if (value != static_cast<PyInteger*>(other)->value) {
+        return Universe::PyTrue;
+    }
+    else {
+        return Universe::PyFalse;
+    }
 }

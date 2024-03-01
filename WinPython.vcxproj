@@ -131,6 +131,7 @@
     <ClCompile Include="byteCodeFileParser.cpp" />
     <ClCompile Include="CodeObject.cpp" />
     <ClCompile Include="interpreter.cpp" />
+    <ClCompile Include="map.cpp" />
     <ClCompile Include="PyInteger.cpp" />
     <ClCompile Include="PyObject.cpp" />
     <ClCompile Include="PyString.cpp" />
@@ -138,6 +139,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="Universe.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="arrayList.hpp" />
@@ -146,9 +148,11 @@
     <ClInclude Include="byteCodeFileParser.hpp" />
     <ClInclude Include="CodeObject.hpp" />
     <ClInclude Include="interpreter.hpp" />
+    <ClInclude Include="map.hpp" />
     <ClInclude Include="PyInteger.hpp" />
     <ClInclude Include="PyObject.hpp" />
     <ClInclude Include="PyString.hpp" />
+    <ClInclude Include="Universe.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

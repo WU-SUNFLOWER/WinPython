@@ -1,7 +1,4 @@
 #include "interpreter.hpp"
-#include "bytecode.hpp"
-#include "PyInteger.hpp"
-#include <iostream>
 
 Interpreter::~Interpreter() {
 
@@ -65,10 +62,10 @@ void Interpreter::run(CodeObject* code) {
                         PUSH(lhs->less(rhs));
                         break;
                     case CompareCondition::Less_Equal:
-                        PUSH(lhs->less(rhs));
+                        PUSH(lhs->less_equal(rhs));
                         break;
                     case CompareCondition::Equal:
-                        PUSH(lhs->less(rhs));
+                        PUSH(lhs->equal(rhs));
                         break;
                     case CompareCondition::Greater_Equal:
                         PUSH(lhs->greater_equal(rhs));
@@ -90,7 +87,7 @@ void Interpreter::run(CodeObject* code) {
             // 该指令执行的是绝对地址跳转
             case ByteCode::Pop_Jump_If_False:
                 lhs = POP();
-                if (static_cast<PyInteger*>(lhs)->getValue() == 0) {
+                if (lhs == Universe::PyFalse) {
                     pc = op_arg;
                 }
                 break;

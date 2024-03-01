@@ -9,8 +9,10 @@ enum ByteCode : uint8_t {
     // 判断指令是否含参的边界值
     // op < Have_Argument 表示指令不含参数
     // op >= Have_Argument 表示指令含参数
-    Have_Argument = 0x5a,  
+    Have_Argument = 0x5a,
+    Store_Name = 0x5a,  // 弹出栈顶元素出栈，并赋值给参数指定的变量
     Load_Const = 0x64,  // 将常量列表中的操作数加载到栈中
+    Load_Name = 0x65,  // 将参数代表的变量压栈
     Compare_Op = 0x6b,
     Pop_Jump_If_False = 0x72,
     Jump_Forward = 0x6e,

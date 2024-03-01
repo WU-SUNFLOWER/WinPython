@@ -1,5 +1,7 @@
 #include "byteCodeFileParser.hpp"
+#include "PyInteger.hpp"
 #include <cassert>
+#include "Universe.hpp"
 
 CodeObject* ByteCodeFileParser::parse() {
     uint32_t magicNumber = fileStream->readInt();
@@ -81,7 +83,7 @@ ArrayList<PyObject*>* ByteCodeFileParser::getTuple() {
                 break;
             // 元素为None Object
             case 'N':
-                tuple->push(nullptr);
+                tuple->push(Universe::PyNone);
                 break;
             // 元素为字符串
             case 's':

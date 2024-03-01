@@ -4,7 +4,6 @@
 #include "bufferedInputStream.hpp"
 #include "arrayList.hpp"
 #include "CodeObject.hpp"
-#include "PyInteger.hpp"
 
 class ByteCodeFileParser {
 private:

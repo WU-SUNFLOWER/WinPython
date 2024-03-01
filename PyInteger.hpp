@@ -1,15 +1,14 @@
 #ifndef PyInteger_Hpp
-#define PyIntger_Hpp
+#define PyInteger_Hpp
 
-#include <cstdint>
-#include <iostream>
 #include "PyObject.hpp"
+#include <cstdint>
 
 class PyInteger: public PyObject {
 private:
     int32_t value;
 public:
-    PyInteger(int32_t v) : value(v) {}
+    PyInteger(int32_t v) : value(v) {};
     
     int32_t getValue() const;
     

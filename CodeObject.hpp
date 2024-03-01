@@ -4,7 +4,6 @@
 #include "arrayList.hpp"
 #include "PyString.hpp"
 #include "PyObject.hpp"
-#include "arrayList.hpp"
 #include <cstdint>
 
 class CodeObject : public PyObject {

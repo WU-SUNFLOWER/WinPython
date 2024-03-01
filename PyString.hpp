@@ -2,10 +2,7 @@
 #define PyString_Hpp
 
 #include "PyObject.hpp"
-#include <cstdio>
-#include <cstring>
 #include <cstdint>
-#include <cassert>
 
 class PyString : public PyObject {
 private:
