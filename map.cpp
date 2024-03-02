@@ -25,7 +25,7 @@ Map<KEY, VAL>::~Map() {
 }
 
 template<typename KEY, typename VAL>
-void Map<KEY, VAL>::add(KEY key, VAL value) {
+void Map<KEY, VAL>::set(KEY key, VAL value) {
     // 如果key值在哈希表中已出现过，则直接覆盖对应的value值
     size_t searchIdx = getIndex(key);
     if (getIndex(key) != -1) {
@@ -76,7 +76,7 @@ KEY Map<KEY, VAL>::getKey(size_t index) {
 template<typename KEY, typename VAL>
 size_t Map<KEY, VAL>::getIndex(KEY& key) {
     for (size_t i = 0; i < length; ++i) {
-        if (ptr[i].key->equal(key)) {
+        if (ptr[i].key->equal(key) == Universe::PyTrue) {
             return i;
         }
     }

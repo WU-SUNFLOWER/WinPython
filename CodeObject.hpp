@@ -6,6 +6,8 @@
 #include "PyObject.hpp"
 #include <cstdint>
 
+class FrameObject;
+
 class CodeObject : public PyObject {
 private:
     int32_t _argCount;
@@ -13,20 +15,20 @@ private:
     int32_t _stackSize;
     int32_t _flag;
     PyString* _byteCodes;
-    ArrayList<PyObject*>* _consts;
-    ArrayList<PyObject*>* _names;
-    ArrayList<PyObject*>* _varNames;
-    ArrayList<PyObject*>* _freeVars;
-    ArrayList<PyObject*>* _callVars;
-    PyString* _moduleName;
+    PyObjectList* _consts;
+    PyObjectList* _names;  // 符号表（例如变量的名称、函数的名称、方法的名称...）
+    PyObjectList* _varNames;
+    PyObjectList* _freeVars;
+    PyObjectList* _callVars;
+    PyString* _name;
     PyString* _fileName;
     int32_t _lineno;
     PyString* _notable;
 public:
     CodeObject(int32_t argCount, int32_t nLocals, int32_t stackSize, int32_t flag,
-        PyString* byteCodes, ArrayList<PyObject*>* consts, ArrayList<PyObject*>* names,
-        ArrayList<PyObject*>* varNames, ArrayList<PyObject*>* freeVars,
-        ArrayList<PyObject*>* callVars, PyString* moduleName, PyString* fileName,
+        PyString* byteCodes, PyObjectList* consts, PyObjectList* names,
+        PyObjectList* varNames, PyObjectList* freeVars,
+        PyObjectList* callVars, PyString* name, PyString* fileName,
         int32_t lineno, PyString* notable
     ) :
         _argCount(argCount),
@@ -39,11 +41,15 @@ public:
         _varNames(varNames),
         _freeVars(freeVars),
         _callVars(callVars),
-        _moduleName(moduleName),
+        _name(name),
         _fileName(fileName),
         _lineno(lineno),
         _notable(notable) {};
+    
     friend class Interpreter;
+    friend class FrameObject;
+    friend class PyFunction;
+
     virtual void print() const {};
     virtual PyObject* add(PyObject* other) const {
         return nullptr;

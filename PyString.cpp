@@ -4,7 +4,7 @@
 #include <cassert>
 #include "StringKlass.hpp"
 
-PyString::PyString(char* str_source) {
+PyString::PyString(const char* str_source) {
     length = strlen(str_source);
     ptr = new uint8_t[length];
     memcpy(ptr, str_source, sizeof(uint8_t) * length);

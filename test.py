@@ -1,16 +1,9 @@
-print "HelloWorld"
+i = 0
 
-if "ABC" > "AB":
-    print "c1"
-else:
-    print "c2"
+while i < 10:
+    i = i + 1
+    if i > 5:
+        break;
+    print(i)
     
-if "A" < "AB":
-    print "c1"
-else:
-    print "c2"
-    
-if "AB" == "AB":
-    print "c1"
-else:
-    print "c2"
+print("finish")

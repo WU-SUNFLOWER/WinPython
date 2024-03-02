@@ -15,7 +15,7 @@ public:
     CodeObject* parseCodeObject();
     PyString* getByteCodes();
     PyString* getString();
-    ArrayList<PyObject*>* getTuple();
+    PyObjectList* getTuple();
     PyString* getName();
     PyString* getNoTable();
 };

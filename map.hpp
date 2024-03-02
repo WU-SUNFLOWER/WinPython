@@ -28,7 +28,7 @@ public:
     ~Map();
     
     // 哈希表的增删改查基础操作
-    void add(KEY key, VAL value);
+    void set(KEY key, VAL value);
     VAL remove(KEY key);
     VAL get(KEY key);
     bool has(KEY key);

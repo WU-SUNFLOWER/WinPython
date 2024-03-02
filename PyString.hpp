@@ -9,7 +9,7 @@ private:
     uint8_t* ptr;
     size_t length;
 public:
-    PyString(char* str_source);
+    PyString(const char* str_source);
     PyString(uint8_t* source, size_t length);
     ~PyString();
 

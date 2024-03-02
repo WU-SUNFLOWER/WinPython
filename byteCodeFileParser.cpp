@@ -1,6 +1,7 @@
 #include "byteCodeFileParser.hpp"
 #include "PyInteger.hpp"
 #include <cassert>
+#include <cstdlib>
 #include "Universe.hpp"
 
 CodeObject* ByteCodeFileParser::parse() {
@@ -28,19 +29,22 @@ CodeObject* ByteCodeFileParser::parseCodeObject() {
     printf("argcount=%d, flag=%d\n", argcount, flag);
 
     PyString* byteCodes = getByteCodes();
-    ArrayList<PyObject*>* consts = getTuple();
-    ArrayList<PyObject*>* names = getTuple();
-    ArrayList<PyObject*>* varNames = getTuple();
-    ArrayList<PyObject*>* freeVars = getTuple();
-    ArrayList<PyObject*>* callVars = getTuple();
+    PyObjectList* consts = getTuple();
+    PyObjectList* names = getTuple();  
+    PyObjectList* varNames = getTuple();
+    PyObjectList* freeVars = getTuple();
+    PyObjectList* callVars = getTuple();
 
     PyString* fileName = getName();
-    PyString* moduleName = getName();
+    // CodeObject对象的名称
+    // 全局CodeObject对象的名称默认为"<module>"
+    // 函数对应的CodeObject对象的名称与函数名一致
+    PyString* name = getName();  
     int32_t beginLineNo = fileStream->readInt();
     PyString* lnotab = getNoTable();
 
     return new CodeObject(argcount, nLocals, stackSize, flag, byteCodes,
-        consts, names, varNames, freeVars, callVars, moduleName, fileName,
+        consts, names, varNames, freeVars, callVars, name, fileName,
         beginLineNo, lnotab
     );
 }
@@ -62,14 +66,14 @@ PyString* ByteCodeFileParser::getString() {
     return s;
 }
 
-ArrayList<PyObject*>* ByteCodeFileParser::getTuple() {
+PyObjectList* ByteCodeFileParser::getTuple() {
     // tuple以`(`字符（0x28）作为起始标志
     if (fileStream->readByte() != '(') {
         fileStream->unreadByte();
         return nullptr;
     }
     int32_t length = fileStream->readInt();  // tuple中元素的个数
-    ArrayList<PyObject*>* tuple = new ArrayList<PyObject*>(length);
+    PyObjectList* tuple = new PyObjectList(length);
     for (int32_t i = 0; i < length; ++i) {
         uint8_t objType = fileStream->readByte();
         switch (objType) {

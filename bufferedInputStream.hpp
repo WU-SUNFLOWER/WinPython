@@ -1,7 +1,8 @@
 #ifndef Buffered_Input_Stream_Hpp
 #define Buffered_Input_Stream_Hpp
 
-#include <iostream>
+#include <cstdio>
+#include <cstdint>
 
 #define Buffer_Length 256
 

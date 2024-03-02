@@ -1,6 +1,8 @@
 #ifndef PyObject_Hpp
 #define PyObject_Hpp
 
+#include "arrayList.hpp"
+#include "map.hpp"
 #include "Klass.hpp"
 #include <cassert>
 
@@ -37,4 +39,7 @@ public:
     PyObject* not_equal(PyObject* other) const;
     /*公用方法 End*/
 };
+
+typedef ArrayList<PyObject*> PyObjectList;
+typedef Map<PyObject*, PyObject*> PyObjectMap;
 #endif

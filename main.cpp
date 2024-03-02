@@ -2,6 +2,7 @@
 #include "byteCodeFileParser.hpp"
 #include "interpreter.hpp"
 #include "Universe.hpp"
+#include <cstdlib>
 
 int main(int argc, char* argv[]) {
     if (argc <= 1) {

@@ -16,9 +16,6 @@
     <Filter Include="源文件\framework">
       <UniqueIdentifier>{743052b9-01ef-4f4a-a414-c3e91f263bae}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\object">
-      <UniqueIdentifier>{661f7767-f02d-4eda-a329-538dbdb2ea04}</UniqueIdentifier>
-    </Filter>
     <Filter Include="源文件\util">
       <UniqueIdentifier>{fcbec385-c468-41f0-a196-c8419a42c31c}</UniqueIdentifier>
     </Filter>
@@ -28,14 +25,23 @@
     <Filter Include="头文件\util">
       <UniqueIdentifier>{4d29d9a1-91cc-4967-9417-4154c319fa95}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\object">
-      <UniqueIdentifier>{8b6a10e9-c801-4aeb-a9d3-289be4529b18}</UniqueIdentifier>
-    </Filter>
     <Filter Include="头文件\klass">
       <UniqueIdentifier>{ea5230ff-cf11-4bc3-8637-24c4152422ed}</UniqueIdentifier>
     </Filter>
     <Filter Include="源文件\klass">
       <UniqueIdentifier>{27603656-c35d-42f4-8c10-6a9ded4f070c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\object_python">
+      <UniqueIdentifier>{8b6a10e9-c801-4aeb-a9d3-289be4529b18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\object_other">
+      <UniqueIdentifier>{d1ced23b-9f0d-4a4a-b172-dc952302ca08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\object_python">
+      <UniqueIdentifier>{661f7767-f02d-4eda-a329-538dbdb2ea04}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\object_other">
+      <UniqueIdentifier>{9e3b7b9f-dcbd-4814-9835-5afc8a4aae73}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -43,16 +49,16 @@
       <Filter>源文件\util</Filter>
     </ClCompile>
     <ClCompile Include="PyString.cpp">
-      <Filter>源文件\object</Filter>
+      <Filter>源文件\object_python</Filter>
     </ClCompile>
     <ClCompile Include="PyObject.cpp">
-      <Filter>源文件\object</Filter>
+      <Filter>源文件\object_python</Filter>
     </ClCompile>
     <ClCompile Include="PyInteger.cpp">
-      <Filter>源文件\object</Filter>
+      <Filter>源文件\object_python</Filter>
     </ClCompile>
     <ClCompile Include="CodeObject.cpp">
-      <Filter>源文件\object</Filter>
+      <Filter>源文件\object_python</Filter>
     </ClCompile>
     <ClCompile Include="byteCodeFileParser.cpp">
       <Filter>源文件\framework</Filter>
@@ -62,9 +68,6 @@
     </ClCompile>
     <ClCompile Include="interpreter.cpp">
       <Filter>源文件\framework</Filter>
-    </ClCompile>
-    <ClCompile Include="Universe.cpp">
-      <Filter>源文件\object</Filter>
     </ClCompile>
     <ClCompile Include="map.cpp">
       <Filter>源文件\util</Filter>
@@ -78,6 +81,21 @@
     <ClCompile Include="StringKlass.cpp">
       <Filter>源文件\klass</Filter>
     </ClCompile>
+    <ClCompile Include="PyFunction.cpp">
+      <Filter>源文件\object_python</Filter>
+    </ClCompile>
+    <ClCompile Include="FunctionKlass.cpp">
+      <Filter>源文件\klass</Filter>
+    </ClCompile>
+    <ClCompile Include="Universe.cpp">
+      <Filter>源文件\object_other</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameObject.cpp">
+      <Filter>源文件\object_other</Filter>
+    </ClCompile>
+    <ClCompile Include="Block.cpp">
+      <Filter>源文件\object_other</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="byteCodeFileParser.hpp">
@@ -90,25 +108,22 @@
       <Filter>头文件\util</Filter>
     </ClInclude>
     <ClInclude Include="CodeObject.hpp">
-      <Filter>头文件\object</Filter>
+      <Filter>头文件\object_python</Filter>
     </ClInclude>
     <ClInclude Include="PyInteger.hpp">
-      <Filter>头文件\object</Filter>
+      <Filter>头文件\object_python</Filter>
     </ClInclude>
     <ClInclude Include="PyObject.hpp">
-      <Filter>头文件\object</Filter>
+      <Filter>头文件\object_python</Filter>
     </ClInclude>
     <ClInclude Include="PyString.hpp">
-      <Filter>头文件\object</Filter>
+      <Filter>头文件\object_python</Filter>
     </ClInclude>
     <ClInclude Include="bytecode.hpp">
       <Filter>头文件\framework</Filter>
     </ClInclude>
     <ClInclude Include="interpreter.hpp">
       <Filter>头文件\framework</Filter>
-    </ClInclude>
-    <ClInclude Include="Universe.hpp">
-      <Filter>头文件\object</Filter>
     </ClInclude>
     <ClInclude Include="map.hpp">
       <Filter>头文件\util</Filter>
@@ -121,6 +136,21 @@
     </ClInclude>
     <ClInclude Include="StringKlass.hpp">
       <Filter>头文件\klass</Filter>
+    </ClInclude>
+    <ClInclude Include="PyFunction.hpp">
+      <Filter>头文件\object_python</Filter>
+    </ClInclude>
+    <ClInclude Include="FunctionKlass.hpp">
+      <Filter>头文件\klass</Filter>
+    </ClInclude>
+    <ClInclude Include="Universe.hpp">
+      <Filter>头文件\object_other</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameObject.hpp">
+      <Filter>头文件\object_other</Filter>
+    </ClInclude>
+    <ClInclude Include="Block.hpp">
+      <Filter>头文件\object_other</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

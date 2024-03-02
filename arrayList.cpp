@@ -1,6 +1,7 @@
-#include <iostream>
+#include <cstdio>
 #include "arrayList.hpp"
 #include "PyString.hpp"
+#include "Block.hpp"
 
 template<typename T>
 ArrayList<T>::ArrayList(size_t n) {
@@ -42,8 +43,8 @@ void ArrayList<T>::insert(size_t index, T elem) {
     }
     // 第二种情况：在数组中间添加元素
     else {
-        // 假装为数组中添加一个新元素，触发数组扩容
-        push(nullptr);
+        // 数组满了要先扩容
+        if (length >= capacity) expand();
         // 挪动元素
         for (size_t i = length; i > index; --i) {
             ptr[i] = ptr[i - 1];
@@ -65,3 +66,4 @@ void ArrayList<T>::set(size_t index, T elem) {
 
 template class ArrayList<PyString*>;
 template class ArrayList<PyObject*>;
+template class ArrayList<Block>;
