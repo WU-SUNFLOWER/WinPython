@@ -10,7 +10,7 @@ private:
 public:
     static FunctionKlass* getInstance() {
         if (instance == nullptr) {
-            return new FunctionKlass();
+            instance = new FunctionKlass();
         }
         return instance;
     }

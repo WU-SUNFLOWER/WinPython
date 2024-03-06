@@ -137,8 +137,12 @@
     <ClCompile Include="interpreter.cpp" />
     <ClCompile Include="Klass.cpp" />
     <ClCompile Include="map.cpp" />
+    <ClCompile Include="MethodKlass.cpp" />
+    <ClCompile Include="NativeFunctionKlass.cpp" />
+    <ClCompile Include="nativeFunctions.cpp" />
     <ClCompile Include="PyFunction.cpp" />
     <ClCompile Include="PyInteger.cpp" />
+    <ClCompile Include="PyMethod.cpp" />
     <ClCompile Include="PyObject.cpp" />
     <ClCompile Include="PyString.cpp" />
     <ClCompile Include="main.cpp">
@@ -161,8 +165,12 @@
     <ClInclude Include="interpreter.hpp" />
     <ClInclude Include="Klass.hpp" />
     <ClInclude Include="map.hpp" />
+    <ClInclude Include="MethodKlass.hpp" />
+    <ClInclude Include="nativeFunctions.hpp" />
+    <ClInclude Include="NativeFunctionKlass.hpp" />
     <ClInclude Include="PyFunction.hpp" />
     <ClInclude Include="PyInteger.hpp" />
+    <ClInclude Include="PyMethod.hpp" />
     <ClInclude Include="PyObject.hpp" />
     <ClInclude Include="PyString.hpp" />
     <ClInclude Include="StringKlass.hpp" />

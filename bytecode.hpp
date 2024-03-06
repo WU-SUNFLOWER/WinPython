@@ -17,6 +17,7 @@ enum ByteCode : uint8_t {
     Store_Global = 0x61,
     Load_Const = 0x64,  // 将常量列表中的操作数加载到栈中
     Load_Name = 0x65,  // 将参数代表的变量压栈
+    Load_Attr = 0x6a, // 将参数代表的属性属性压栈
     Compare_Op = 0x6b,
     Jump_Forward = 0x6e,
     Jump_Absolute = 0x71,

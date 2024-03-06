@@ -18,10 +18,7 @@ public:
     void insert(size_t index, T elem);
     void set(size_t index, T elem);
     // 获取指定位置的元素
-    T get(size_t index) {
-        assert(index < length);
-        return ptr[index];
-    }
+    T get(size_t index);
     // 获取数组中最后一个位置的元素
     T pop() {
         assert(length > 0);
@@ -33,6 +30,7 @@ public:
     size_t getCapacity() const {
         return capacity;
     }
+
 };
 
 #endif

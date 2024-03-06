@@ -17,9 +17,11 @@ public:
     Interpreter();
     void run(CodeObject* code);
 
-    void entryNewFrame(uint16_t argNumber);
+    void entryIntoNewFrame(uint16_t argNumber);
 
-    void exitCurFrame();
+    void lauchCallable(PyObject* callable, PyObjectList* args);
+
+    void exitFromCurFrame();
 };
 
 #endif

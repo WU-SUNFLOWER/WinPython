@@ -3,15 +3,31 @@
 #include "PyFunction.hpp"
 #include <cstdio>
 #include <cstdlib>
+#include "PyObject.hpp"
 #include "Block.hpp"
+#include "nativeFunctions.hpp"
+#include "FunctionKlass.hpp"
+#include "NativeFunctionKlass.hpp"
+#include "MethodKlass.hpp"
+#include "PyMethod.hpp"
+#include "StringKlass.hpp"
 
 Interpreter::Interpreter() {
     _curFrame = nullptr;
     _retValue = nullptr;
     _buildins = new PyObjectMap();
+
     _buildins->set(new PyString("True"), Universe::PyTrue);
     _buildins->set(new PyString("False"), Universe::PyFalse);
     _buildins->set(Universe::PyNone, Universe::PyNone);
+    
+#define PackNativeFunc(f) (new PyFunction(reinterpret_cast<NativeFuncPointer>(f)))
+
+    _buildins->set(new PyString("len"), PackNativeFunc(NativeFunction::len));
+
+    PyObjectMap* dict_str = StringKlass::getInstance()->getKlassDict();
+    dict_str->set(new PyString("upper"), 
+        PackNativeFunc(NativeFunction::string_upper));
 }
 
 #define POP() (_curFrame->popFromStack())
@@ -140,9 +156,21 @@ void Interpreter::run(CodeObject* codeObject) {
             }
 
             // 弹出栈顶的CodeObject对象，据此创建函数
+            // 该指令含有参数，表示需要为该函数绑定多少个默认参数
             case ByteCode::Make_Function: {
                 lhs = POP();
                 PyFunction* funcObject = new PyFunction(static_cast<CodeObject*>(lhs));
+
+                // 处理需要绑定默认参数的函数
+                int16_t defaultArgCount = op_arg;
+                if (defaultArgCount > 0) {
+                    PyObjectList* DefaultArgs = new PyObjectList(defaultArgCount);
+                    while (defaultArgCount-- > 0) {
+                        DefaultArgs->set(defaultArgCount, POP());
+                    }
+                    funcObject->setDefaultArgs(DefaultArgs);
+                }
+
                 // 同步栈桢全局变量表和函数对象的全局变量表
                 funcObject->setGlobalMap(_curFrame->_globals);
                 PUSH(funcObject);
@@ -150,7 +178,7 @@ void Interpreter::run(CodeObject* codeObject) {
             }
             
             case ByteCode::Call_Function: {
-                entryNewFrame(op_arg);
+                entryIntoNewFrame(op_arg);
                 break;
             }
             
@@ -158,7 +186,7 @@ void Interpreter::run(CodeObject* codeObject) {
                 // 因为callee的栈桢即将被销毁，所以需要将返回值临时缓存一下
                 _retValue = POP();
                 // 退出并销毁callee栈桢，恢复caller栈桢
-                exitCurFrame();
+                exitFromCurFrame();
                 break;
 
             // 将栈顶元素储存到全局变量
@@ -214,6 +242,17 @@ void Interpreter::run(CodeObject* codeObject) {
                 PUSH(variableObject);
                 break;
             }
+            
+            case ByteCode::Load_Attr: {
+                // 将要查找属性的对象弹栈
+                lhs = POP();  
+                // 查找要获取的属性名的name
+                rhs = _curFrame->_names->get(op_arg);
+                // 将查得的属性对象压栈
+                PUSH(lhs->getattr(rhs));
+                break;
+            }
+
 
             case ByteCode::Load_Fast:
                 PUSH(_curFrame->_fastLocals->get(op_arg));
@@ -229,20 +268,76 @@ void Interpreter::run(CodeObject* codeObject) {
     }
 }
 
+#define isCommonFuncKlass(k) \
+    (k == FunctionKlass::getInstance() || \
+    k == NativeFunctionKlass::getInstance())
+#define isNativeFuncKlass(k) (k == NativeFunctionKlass::getInstance())
+#define isPythonFuncKlass(k) (k == FunctionKlass::getInstance())
+#define isMethod(k) (k == MethodKlass::getInstance())
+
 // 创建新的栈桢并将解释器的执行上下文切换为新的栈桢
-void Interpreter::entryNewFrame(uint16_t argNumber) {
-    PyObjectList* fastLocalAr = new PyObjectList(argNumber);
+void Interpreter::entryIntoNewFrame(uint16_t argNumber) {
+    PyObjectList* args = new PyObjectList(argNumber);
+    
     // 加载调用参数到fastLocal数组中
     while (argNumber-- > 0) {
-        fastLocalAr->set(argNumber, POP());
+        args->set(argNumber, POP());
     }
-    PyFunction* callee = static_cast<PyFunction*>(POP());
-    FrameObject* calleeFrame = new FrameObject(callee, _curFrame, fastLocalAr);
-    _curFrame = calleeFrame;
+    
+    // 从栈中弹出callable object
+    PyObject* callableObject = POP();
+    const Klass* klass = callableObject->getKlass();
+
+    // 判断callable object的真实类型，提取出真正的callee function
+    PyFunction* calleeFunc = nullptr;
+    PyObject* owner = nullptr;
+    if (isMethod(klass)) {
+        PyMethod* method = static_cast<PyMethod*>(callableObject);
+        calleeFunc = method->getFunc();
+        owner = method->getOwner();
+    }
+    else if (isCommonFuncKlass(klass)) {
+        calleeFunc = static_cast<PyFunction*>(callableObject);
+    }
+    else {
+        printf("Unknown callable object!");
+        exit(-1);
+    }
+    
+    // 对于一般的python函数，需要根据形参列表中的默认参数更新实参列表
+    if (isPythonFuncKlass(klass)) {
+        PyObjectList* defaultArgs = calleeFunc->_defaultArgs;
+        size_t argCnt_orignal = args->getLength();
+        size_t argCnt_total = calleeFunc->funcCode->_argCount;
+        size_t argCnt_default = defaultArgs->getLength();
+        for (size_t i = argCnt_orignal; i < argCnt_total; ++i) {
+            args->set(i, defaultArgs->get(argCnt_default - argCnt_total + i));
+        }
+    }
+
+    // 对于方法，还需要向参数列表中添加宿主对象
+    if (isMethod(klass)) {
+        args->insert(0, owner);
+    }
+
+    // 前期准备工作完毕，发起真正的函数调用
+    klass = calleeFunc->getKlass();
+    if (isNativeFuncKlass(klass)) {
+        _curFrame->pushToStack(calleeFunc->callNativeFunc(args));
+    }
+    else if (isPythonFuncKlass(klass)) {
+        // 创建新栈桢，并切换解释器的执行上下文
+        FrameObject* calleeFrame = 
+            new FrameObject(calleeFunc, _curFrame, args);
+        _curFrame = calleeFrame;
+    }
+    else {
+        printf("Unknown function object!");
+    }
 }
 
 // 退出并销毁当前栈桢，再把解释器执行上下文切换为caller的栈桢
-void Interpreter::exitCurFrame() {
+void Interpreter::exitFromCurFrame() {
     FrameObject* callerFrame = _curFrame->_callerFrame;
     bool isRoot = _curFrame->isRootFrame();
     // 销毁callee的栈桢

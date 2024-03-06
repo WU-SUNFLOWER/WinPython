@@ -5,8 +5,12 @@
 #include "CodeObject.hpp"
 #include "Map.hpp"
 
+// 定义C++内建函数调用指针
+typedef PyObject* (*NativeFuncPointer)(PyObjectList* args);
+
 class PyFunction : public PyObject {
     friend class FunctionKlass;
+    friend class NativeFunctionKlass;
     friend class FrameObject;
     friend class Interpreter;
 private:
@@ -15,14 +19,28 @@ private:
     uint32_t flag;
 
     PyObjectMap* _globals;
+    
+    /*
+        储存函数的默认参数
+        Python中规定函数的非默认参数，必须在默认参数之前
+        例如：
+        def foo(a, b=1) 合法
+        def foo(a=1, b) 报错
+    */
+    PyObjectList* _defaultArgs;
+
+    // 这个指针为C++内建函数预留，普通Python函数默认为空
+    NativeFuncPointer _nativeFunc;
 
 public:
     PyFunction(CodeObject* codeObject);
     PyFunction(Klass* klass);
+    PyFunction(NativeFuncPointer nativeFunc);
 
     void setGlobalMap(PyObjectMap* map) {
         _globals = map;
     }
+    void setDefaultArgs(PyObjectList* args);
 
     const PyString* getName() const {
         return funcName;
@@ -30,5 +48,7 @@ public:
     uint32_t getFlags() const {
         return flag;
     }
+
+    PyObject* callNativeFunc(PyObjectList* args) const;
 };
 #endif

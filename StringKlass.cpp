@@ -1,6 +1,7 @@
 #include "StringKlass.hpp"
 #include "Universe.hpp"
 #include "PyString.hpp"
+#include "PyInteger.hpp"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -79,4 +80,8 @@ PyObject* StringKlass::greater(const PyObject* lhs, const PyObject* rhs) const
 PyObject* StringKlass::not_equal(const PyObject* lhs, const PyObject* rhs) const
 {
     return takeNot(equal(lhs, rhs));
+}
+
+PyObject* StringKlass::len(const PyObject* strObject) const {
+    return new PyInteger(static_cast<const PyString*>(strObject)->getLength());
 }

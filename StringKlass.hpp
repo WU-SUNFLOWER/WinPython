@@ -25,6 +25,7 @@ public:
     virtual PyObject* greater(const PyObject* lhs, const PyObject* rhs) const override;
     virtual PyObject* not_equal(const PyObject* lhs, const PyObject* rhs) const override;
 
+    virtual PyObject* len(const PyObject* strObject) const override;
 };
 
 #endif

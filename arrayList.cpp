@@ -5,7 +5,7 @@
 
 template<typename T>
 ArrayList<T>::ArrayList(size_t n) {
-    capacity = n;
+    capacity = n >= 1 ? n : 1;  // 防止传入≤0的初始大小
     length = 0;
     ptr = new T[capacity];
 }
@@ -63,6 +63,13 @@ void ArrayList<T>::set(size_t index, T elem) {
     }
     ptr[index] = elem;
 }
+
+template<typename T>
+T ArrayList<T>::get(size_t index) {
+    assert(index < length);
+    return ptr[index];
+}
+
 
 template class ArrayList<PyString*>;
 template class ArrayList<PyObject*>;

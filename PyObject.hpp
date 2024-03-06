@@ -23,6 +23,7 @@ public:
     }
 
     /*公用方法 Start*/
+
     void print() const;
 
     PyObject* add(PyObject* other) const;
@@ -37,6 +38,12 @@ public:
     PyObject* greater_equal(PyObject* other) const;
     PyObject* greater(PyObject* other) const;
     PyObject* not_equal(PyObject* other) const;
+
+    // 计算长度
+    PyObject* len() const;
+    // 获取对象属性
+    PyObject* getattr(PyObject* attr) const;
+
     /*公用方法 End*/
 };
 

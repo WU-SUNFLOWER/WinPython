@@ -1,4 +1,9 @@
 #include "PyObject.hpp"
+#include "Universe.hpp"
+#include "FunctionKlass.hpp"
+#include "NativeFunctionKlass.hpp"
+#include "PyFunction.hpp"
+#include "PyMethod.hpp"
 
 void PyObject::print() const
 {
@@ -47,4 +52,24 @@ PyObject* PyObject::greater(PyObject* other) const {
 
 PyObject* PyObject::not_equal(PyObject* other) const {
     return getKlass()->not_equal(this, other);
+}
+
+PyObject* PyObject::len() const {
+    return getKlass()->len(this);
+}
+
+PyObject* PyObject::getattr(PyObject* attr) const {
+    PyObject* ret = getKlass()->getKlassDict()->get(attr);
+    if (ret == Universe::PyNone) return ret;
+    
+    // 如果尝试获取某个对象的方法函数
+    // 则将其由原生函数打包成PyMethod
+    const Klass* retKlass = ret->getKlass();
+    if (retKlass == FunctionKlass::getInstance()
+        || retKlass == NativeFunctionKlass::getInstance()) {
+        ret = new PyMethod(static_cast<PyFunction*>(ret), 
+            const_cast<PyObject*>(this));
+    }
+    
+    return ret;
 }

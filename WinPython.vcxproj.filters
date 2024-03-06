@@ -96,6 +96,18 @@
     <ClCompile Include="Block.cpp">
       <Filter>源文件\object_other</Filter>
     </ClCompile>
+    <ClCompile Include="NativeFunctionKlass.cpp">
+      <Filter>源文件\klass</Filter>
+    </ClCompile>
+    <ClCompile Include="nativeFunctions.cpp">
+      <Filter>源文件\framework</Filter>
+    </ClCompile>
+    <ClCompile Include="MethodKlass.cpp">
+      <Filter>源文件\klass</Filter>
+    </ClCompile>
+    <ClCompile Include="PyMethod.cpp">
+      <Filter>源文件\object_python</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="byteCodeFileParser.hpp">
@@ -151,6 +163,18 @@
     </ClInclude>
     <ClInclude Include="Block.hpp">
       <Filter>头文件\object_other</Filter>
+    </ClInclude>
+    <ClInclude Include="NativeFunctionKlass.hpp">
+      <Filter>头文件\klass</Filter>
+    </ClInclude>
+    <ClInclude Include="nativeFunctions.hpp">
+      <Filter>头文件\framework</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodKlass.hpp">
+      <Filter>头文件\klass</Filter>
+    </ClInclude>
+    <ClInclude Include="PyMethod.hpp">
+      <Filter>头文件\object_python</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
