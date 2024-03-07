@@ -18,6 +18,11 @@ FrameObject::FrameObject(CodeObject* codeObject) {
     size_t cellsLength = 
         codeObject->_cellVars->getLength() + codeObject->_freeVars->getLength();
     _cells = cellsLength > 0 ? new PyList(cellsLength) : nullptr;
+    if (_cells) {
+        for (size_t i = 0; i < cellsLength; ++i) {
+            _cells->set(i, nullptr);
+        }
+    }
 
     _stack = new PyList(codeObject->_stackSize);
     _blockStack = new ArrayList<Block>({});

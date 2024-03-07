@@ -1,10 +1,23 @@
-def foo(x = 5):
-    y = 10
-    def say():
-        print(x + y)
-    x = 1
-    print x
-    return say
+def foo():
+    value = 1
+    print value
 
-say = foo()
-say()
+    def bar(a = 3):
+        print value
+        inner_v = 4
+
+        def func1():
+            print a
+            print value
+
+        def func2():
+            print a
+            print inner_v
+
+        func1()
+        func2()
+
+    return bar
+
+f = foo()
+f()
