@@ -19,7 +19,7 @@ private:
     PyObjectList* _names;  // 符号表（例如变量的名称、函数的名称、方法的名称...）
     PyObjectList* _varNames;
     PyObjectList* _freeVars;
-    PyObjectList* _callVars;
+    PyObjectList* _cellVars;
     PyString* _name;
     PyString* _fileName;
     int32_t _lineno;
@@ -28,7 +28,7 @@ public:
     CodeObject(int32_t argCount, int32_t nLocals, int32_t stackSize, int32_t flag,
         PyString* byteCodes, PyObjectList* consts, PyObjectList* names,
         PyObjectList* varNames, PyObjectList* freeVars,
-        PyObjectList* callVars, PyString* name, PyString* fileName,
+        PyObjectList* cellVars, PyString* name, PyString* fileName,
         int32_t lineno, PyString* notable
     ) :
         _argCount(argCount),
@@ -40,7 +40,7 @@ public:
         _names(names),
         _varNames(varNames),
         _freeVars(freeVars),
-        _callVars(callVars),
+        _cellVars(cellVars),
         _name(name),
         _fileName(fileName),
         _lineno(lineno),

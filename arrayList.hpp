@@ -24,6 +24,7 @@ public:
         assert(length > 0);
         return ptr[--length];
     }
+
     size_t getLength() const {
         return length;
     }

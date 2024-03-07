@@ -11,6 +11,9 @@
 #include "MethodKlass.hpp"
 #include "PyMethod.hpp"
 #include "StringKlass.hpp"
+#include "CellKlass.hpp"
+#include "PyCell.hpp"
+#include "PyList.hpp"
 
 Interpreter::Interpreter() {
     _curFrame = nullptr;
@@ -60,6 +63,17 @@ void Interpreter::run(CodeObject* codeObject) {
                 POP();
                 break;
 
+            case ByteCode::Build_Tuple: {
+                PyList* tuple = new PyList();
+                while (op_arg-- > 0) {
+                    PyObject* temp = POP();
+                    tuple->set(op_arg, temp);
+                }
+                PUSH(tuple);
+                break;
+            }
+                
+            
             case ByteCode::Load_Const:
                 PUSH(Consts->get(op_arg));
                 break;
@@ -158,25 +172,15 @@ void Interpreter::run(CodeObject* codeObject) {
             // 弹出栈顶的CodeObject对象，据此创建函数
             // 该指令含有参数，表示需要为该函数绑定多少个默认参数
             case ByteCode::Make_Function: {
-                lhs = POP();
-                PyFunction* funcObject = new PyFunction(static_cast<CodeObject*>(lhs));
-
-                // 处理需要绑定默认参数的函数
-                int16_t defaultArgCount = op_arg;
-                if (defaultArgCount > 0) {
-                    PyObjectList* DefaultArgs = new PyObjectList(defaultArgCount);
-                    while (defaultArgCount-- > 0) {
-                        DefaultArgs->set(defaultArgCount, POP());
-                    }
-                    funcObject->setDefaultArgs(DefaultArgs);
-                }
-
-                // 同步栈桢全局变量表和函数对象的全局变量表
-                funcObject->setGlobalMap(_curFrame->_globals);
-                PUSH(funcObject);
+                makeFunction(op_arg, false);
                 break;
             }
             
+            case ByteCode::Make_Closure: {
+                makeFunction(op_arg, true);
+                break;
+            }
+
             case ByteCode::Call_Function: {
                 entryIntoNewFrame(op_arg);
                 break;
@@ -262,10 +266,84 @@ void Interpreter::run(CodeObject* codeObject) {
                 _curFrame->_fastLocals->set(op_arg, POP());
                 break;
 
+            // 弹出栈顶元素，将其挂载到运行时的cells表中
+            /*
+                在Python的闭包机制中，只有outer function才有可能调用Store_Deref
+                如果在inner function中尝试对同名变量赋值，虚拟机会为inner function
+                创建新的local variable而不是修改outer function中的同名变量
+            */
+            case ByteCode::Store_Deref:
+                _curFrame->_cells->set(op_arg, POP());
+                break;
+            
+            // 获取cell variable并解引用，再加载到栈顶
+            case ByteCode::Load_Deref: {
+                PyObject* object = _curFrame->_cells->get(op_arg);
+                if (object->getKlass() == CellKlass::getInstance()) {
+                    PyCell* cell = static_cast<PyCell*>(object);
+                    PyObject* temp = cell->getObject();
+                    PUSH(temp);
+                }
+                else {
+                    PUSH(object);
+                }
+                break;
+            }
+
+
+            // 将cells表中的元素转换为PyCell并压栈
+            // 该指令与Make_Closure指令配合使用，用于构建闭包函数
+            case ByteCode::Load_Closure: {
+                PyObject* cellObject = _curFrame->_cells->get(op_arg);
+                /* 
+                    如果在cells列表里没找到，也有可能是inner function恰好引用
+                    outer function的argument。所以还要再去尝试找找。
+                */
+                if (!cellObject) {
+                    PyObject* cellName = 
+                        _curFrame->_codeObject->_cellVars->get(op_arg);
+                    size_t i = _curFrame->_varNames->index(cellName);
+                    cellObject = _curFrame->_fastLocals->get(i);
+                    // 找到了之后别忘了把cellObject挂载到栈桢的_cells上去
+                    _curFrame->_cells->set(op_arg, cellObject);
+                }
+                assert(cellObject != nullptr);
+                if (cellObject->getKlass() != CellKlass::getInstance()) {
+                    cellObject = new PyCell(_curFrame->_cells, op_arg);
+                }
+                PyObject* temp = static_cast<PyCell*>(cellObject)->getObject();
+                PUSH(cellObject);
+                break;
+            }
+
+
             default:
                 printf("Unknown bytecode 0x%x\n", op_code);
         }
     }
+}
+
+void Interpreter::makeFunction(int16_t defaultArgCount, bool isClosure) {
+    PyFunction* funcObject = new PyFunction(static_cast<CodeObject*>(POP()));
+
+    // 如果需要创建的函数对象为闭包函数，需要绑定cells列表
+    if (isClosure) {
+        PyObject* temp = POP();
+        funcObject->setFreevars(static_cast<PyList*>(temp));
+    }
+
+    // 处理需要绑定默认参数的函数
+    if (defaultArgCount > 0) {
+        PyObjectList* DefaultArgs = new PyObjectList(defaultArgCount);
+        while (defaultArgCount-- > 0) {
+            DefaultArgs->set(defaultArgCount, POP());
+        }
+        funcObject->setDefaultArgs(DefaultArgs);
+    }
+
+    // 同步栈桢全局变量表和函数对象的全局变量表
+    funcObject->setGlobalMap(_curFrame->_globals);
+    PUSH(funcObject);
 }
 
 #define isCommonFuncKlass(k) \
@@ -275,7 +353,6 @@ void Interpreter::run(CodeObject* codeObject) {
 #define isPythonFuncKlass(k) (k == FunctionKlass::getInstance())
 #define isMethod(k) (k == MethodKlass::getInstance())
 
-// 创建新的栈桢并将解释器的执行上下文切换为新的栈桢
 void Interpreter::entryIntoNewFrame(uint16_t argNumber) {
     PyObjectList* args = new PyObjectList(argNumber);
     
@@ -287,6 +364,10 @@ void Interpreter::entryIntoNewFrame(uint16_t argNumber) {
     // 从栈中弹出callable object
     PyObject* callableObject = POP();
     const Klass* klass = callableObject->getKlass();
+    if (!isMethod(klass) && !isCommonFuncKlass(klass)) {
+        printf("Unknown callable object!");
+        exit(-1);
+    }
 
     // 判断callable object的真实类型，提取出真正的callee function
     PyFunction* calleeFunc = nullptr;
@@ -299,14 +380,15 @@ void Interpreter::entryIntoNewFrame(uint16_t argNumber) {
     else if (isCommonFuncKlass(klass)) {
         calleeFunc = static_cast<PyFunction*>(callableObject);
     }
-    else {
-        printf("Unknown callable object!");
+    
+    if (!calleeFunc) {
+        printf("Try to call a function with null pointer");
         exit(-1);
     }
-    
+
     // 对于一般的python函数，需要根据形参列表中的默认参数更新实参列表
-    if (isPythonFuncKlass(klass)) {
-        PyObjectList* defaultArgs = calleeFunc->_defaultArgs;
+    PyObjectList* defaultArgs = calleeFunc->_defaultArgs;
+    if (isPythonFuncKlass(klass) && defaultArgs) {
         size_t argCnt_orignal = args->getLength();
         size_t argCnt_total = calleeFunc->funcCode->_argCount;
         size_t argCnt_default = defaultArgs->getLength();
@@ -326,9 +408,26 @@ void Interpreter::entryIntoNewFrame(uint16_t argNumber) {
         _curFrame->pushToStack(calleeFunc->callNativeFunc(args));
     }
     else if (isPythonFuncKlass(klass)) {
-        // 创建新栈桢，并切换解释器的执行上下文
+        // 创建新栈桢
         FrameObject* calleeFrame = 
             new FrameObject(calleeFunc, _curFrame, args);
+        /* 
+           将与callee绑定的cells（即callee函数运行时
+           需要依赖的freevars），装载到新的栈桢上去。
+           这样当callee运行时，就可以通过Load_Closure指令
+           访问这些freevars了。
+        */
+        PyList* freevarsList = calleeFunc->_freevars;
+        if (freevarsList) {
+            size_t freevar_len = freevarsList->getLength();
+            size_t cells_len = calleeFunc->funcCode->_cellVars->getLength();
+            for (size_t i = 0; i < freevar_len; ++i) {
+                PyCell* temp = static_cast<PyCell*>(freevarsList->get(i));
+                PyObject* temp1 = temp->getObject();
+                calleeFrame->_cells->set(cells_len + i, temp);
+            }
+        }
+        // 别忘了最后一步，切换解释器的执行上下文
         _curFrame = calleeFrame;
     }
     else {

@@ -108,6 +108,18 @@
     <ClCompile Include="PyMethod.cpp">
       <Filter>源文件\object_python</Filter>
     </ClCompile>
+    <ClCompile Include="CellKlass.cpp">
+      <Filter>源文件\klass</Filter>
+    </ClCompile>
+    <ClCompile Include="PyCell.cpp">
+      <Filter>源文件\object_python</Filter>
+    </ClCompile>
+    <ClCompile Include="PyList.cpp">
+      <Filter>源文件\object_python</Filter>
+    </ClCompile>
+    <ClCompile Include="ListKlass.cpp">
+      <Filter>源文件\klass</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="byteCodeFileParser.hpp">
@@ -175,6 +187,18 @@
     </ClInclude>
     <ClInclude Include="PyMethod.hpp">
       <Filter>头文件\object_python</Filter>
+    </ClInclude>
+    <ClInclude Include="CellKlass.hpp">
+      <Filter>头文件\klass</Filter>
+    </ClInclude>
+    <ClInclude Include="PyCell.hpp">
+      <Filter>头文件\object_python</Filter>
+    </ClInclude>
+    <ClInclude Include="PyList.hpp">
+      <Filter>头文件\object_python</Filter>
+    </ClInclude>
+    <ClInclude Include="ListKlass.hpp">
+      <Filter>头文件\klass</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

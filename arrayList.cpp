@@ -1,7 +1,9 @@
 #include <cstdio>
+#include <cstring>
 #include "arrayList.hpp"
 #include "PyString.hpp"
 #include "Block.hpp"
+#include <algorithm>
 
 template<typename T>
 ArrayList<T>::ArrayList(size_t n) {
@@ -17,13 +19,15 @@ ArrayList<T>::~ArrayList() {
 
 template<typename T>
 void ArrayList<T>::expand() {
-    T* newPtr = new T[capacity <<= 1];
+    size_t newCapacity = std::max(capacity << 1, length);
+    T* newPtr = new T[newCapacity];
     // 拷贝老缓冲区的数组元素
     for (size_t i = 0; i < length; ++i) {
         newPtr[i] = ptr[i];
     }
     delete[] ptr;
     ptr = newPtr;
+    capacity = newCapacity;
 }
 
 template<typename T>

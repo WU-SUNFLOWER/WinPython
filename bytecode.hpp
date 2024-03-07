@@ -17,6 +17,7 @@ enum ByteCode : uint8_t {
     Store_Global = 0x61,
     Load_Const = 0x64,  // 将常量列表中的操作数加载到栈中
     Load_Name = 0x65,  // 将参数代表的变量压栈
+    Build_Tuple = 0x66,  // 创建一个元组，参数代表从栈上弹出多少个元素打包成元组
     Load_Attr = 0x6a, // 将参数代表的属性属性压栈
     Compare_Op = 0x6b,
     Jump_Forward = 0x6e,
@@ -28,6 +29,11 @@ enum ByteCode : uint8_t {
     Store_Fast = 0x7d,
     Call_Function = 0x83,
     Make_Function = 0x84,
+    Make_Closure = 0x86,  // 创建闭包函数，该指令的参数表示形参默认值的个数
+    Load_Closure = 0x87,  // 加载free variable到栈顶
+    Load_Deref = 0x88,  // 获取cell variable并解引用，再加载到栈顶
+    Store_Deref = 0x89,  // 弹出栈顶元素，将其储存为cell variable
+    
 };
 
 enum CompareCondition : uint8_t {

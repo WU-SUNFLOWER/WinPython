@@ -8,13 +8,10 @@ CodeObject* ByteCodeFileParser::parse() {
     uint32_t magicNumber = fileStream->readInt();
     uint32_t modifiedData = fileStream->readInt();
 
-    printf("magic number=0x%x, data=0x%x\n", magicNumber, modifiedData);
-    
     uint8_t objectType = fileStream->readByte();
     // ½âÎöCodeObject
     if (objectType == 'c') {
         CodeObject* result = parseCodeObject();
-        puts("success to parse code object!");
         return result;
     }
 
@@ -26,7 +23,6 @@ CodeObject* ByteCodeFileParser::parseCodeObject() {
     int32_t nLocals = fileStream->readInt();
     int32_t stackSize = fileStream->readInt();
     int32_t flag = fileStream->readInt();
-    printf("argcount=%d, flag=%d\n", argcount, flag);
 
     PyString* byteCodes = getByteCodes();
     PyObjectList* consts = getTuple();

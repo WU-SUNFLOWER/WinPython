@@ -11,6 +11,7 @@ PyFunction::PyFunction(CodeObject* codeObject) {
     _globals = nullptr;
     _defaultArgs = nullptr;
     _nativeFunc = nullptr;
+    _freevars = nullptr;
     // 别忘了初始化klass指针
     setKlass(FunctionKlass::getInstance());
 }
@@ -22,6 +23,7 @@ PyFunction::PyFunction(Klass* klass) {
     _globals = nullptr;
     _defaultArgs = nullptr;
     _nativeFunc = nullptr;
+    _freevars = nullptr;
     setKlass(klass);
 }
 
@@ -32,6 +34,7 @@ PyFunction::PyFunction(NativeFuncPointer nativeFunc) {
     _globals = nullptr;
     _defaultArgs = nullptr;
     _nativeFunc = nativeFunc;
+    _freevars = nullptr;
     setKlass(NativeFunctionKlass::getInstance());
 }
 

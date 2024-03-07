@@ -6,6 +6,7 @@
 #include "map.hpp"
 #include "PyFunction.hpp"
 #include "Block.hpp"
+#include "PyList.hpp"
 
 class FrameObject {
 private:
@@ -13,13 +14,19 @@ private:
     ArrayList<Block>* _blockStack;  // 这个栈用于处理代码块嵌套的结构
 
     PyObjectList* _consts;  // 常量列表
-    PyObjectList* _names;  // 变量名称列表
+    PyObjectList* _names;  // 全局变量名称列表
+    PyList* _varNames;  // 函数体局部变量名称列表
 
     PyObjectMap* _locals;  // 局部变量表
     PyObjectMap* _globals;  // 全局变量表
-    // （基于下标访问的）局部变量表
+
+    // （基于下标访问的）局部变量列表
     // 该表用于函数参数传递，及储存函数体内的局部变量
     PyObjectList* _fastLocals;
+    
+    // 该表用于维护当前栈桢正在运行函数的所有free variable，
+    // 和cell variable
+    PyList* _cells;  
 
     FrameObject* _callerFrame;  // caller函数的栈桢，用于返回caller函数
 

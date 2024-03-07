@@ -4,6 +4,7 @@
 #include "PyObject.hpp"
 #include "CodeObject.hpp"
 #include "Map.hpp"
+#include "PyList.hpp"
 
 // 定义C++内建函数调用指针
 typedef PyObject* (*NativeFuncPointer)(PyObjectList* args);
@@ -29,6 +30,13 @@ private:
     */
     PyObjectList* _defaultArgs;
 
+    /* 
+        这个列表是为Python中函数闭包的特性服务的。
+        它用于储存被嵌套函数（inner）
+        对包裹它的函数（outer）的局部变量的依赖情况 
+    */
+    PyList* _freevars;
+
     // 这个指针为C++内建函数预留，普通Python函数默认为空
     NativeFuncPointer _nativeFunc;
 
@@ -41,6 +49,9 @@ public:
         _globals = map;
     }
     void setDefaultArgs(PyObjectList* args);
+    void setFreevars(PyList* cells) {
+        _freevars = cells;
+    }
 
     const PyString* getName() const {
         return funcName;

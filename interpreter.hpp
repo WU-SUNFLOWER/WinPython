@@ -17,9 +17,9 @@ public:
     Interpreter();
     void run(CodeObject* code);
 
-    void entryIntoNewFrame(uint16_t argNumber);
+    void makeFunction(int16_t defaultArgCount, bool isClosureFunc);
 
-    void lauchCallable(PyObject* callable, PyObjectList* args);
+    void entryIntoNewFrame(uint16_t argNumber);
 
     void exitFromCurFrame();
 };
