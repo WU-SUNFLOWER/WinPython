@@ -4,6 +4,7 @@
 enum ByteCode : uint8_t {
     Pop_Top = 0x01,  // 无条件弹出栈顶元素
     Binary_Add = 0x17,
+    Binary_Subtract = 0x18,
     Print_Item = 0x47,
     Print_NewLine = 0x48,
     Break_Loop = 0x50,
@@ -33,7 +34,6 @@ enum ByteCode : uint8_t {
     Load_Closure = 0x87,  // 加载free variable到栈顶
     Load_Deref = 0x88,  // 获取cell variable并解引用，再加载到栈顶
     Store_Deref = 0x89,  // 弹出栈顶元素，将其储存为cell variable
-    
 };
 
 enum CompareCondition : uint8_t {

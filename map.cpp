@@ -55,7 +55,8 @@ VAL Map<KEY, VAL>::remove(KEY key) {
 template<typename KEY, typename VAL>
 VAL Map<KEY, VAL>::get(KEY key) {
     size_t searchIdx = getIndex(key);
-    if (searchIdx != -1) {
+    size_t failFlag = -1;
+    if (searchIdx != failFlag) {
         return ptr[searchIdx].value;
     }
     else {

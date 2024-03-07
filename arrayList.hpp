@@ -9,9 +9,10 @@ private:
     size_t length;  // 数组内有效元素的个数
     size_t capacity;  // 数组开辟内存的总长度
     T* ptr;
+    T _defaultElem;
     void expand();
 public:
-    ArrayList(size_t n = 8);
+    ArrayList(T defaultElem, size_t n = 8);
     ~ArrayList();
     // 向数组中的最后一个位置添加元素
     void push(T elem);

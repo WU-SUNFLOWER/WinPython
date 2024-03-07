@@ -25,11 +25,11 @@ CodeObject* ByteCodeFileParser::parseCodeObject() {
     int32_t flag = fileStream->readInt();
 
     PyString* byteCodes = getByteCodes();
-    PyObjectList* consts = getTuple();
-    PyObjectList* names = getTuple();  
-    PyObjectList* varNames = getTuple();
-    PyObjectList* freeVars = getTuple();
-    PyObjectList* callVars = getTuple();
+    PyList* consts = getTuple();
+    PyList* names = getTuple();  
+    PyList* varNames = getTuple();
+    PyList* freeVars = getTuple();
+    PyList* callVars = getTuple();
 
     PyString* fileName = getName();
     // CodeObject对象的名称
@@ -62,43 +62,43 @@ PyString* ByteCodeFileParser::getString() {
     return s;
 }
 
-PyObjectList* ByteCodeFileParser::getTuple() {
+PyList* ByteCodeFileParser::getTuple() {
     // tuple以`(`字符（0x28）作为起始标志
     if (fileStream->readByte() != '(') {
         fileStream->unreadByte();
         return nullptr;
     }
     int32_t length = fileStream->readInt();  // tuple中元素的个数
-    PyObjectList* tuple = new PyObjectList(length);
+    PyList* tuple = new PyList(length);
     for (int32_t i = 0; i < length; ++i) {
         uint8_t objType = fileStream->readByte();
         switch (objType) {
             // 元素为Code Object
             case 'c':
-                tuple->push(parseCodeObject());
+                tuple->append(parseCodeObject());
                 break;
             // 元素为int
             case 'i':
-                tuple->push(new PyInteger(fileStream->readInt()));
+                tuple->append(new PyInteger(fileStream->readInt()));
                 break;
             // 元素为None Object
             case 'N':
-                tuple->push(Universe::PyNone);
+                tuple->append(Universe::PyNone);
                 break;
             // 元素为字符串
             case 's':
-                tuple->push(getString());
+                tuple->append(getString());
                 break;
             // 
             case 't': {
                 PyString* str = getString();
-                tuple->push(str);
+                tuple->append(str);
                 stringTable.push(str);
                 break;
             }
             //
             case 'R': 
-                tuple->push(stringTable.get(fileStream->readInt()));
+                tuple->append(stringTable.get(fileStream->readInt()));
                 break;
             // 遇到无法解析的object type，直接退出程序
             default:

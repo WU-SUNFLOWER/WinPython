@@ -1,8 +1,10 @@
-def f():
+def foo(x = 5):
+    y = 10
+    def say():
+        print(x + y)
     x = 1
-    def g():
-        x = 2
-        return x
-        
-g = f()
-print g()
+    print x
+    return say
+
+say = foo()
+say()

@@ -3,17 +3,14 @@
 #include "Universe.hpp"
 
 PyList::PyList(size_t n) {
-    _container = new PyObjectList(n);
-    for (size_t i = 0; i < n; ++i) {
-        _container->set(i, nullptr);
-    }
+    _container = new ArrayList<PyObject*>(nullptr, n);
     setKlass(ListKlass::getInstance());
 }
 
 PyList::PyList() : PyList(1) {
 }
 
-PyList::PyList(PyObjectList* rawList) {
+PyList::PyList(ArrayList<PyObject*>* rawList) {
     _container = rawList;
     setKlass(ListKlass::getInstance());
 }

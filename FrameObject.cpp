@@ -5,7 +5,7 @@ FrameObject::FrameObject(CodeObject* codeObject) {
     _codeObject = codeObject;
     _consts = codeObject->_consts;
     _names = codeObject->_names;
-    _varNames = new PyList(codeObject->_varNames);
+    _varNames = codeObject->_varNames;
     _byteCodes = codeObject->_byteCodes;
     
     // 初始化一张空的映射表用于储存本地变量
@@ -19,14 +19,14 @@ FrameObject::FrameObject(CodeObject* codeObject) {
         codeObject->_cellVars->getLength() + codeObject->_freeVars->getLength();
     _cells = cellsLength > 0 ? new PyList(cellsLength) : nullptr;
 
-    _stack = new PyObjectList(codeObject->_stackSize);
-    _blockStack = new ArrayList<Block>();
+    _stack = new PyList(codeObject->_stackSize);
+    _blockStack = new ArrayList<Block>({});
 
     _callerFrame = nullptr;
 }
 
 FrameObject::FrameObject(PyFunction* callee, FrameObject* callerFrame, 
-    PyObjectList* args) : FrameObject(callee->funcCode) {
+    PyList* args) : FrameObject(callee->funcCode) {
     // 将函数调用所产生栈桢的全局变量表，同步为函数绑定的变量表
     _globals = callee->_globals;
     _callerFrame = callerFrame;
@@ -58,7 +58,7 @@ bool FrameObject::hasMoreCode() {
 
 void FrameObject::pushToStack(PyObject* object)
 {
-    _stack->push(object);
+    _stack->append(object);
 }
 
 PyObject* FrameObject::popFromStack()

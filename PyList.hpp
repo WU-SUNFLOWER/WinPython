@@ -6,13 +6,13 @@
 class PyList : public PyObject {
     friend class ListKlass;
 private:
-    PyObjectList* _container;
+    ArrayList<PyObject*>* _container;
 public:
     PyList();
     PyList(size_t n);
-    PyList(PyObjectList* rawList);
+    PyList(ArrayList<PyObject*>* rawList);
     
-    PyObjectList* getContainer() const {
+    ArrayList<PyObject*>* getContainer() const {
         return _container;
     }
     size_t getLength() const {
@@ -20,6 +20,12 @@ public:
     }
     void append(PyObject* obj) {
         _container->push(obj);
+    }
+    PyObject* pop() {
+        return _container->pop();
+    }
+    void insert(size_t index, PyObject* elem) {
+        _container->insert(index, elem);
     }
     size_t index(PyObject* target);
     PyObject* get(size_t idx) {

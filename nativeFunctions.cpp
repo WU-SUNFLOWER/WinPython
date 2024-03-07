@@ -2,11 +2,11 @@
 #include "StringKlass.hpp" 
 #include "PyString.hpp"
 
-PyObject* NativeFunction::len(PyObjectList* args) {
+PyObject* NativeFunction::len(PyList* args) {
     return args->get(0)->len();
 }
 
-PyObject* NativeFunction::string_upper(PyObjectList* args) {
+PyObject* NativeFunction::string_upper(PyList* args) {
     PyObject* object = args->get(0);
     assert(object != nullptr && object->getKlass() == StringKlass::getInstance());
     

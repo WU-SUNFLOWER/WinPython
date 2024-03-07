@@ -7,7 +7,7 @@
 #include "PyList.hpp"
 
 // 定义C++内建函数调用指针
-typedef PyObject* (*NativeFuncPointer)(PyObjectList* args);
+typedef PyObject* (*NativeFuncPointer)(PyList* args);
 
 class PyFunction : public PyObject {
     friend class FunctionKlass;
@@ -28,7 +28,7 @@ private:
         def foo(a, b=1) 合法
         def foo(a=1, b) 报错
     */
-    PyObjectList* _defaultArgs;
+    PyList* _defaultArgs;
 
     /* 
         这个列表是为Python中函数闭包的特性服务的。
@@ -48,7 +48,7 @@ public:
     void setGlobalMap(PyObjectMap* map) {
         _globals = map;
     }
-    void setDefaultArgs(PyObjectList* args);
+    void setDefaultArgs(PyList* args);
     void setFreevars(PyList* cells) {
         _freevars = cells;
     }
@@ -60,6 +60,6 @@ public:
         return flag;
     }
 
-    PyObject* callNativeFunc(PyObjectList* args) const;
+    PyObject* callNativeFunc(PyList* args) const;
 };
 #endif

@@ -10,12 +10,12 @@ private:
     BufferedInputStream* fileStream;
     ArrayList<PyString*> stringTable;
 public:
-    ByteCodeFileParser(BufferedInputStream* stream) : fileStream(stream) {}
+    ByteCodeFileParser(BufferedInputStream* stream) : fileStream(stream), stringTable(nullptr) {}
     CodeObject* parse();
     CodeObject* parseCodeObject();
     PyString* getByteCodes();
     PyString* getString();
-    PyObjectList* getTuple();
+    PyList* getTuple();
     PyString* getName();
     PyString* getNoTable();
 };

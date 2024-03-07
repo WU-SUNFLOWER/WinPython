@@ -47,6 +47,5 @@ public:
     /*公用方法 End*/
 };
 
-typedef ArrayList<PyObject*> PyObjectList;
 typedef Map<PyObject*, PyObject*> PyObjectMap;
 #endif

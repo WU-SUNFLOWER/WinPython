@@ -6,10 +6,14 @@
 #include <algorithm>
 
 template<typename T>
-ArrayList<T>::ArrayList(size_t n) {
+ArrayList<T>::ArrayList(T defaultElem, size_t n) {
     capacity = n >= 1 ? n : 1;  // 防止传入≤0的初始大小
     length = 0;
+    _defaultElem = defaultElem;
     ptr = new T[capacity];
+    for (size_t i = 0; i < capacity; ++i) {
+        ptr[i] = _defaultElem;
+    }
 }
 
 template<typename T>
@@ -19,15 +23,17 @@ ArrayList<T>::~ArrayList() {
 
 template<typename T>
 void ArrayList<T>::expand() {
-    size_t newCapacity = std::max(capacity << 1, length);
-    T* newPtr = new T[newCapacity];
+    capacity = std::max(capacity << 1, length);
+    T* newPtr = new T[capacity];
+    for (size_t i = 0; i < capacity; ++i) {
+        newPtr[i] = _defaultElem;
+    }
     // 拷贝老缓冲区的数组元素
     for (size_t i = 0; i < length; ++i) {
         newPtr[i] = ptr[i];
     }
     delete[] ptr;
     ptr = newPtr;
-    capacity = newCapacity;
 }
 
 template<typename T>

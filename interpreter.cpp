@@ -74,9 +74,11 @@ void Interpreter::run(CodeObject* codeObject) {
             }
                 
             
-            case ByteCode::Load_Const:
-                PUSH(Consts->get(op_arg));
+            case ByteCode::Load_Const: {
+                PyObject* temp = Consts->get(op_arg);
+                PUSH(temp);
                 break;
+            }
 
             case ByteCode::Print_Item:
                 lhs = POP();
@@ -91,6 +93,12 @@ void Interpreter::run(CodeObject* codeObject) {
                 rhs = POP();  // 右操作数
                 lhs = POP();  // 左操作数
                 PUSH(lhs->add(rhs));
+                break;
+
+            case ByteCode::Binary_Subtract:
+                rhs = POP();  // 右操作数
+                lhs = POP();  // 左操作数
+                PUSH(lhs->sub(rhs));
                 break;
 
             case ByteCode::Compare_Op: {
@@ -210,7 +218,12 @@ void Interpreter::run(CodeObject* codeObject) {
                 PyObject* variableName = _curFrame->_names->get(op_arg);
                 // 再根据变量名索引到Python对象(可能是None)
                 PyObject* variableObject = _curFrame->_globals->get(variableName);
-                // 将找到的全局变量压入栈顶
+                if (variableObject != Universe::PyNone) {
+                    PUSH(variableObject);
+                    break;
+                }
+                // 如果还是没找到，去看看内建变量表（可能最后会得到None）
+                variableObject = this->_buildins->get(variableName);
                 PUSH(variableObject);
                 break;
             }
@@ -334,7 +347,7 @@ void Interpreter::makeFunction(int16_t defaultArgCount, bool isClosure) {
 
     // 处理需要绑定默认参数的函数
     if (defaultArgCount > 0) {
-        PyObjectList* DefaultArgs = new PyObjectList(defaultArgCount);
+        PyList* DefaultArgs = new PyList(defaultArgCount);
         while (defaultArgCount-- > 0) {
             DefaultArgs->set(defaultArgCount, POP());
         }
@@ -354,7 +367,7 @@ void Interpreter::makeFunction(int16_t defaultArgCount, bool isClosure) {
 #define isMethod(k) (k == MethodKlass::getInstance())
 
 void Interpreter::entryIntoNewFrame(uint16_t argNumber) {
-    PyObjectList* args = new PyObjectList(argNumber);
+    PyList* args = new PyList(argNumber);
     
     // 加载调用参数到fastLocal数组中
     while (argNumber-- > 0) {
@@ -387,7 +400,7 @@ void Interpreter::entryIntoNewFrame(uint16_t argNumber) {
     }
 
     // 对于一般的python函数，需要根据形参列表中的默认参数更新实参列表
-    PyObjectList* defaultArgs = calleeFunc->_defaultArgs;
+    PyList* defaultArgs = calleeFunc->_defaultArgs;
     if (isPythonFuncKlass(klass) && defaultArgs) {
         size_t argCnt_orignal = args->getLength();
         size_t argCnt_total = calleeFunc->funcCode->_argCount;

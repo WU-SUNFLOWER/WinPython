@@ -10,11 +10,11 @@
 
 class FrameObject {
 private:
-    PyObjectList* _stack;  // 运行时栈
+    PyList* _stack;  // 运行时栈
     ArrayList<Block>* _blockStack;  // 这个栈用于处理代码块嵌套的结构
 
-    PyObjectList* _consts;  // 常量列表
-    PyObjectList* _names;  // 全局变量名称列表
+    PyList* _consts;  // 常量列表
+    PyList* _names;  // 全局变量名称列表
     PyList* _varNames;  // 函数体局部变量名称列表
 
     PyObjectMap* _locals;  // 局部变量表
@@ -22,7 +22,7 @@ private:
 
     // （基于下标访问的）局部变量列表
     // 该表用于函数参数传递，及储存函数体内的局部变量
-    PyObjectList* _fastLocals;
+    PyList* _fastLocals;
     
     // 该表用于维护当前栈桢正在运行函数的所有free variable，
     // 和cell variable
@@ -38,7 +38,7 @@ public:
     // 该构造函数仅适用于为<module>创建栈桢
     FrameObject(CodeObject* code);
     // 该构造函数用于一般的通过PyFunction创建栈桢
-    FrameObject(PyFunction* callee, FrameObject* callerFrame, PyObjectList* args);
+    FrameObject(PyFunction* callee, FrameObject* callerFrame, PyList* args);
     ~FrameObject();
 
     uint8_t getOpCode();

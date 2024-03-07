@@ -39,11 +39,11 @@ PyFunction::PyFunction(NativeFuncPointer nativeFunc) {
 }
 
 // 为函数对象挂载默认参数
-void PyFunction::setDefaultArgs(PyObjectList* args) {
+void PyFunction::setDefaultArgs(PyList* args) {
     _defaultArgs = args;
 }
 
-PyObject* PyFunction::callNativeFunc(PyObjectList* args) const {
+PyObject* PyFunction::callNativeFunc(PyList* args) const {
     if (getKlass() != NativeFunctionKlass::getInstance()) {
         printf("You can only call PyFunction::callNativeFunc for native function!");
         exit(-1);
