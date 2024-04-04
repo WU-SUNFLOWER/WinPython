@@ -12,7 +12,8 @@ void StringKlass::print(const PyObject* lhs) const {
     checkLegalPyObject(lhs, this);
     const PyString* _lhs = static_cast<const PyString*>(lhs);
     size_t length = _lhs->getLength();
-    const uint8_t* ptr = _lhs->getValue();
+    const char* ptr = reinterpret_cast<const char*>(_lhs->getValue());
+
     for (size_t i = 0; i < length; ++i) {
         putchar(ptr[i]);
     }
@@ -83,5 +84,28 @@ PyObject* StringKlass::not_equal(const PyObject* lhs, const PyObject* rhs) const
 }
 
 PyObject* StringKlass::len(const PyObject* strObject) const {
-    return new PyInteger(static_cast<const PyString*>(strObject)->getLength());
+    const PyString* _lhs = static_cast<const PyString*>(strObject);
+    int32_t charLength = 0;
+    size_t bufLength = _lhs->getLength();
+    const uint8_t* ptr = _lhs->getValue();
+    for (size_t i = 0; i < bufLength;) {
+        if ((ptr[i] & 0xF0) == 0xE0) {
+            // 1110xxxx 表示是三字节的UTF-8字符
+            i += 3;
+        }
+        else if ((ptr[i] & 0xE0) == 0xC0) {
+            // 110xxxxx 表示是两字节的UTF-8字符
+            i += 2;
+        }
+        else if ((ptr[i] & 0x80) == 0x00) {
+            // 0xxxxxxx 表示是一个字节的UTF-8字符
+            i += 1;
+        }
+        else {
+            // 对于四字节的UTF-8字符处理
+            i += 4;
+        }
+        ++charLength;
+    }
+    return new PyInteger(charLength);
 }
