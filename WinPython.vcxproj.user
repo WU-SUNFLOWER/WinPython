@@ -4,12 +4,12 @@
     <LocalDebuggerCommand>
     </LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>C:\Users\Administrator\Desktop\WinPython\test.py</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>C:\Users\Administrator\Desktop\hello.py</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LocalDebuggerCommand>
     </LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>C:\Users\Administrator\Desktop\WinPython\test.py</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>C:\Users\Administrator\Desktop\hello.py</LocalDebuggerCommandArguments>
   </PropertyGroup>
 </Project>

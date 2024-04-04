@@ -19,5 +19,7 @@ def foo():
 
     return bar
 
+print("hahahaha")
+
 f = foo()
 f()

@@ -30,6 +30,7 @@ int main(int argc, char* argv[]) {
         const char* sourceFile = argv[1];
         byteCodeFile =
             std::filesystem::path(sourceFile).replace_extension("pyc").string();
+        converter(sourceFile, byteCodeFile.c_str());
     }
     // 传入.pyc文件
     else if (argc == 3 && strcmp(argv[1], "-c") == 0) {
