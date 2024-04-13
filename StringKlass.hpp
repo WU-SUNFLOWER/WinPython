@@ -26,6 +26,8 @@ public:
     virtual PyObject* not_equal(const PyObject* lhs, const PyObject* rhs) const override;
 
     virtual PyObject* len(const PyObject* strObject) const override;
+    virtual PyObject* subscr(PyObject* strObject, PyObject* subscription) const override;
+    virtual PyObject* has(PyObject* object, PyObject* target) const override;
 };
 
 #endif

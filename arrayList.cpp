@@ -60,6 +60,7 @@ void ArrayList<T>::insert(size_t index, T elem) {
             ptr[i] = ptr[i - 1];
         }
         ptr[index] = elem;
+        ++length;
     }
 }
 
@@ -78,6 +79,14 @@ template<typename T>
 T ArrayList<T>::get(size_t index) {
     assert(index < length);
     return ptr[index];
+}
+
+template<typename T>
+void ArrayList<T>::deleteByIndex(size_t idx) {
+    for (size_t i = idx; i < length - 1; ++i) {
+        ptr[i] = ptr[i + 1];
+    }
+    --length;
 }
 
 

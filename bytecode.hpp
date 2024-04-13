@@ -3,8 +3,12 @@
 
 enum ByteCode : uint8_t {
     Pop_Top = 0x01,  // 无条件弹出栈顶元素
+    Binary_Multiply = 0x14,
     Binary_Add = 0x17,
     Binary_Subtract = 0x18,
+    Binary_Subscr = 0x19,
+    Store_Subscr = 0x3c,
+    Delete_Subscr = 0x3d,
     Print_Item = 0x47,
     Print_NewLine = 0x48,
     Break_Loop = 0x50,
@@ -19,6 +23,7 @@ enum ByteCode : uint8_t {
     Load_Const = 0x64,  // 将常量列表中的操作数加载到栈中
     Load_Name = 0x65,  // 将参数代表的变量压栈
     Build_Tuple = 0x66,  // 创建一个元组，参数代表从栈上弹出多少个元素打包成元组
+    Build_List = 0x67,
     Load_Attr = 0x6a, // 将参数代表的属性属性压栈
     Compare_Op = 0x6b,
     Jump_Forward = 0x6e,
@@ -43,11 +48,11 @@ enum CompareCondition : uint8_t {
     Not_Equal = 0x03,
     Greater = 0x04,
     Greater_Equal = 0x05,
-    In = 0x05,
-    Not_In = 0x06,
-    Is = 0x07,
-    Is_Not = 0x08,
-    Exc_Match = 0x09,
+    In = 0x06,
+    Not_In = 0x07,
+    Is = 0x08,
+    Is_Not = 0x09,
+    Exc_Match = 0x10,
 };
 
 #endif

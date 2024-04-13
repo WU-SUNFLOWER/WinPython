@@ -14,6 +14,7 @@
 #include "CellKlass.hpp"
 #include "PyCell.hpp"
 #include "PyList.hpp"
+#include "ListKlass.hpp"
 
 Interpreter::Interpreter() {
     _curFrame = nullptr;
@@ -29,8 +30,23 @@ Interpreter::Interpreter() {
     _buildins->set(new PyString("len"), PackNativeFunc(NativeFunction::len));
 
     PyObjectMap* dict_str = StringKlass::getInstance()->getKlassDict();
+    PyObjectMap* dict_list = ListKlass::getInstance()->getKlassDict();
+
     dict_str->set(new PyString("upper"), 
         PackNativeFunc(NativeFunction::string_upper));
+
+    dict_list->set(new PyString("append"), 
+        PackNativeFunc(NativeFunction::list_append));
+    dict_list->set(new PyString("insert"),
+        PackNativeFunc(NativeFunction::list_insert));
+    dict_list->set(new PyString("index"),
+        PackNativeFunc(NativeFunction::list_index));
+    dict_list->set(new PyString("pop"),
+        PackNativeFunc(NativeFunction::list_pop));
+    dict_list->set(new PyString("remove"),
+        PackNativeFunc(NativeFunction::list_remove));
+    dict_list->set(new PyString("reverse"),
+        PackNativeFunc(NativeFunction::list_reverse));
 }
 
 #define POP() (_curFrame->popFromStack())
@@ -63,16 +79,15 @@ void Interpreter::run(CodeObject* codeObject) {
                 POP();
                 break;
 
-            case ByteCode::Build_Tuple: {
-                PyList* tuple = new PyList();
+            case ByteCode::Build_List:{
+                PyList* list = new PyList();
                 while (op_arg-- > 0) {
                     PyObject* temp = POP();
-                    tuple->set(op_arg, temp);
+                    list->set(op_arg, temp);
                 }
-                PUSH(tuple);
+                PUSH(list);
                 break;
             }
-                
             
             case ByteCode::Load_Const: {
                 PyObject* temp = Consts->get(op_arg);
@@ -89,6 +104,12 @@ void Interpreter::run(CodeObject* codeObject) {
                 putchar('\n');
                 break;
 
+            case ByteCode::Binary_Multiply:
+                rhs = POP();  // 右操作数
+                lhs = POP();  // 左操作数
+                PUSH(lhs->mul(rhs));
+                break;
+
             case ByteCode::Binary_Add:
                 rhs = POP();  // 右操作数
                 lhs = POP();  // 左操作数
@@ -100,6 +121,27 @@ void Interpreter::run(CodeObject* codeObject) {
                 lhs = POP();  // 左操作数
                 PUSH(lhs->sub(rhs));
                 break;
+
+            case ByteCode::Binary_Subscr:
+                rhs = POP();  // 右操作数（在此处为要取的下标）
+                lhs = POP();  // 左操作数（在此处为被取下标的元素）
+                PUSH(lhs->subscr(rhs));
+                break;
+
+            case ByteCode::Store_Subscr: {
+                rhs = POP();  // 右操作数（在此处为要取的下标）
+                lhs = POP();  // 左操作数（在此处为被取下标的元素）
+                PyObject* newObject = POP();
+                lhs->store_subscr(rhs, newObject);
+                break;
+            }
+
+            case ByteCode::Delete_Subscr: {
+                rhs = POP();  // 右操作数（在此处为要取的下标）
+                lhs = POP();  // 左操作数（在此处为被取下标的元素）
+                lhs->delete_subscr(rhs);
+                break;
+            }
 
             case ByteCode::Compare_Op: {
                 rhs = POP();  // 右操作数
@@ -129,6 +171,15 @@ void Interpreter::run(CodeObject* codeObject) {
                         break;
                     case CompareCondition::Is_Not:
                         PUSH(packBoolean(lhs != rhs));
+                        break;
+                    case CompareCondition::In:
+                        PUSH(rhs->has(lhs));
+                        break;
+                    case CompareCondition::Not_In:
+                        PUSH(
+                            rhs->has(lhs) == Universe::PyTrue ? 
+                            Universe::PyFalse : Universe::PyTrue
+                        );
                         break;
                     default:
                         printf("Unknown Compare Condition Code 0x%x\n", op_arg);

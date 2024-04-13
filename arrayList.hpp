@@ -25,6 +25,8 @@ public:
         assert(length > 0);
         return ptr[--length];
     }
+    // 删除指定位置的元素
+    void deleteByIndex(size_t index);
 
     size_t getLength() const {
         return length;

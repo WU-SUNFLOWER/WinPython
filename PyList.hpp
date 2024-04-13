@@ -28,11 +28,14 @@ public:
         _container->insert(index, elem);
     }
     size_t index(PyObject* target);
-    PyObject* get(size_t idx) {
+    PyObject* get(size_t idx) const {
         return _container->get(idx);
     }
     void set(size_t idx, PyObject* obj) {
-        return _container->set(idx, obj);
+        _container->set(idx, obj);
+    }
+    void deleteByIndex(size_t idx) {
+        _container->deleteByIndex(idx);
     }
 };
 

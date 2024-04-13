@@ -32,17 +32,26 @@ public:
     PyObject* div(PyObject* other) const;
     PyObject* mod(PyObject* other) const;
 
-    PyObject* less(PyObject* other) const;
-    PyObject* less_equal(PyObject* other) const;
-    PyObject* equal(PyObject* other) const;
-    PyObject* greater_equal(PyObject* other) const;
-    PyObject* greater(PyObject* other) const;
-    PyObject* not_equal(PyObject* other) const;
+    PyObject* less(const PyObject* other) const;
+    PyObject* less_equal(const PyObject* other) const;
+    PyObject* equal(const PyObject* other) const;
+    PyObject* greater_equal(const PyObject* other) const;
+    PyObject* greater(const PyObject* other) const;
+    PyObject* not_equal(const PyObject* other) const;
 
     // 计算长度
     PyObject* len() const;
     // 获取对象属性
     PyObject* getattr(PyObject* attr) const;
+    // 对象取下标
+    PyObject* subscr(PyObject* subscription);
+    // 对象下标赋新值
+    PyObject* store_subscr(PyObject* subscription, PyObject* newObject);
+    // 对象删除下标对应元素
+    PyObject* delete_subscr(PyObject* subscription);
+    // 检查对象是否包含某些东西
+    PyObject* has(PyObject* target);
+
 
     /*公用方法 End*/
 };

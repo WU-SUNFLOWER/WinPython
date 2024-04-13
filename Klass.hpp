@@ -43,6 +43,15 @@ public:
 
     // 其他工具函数
     virtual PyObject* len(const PyObject* object) const { return 0; };
+    virtual PyObject* subscr(PyObject* object,
+        PyObject* subscrption) const { return 0; }
+    virtual PyObject* store_subscr(PyObject* object, 
+        PyObject* subscription, PyObject* newObject) const { return 0; }
+    virtual PyObject* delete_subscr(PyObject* object,
+        PyObject* subscription) const {
+        return 0;
+    }
+    virtual PyObject* has(PyObject* object, PyObject* target) const { return 0; }
 };
 
 #define checkLegalPyObject_DB(x, y) (Klass::checkLegalPyObject(x, this), Klass::checkLegalPyObject(y, this))

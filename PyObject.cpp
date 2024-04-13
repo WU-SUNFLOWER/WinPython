@@ -4,6 +4,8 @@
 #include "NativeFunctionKlass.hpp"
 #include "PyFunction.hpp"
 #include "PyMethod.hpp"
+#include <cstdlib>
+#include <cstdio>
 
 void PyObject::print() const
 {
@@ -30,27 +32,51 @@ PyObject* PyObject::mod(PyObject* other) const {
     return getKlass()->mod(this, other);
 }
 
-PyObject* PyObject::less(PyObject* other) const {
+PyObject* PyObject::less(const PyObject* other) const {
+    if (getKlass() != other->getKlass()) {
+        puts("You can't compare objects of different data types.");
+        exit(-1);
+    }
     return getKlass()->less(this, other);
 }
 
-PyObject* PyObject::less_equal(PyObject* other) const {
+PyObject* PyObject::less_equal(const PyObject* other) const {
+    if (getKlass() != other->getKlass()) {
+        puts("You can't compare objects of different data types.");
+        exit(-1);
+    }
     return getKlass()->less_equal(this, other);
 }
 
-PyObject* PyObject::equal(PyObject* other) const {
+PyObject* PyObject::equal(const PyObject* other) const {
+    if (getKlass() != other->getKlass()) {
+        puts("You can't compare objects of different data types.");
+        exit(-1);
+    }
     return getKlass()->equal(this, other);
 }
 
-PyObject* PyObject::greater_equal(PyObject* other) const {
+PyObject* PyObject::greater_equal(const PyObject* other) const {
+    if (getKlass() != other->getKlass()) {
+        puts("You can't compare objects of different data types.");
+        exit(-1);
+    }
     return getKlass()->greater_equal(this, other);
 }
 
-PyObject* PyObject::greater(PyObject* other) const {
+PyObject* PyObject::greater(const PyObject* other) const {
+    if (getKlass() != other->getKlass()) {
+        puts("You can't compare objects of different data types.");
+        exit(-1);
+    }
     return getKlass()->greater(this, other);
 }
 
-PyObject* PyObject::not_equal(PyObject* other) const {
+PyObject* PyObject::not_equal(const PyObject* other) const {
+    if (getKlass() != other->getKlass()) {
+        puts("You can't compare objects of different data types.");
+        exit(-1);
+    }
     return getKlass()->not_equal(this, other);
 }
 
@@ -72,4 +98,20 @@ PyObject* PyObject::getattr(PyObject* attr) const {
     }
     
     return ret;
+}
+
+PyObject* PyObject::subscr(PyObject* subscription) {
+    return getKlass()->subscr(this, subscription);
+}
+
+PyObject* PyObject::store_subscr(PyObject* subscription, PyObject* newObject) {
+    return getKlass()->store_subscr(this, subscription, newObject);
+}
+
+PyObject* PyObject::delete_subscr(PyObject* subscription) {
+    return getKlass()->delete_subscr(this, subscription);
+}
+
+PyObject* PyObject::has(PyObject* target) {
+    return getKlass()->has(this, target);
 }

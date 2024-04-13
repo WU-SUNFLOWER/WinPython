@@ -10,7 +10,7 @@ private:
     size_t length;
 public:
     PyString(const char* str_source);
-    PyString(uint8_t* source, size_t length);
+    PyString(const uint8_t* source, size_t length);
     ~PyString();
 
     const uint8_t* getValue() const {

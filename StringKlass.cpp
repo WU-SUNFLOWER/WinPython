@@ -109,3 +109,25 @@ PyObject* StringKlass::len(const PyObject* strObject) const {
     }
     return new PyInteger(charLength);
 }
+
+PyObject* StringKlass::subscr(PyObject* object, PyObject* subscription) const {
+    assert(object->getKlass() == this);
+    assert(subscription->getKlass() == IntegerKlass::getInstance());
+    PyString* strObject = reinterpret_cast<PyString*>(object);
+    PyInteger* subscr = reinterpret_cast<PyInteger*>(subscription);
+    const uint8_t* address = strObject->getValue() + subscr->getValue();
+    PyString* result = new PyString(address, 1);
+    return result;
+}
+
+PyObject* StringKlass::has(PyObject* object, PyObject* target) const {
+    assert(object->getKlass() == this);
+    assert(target->getKlass() == this);
+    PyString* str = reinterpret_cast<PyString*>(object);
+    PyString* targetStr = reinterpret_cast<PyString*>(target);
+    const char* result = strstr(
+        reinterpret_cast<const char*>(str->getValue()),
+        reinterpret_cast<const char*>(targetStr->getValue())
+    );
+    return result == nullptr ? Universe::PyFalse : Universe::PyTrue;
+}
