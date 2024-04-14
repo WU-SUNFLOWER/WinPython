@@ -7,8 +7,10 @@ enum ByteCode : uint8_t {
     Binary_Add = 0x17,
     Binary_Subtract = 0x18,
     Binary_Subscr = 0x19,
+    Store_Map = 0x36,
     Store_Subscr = 0x3c,
     Delete_Subscr = 0x3d,
+    Get_Iter = 0x44,
     Print_Item = 0x47,
     Print_NewLine = 0x48,
     Break_Loop = 0x50,
@@ -19,11 +21,14 @@ enum ByteCode : uint8_t {
     // op >= Have_Argument 表示指令含参数
     Have_Argument = 0x5a,
     Store_Name = 0x5a,  // 弹出栈顶元素出栈，并赋值给参数指定的变量
+    Unpack_Sequence = 0x5c,
+    For_Iter = 0x5d,
     Store_Global = 0x61,
     Load_Const = 0x64,  // 将常量列表中的操作数加载到栈中
     Load_Name = 0x65,  // 将参数代表的变量压栈
     Build_Tuple = 0x66,  // 创建一个元组，参数代表从栈上弹出多少个元素打包成元组
     Build_List = 0x67,
+    Build_Map = 0x69,
     Load_Attr = 0x6a, // 将参数代表的属性属性压栈
     Compare_Op = 0x6b,
     Jump_Forward = 0x6e,
@@ -39,6 +44,8 @@ enum ByteCode : uint8_t {
     Load_Closure = 0x87,  // 加载free variable到栈顶
     Load_Deref = 0x88,  // 获取cell variable并解引用，再加载到栈顶
     Store_Deref = 0x89,  // 弹出栈顶元素，将其储存为cell variable
+
+
 };
 
 enum CompareCondition : uint8_t {

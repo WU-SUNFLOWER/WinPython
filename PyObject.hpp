@@ -48,10 +48,13 @@ public:
     // 对象下标赋新值
     PyObject* store_subscr(PyObject* subscription, PyObject* newObject);
     // 对象删除下标对应元素
-    PyObject* delete_subscr(PyObject* subscription);
+    void delete_subscr(PyObject* subscription);
     // 检查对象是否包含某些东西
     PyObject* has(PyObject* target);
 
+    // 迭代器相关
+    PyObject* getIter();
+    PyObject* next();
 
     /*公用方法 End*/
 };

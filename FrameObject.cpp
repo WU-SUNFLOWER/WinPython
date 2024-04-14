@@ -71,6 +71,10 @@ PyObject* FrameObject::popFromStack()
     return _stack->pop();
 }
 
+PyObject* FrameObject::getTopInStack() {
+    return _stack->top();
+}
+
 bool FrameObject::isRootFrame() const
 {
     return _callerFrame == nullptr;

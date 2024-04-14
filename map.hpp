@@ -32,9 +32,11 @@ public:
     VAL remove(KEY key);
     VAL get(KEY key);
     bool has(KEY key);
+
     
-    // 根据哈希表数组真实下标，反查key值
-    KEY getKey(size_t index);
+    // 根据哈希表数组真实下标，反查key值和value值
+    KEY getKeyByIndex(size_t index);
+    KEY getValueByIndex(size_t index);
     // 根据key值，计算哈希表数组下标
     size_t getIndex(KEY& key);
 

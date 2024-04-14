@@ -2,11 +2,20 @@
 #include "Universe.hpp"
 #include "PyString.hpp"
 #include "PyInteger.hpp"
+#include "PyDict.hpp"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include "nativeFunctions.hpp"
 
 StringKlass* StringKlass::instance = nullptr;
+
+void StringKlass::initialize() {
+    PyDict* dict = new PyDict();
+    dict->set(new PyString("upper"),
+        PackNativeFunc(NativeFunction::string_upper));
+    setKlassDict(dict);
+}
 
 void StringKlass::print(const PyObject* lhs) const {
     checkLegalPyObject(lhs, this);

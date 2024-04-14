@@ -70,8 +70,13 @@ bool Map<KEY, VAL>::has(KEY key) {
 }
 
 template<typename KEY, typename VAL>
-KEY Map<KEY, VAL>::getKey(size_t index) {
+KEY Map<KEY, VAL>::getKeyByIndex(size_t index) {
     return ptr[index].key;
+}
+
+template<typename KEY, typename VAL>
+KEY Map<KEY, VAL>::getValueByIndex(size_t index) {
+    return ptr[index].value;
 }
 
 template<typename KEY, typename VAL>

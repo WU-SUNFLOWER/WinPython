@@ -14,7 +14,10 @@
 #include "CellKlass.hpp"
 #include "PyCell.hpp"
 #include "PyList.hpp"
+#include "PyDict.hpp"
 #include "ListKlass.hpp"
+#include "StringTable.hpp"
+#include "DictKlass.hpp"
 
 Interpreter::Interpreter() {
     _curFrame = nullptr;
@@ -25,31 +28,16 @@ Interpreter::Interpreter() {
     _buildins->set(new PyString("False"), Universe::PyFalse);
     _buildins->set(Universe::PyNone, Universe::PyNone);
     
-#define PackNativeFunc(f) (new PyFunction(reinterpret_cast<NativeFuncPointer>(f)))
-
     _buildins->set(new PyString("len"), PackNativeFunc(NativeFunction::len));
 
-    PyObjectMap* dict_str = StringKlass::getInstance()->getKlassDict();
-    PyObjectMap* dict_list = ListKlass::getInstance()->getKlassDict();
+    DictKlass::getInstance()->initialize();
+    ListKlass::getInstance()->initialize();
+    StringKlass::getInstance()->initialize();
 
-    dict_str->set(new PyString("upper"), 
-        PackNativeFunc(NativeFunction::string_upper));
-
-    dict_list->set(new PyString("append"), 
-        PackNativeFunc(NativeFunction::list_append));
-    dict_list->set(new PyString("insert"),
-        PackNativeFunc(NativeFunction::list_insert));
-    dict_list->set(new PyString("index"),
-        PackNativeFunc(NativeFunction::list_index));
-    dict_list->set(new PyString("pop"),
-        PackNativeFunc(NativeFunction::list_pop));
-    dict_list->set(new PyString("remove"),
-        PackNativeFunc(NativeFunction::list_remove));
-    dict_list->set(new PyString("reverse"),
-        PackNativeFunc(NativeFunction::list_reverse));
 }
 
 #define POP() (_curFrame->popFromStack())
+#define TOP() (_curFrame->getTopInStack())
 #define PUSH(x) (_curFrame->pushToStack(x))
 #define POP_BLOCK() (_curFrame->_blockStack->pop())
 #define PUSH_BLOCK(type, target, level) \
@@ -89,6 +77,21 @@ void Interpreter::run(CodeObject* codeObject) {
                 break;
             }
             
+            case ByteCode::Build_Map: {
+                PUSH(new PyDict());
+                break;
+            }
+
+            case ByteCode::Store_Map: {
+                PyObject* key = POP();
+                PyObject* value = POP();
+                // 因为可能有多个多个元素要存入字典，
+                // 所以字典对象暂时不能从栈上弹出
+                PyDict* dict = static_cast<PyDict*>(TOP());
+                dict->set(key, value);
+                break;
+            }
+
             case ByteCode::Load_Const: {
                 PyObject* temp = Consts->get(op_arg);
                 PUSH(temp);
@@ -379,7 +382,51 @@ void Interpreter::run(CodeObject* codeObject) {
                 PUSH(cellObject);
                 break;
             }
+            
+            // 从栈上弹出要获取迭代器的元素，再把获取到的迭代器压回栈上
+            case ByteCode::Get_Iter: {
+                lhs = POP();
+                PUSH(lhs->getIter());
+                break;
+            }
+            
+            case ByteCode::For_Iter: {
+                // 获取迭代器对象（由于迭代器要重复使用，所以不能从栈上弹出）
+                PyObject* iter = TOP();
+                // 调用迭代器对象的next方法
+                PyObject* ret = iter->next();
+                // 如果返回值是None，则说明迭代结束，执行跳转
+                // 注意这里必须用TOP不能用POP，
+                // 因为迭代结束前留在栈上的返回值可能会被后续指令使用
+                if (ret == Universe::PyNone) {
+                    PC += op_arg;
+                }
+                else {
+                    PUSH(ret);
+                }
+                break;
+            }
 
+            case ByteCode::Unpack_Sequence: {
+                PyList* list = static_cast<PyList*>(POP());
+                // Python中解包值接收变量数必须和待解包列表的长度一致
+                size_t length = list->getLength();
+                if (op_arg < length) {
+                    printf("too many values to unpack (expected %lld)", length);
+                    exit(-1);
+                }
+                else if (op_arg > length) {
+                    printf("not enough values to unpack (expected %d, got %lld)", 
+                        op_arg, length);
+                    exit(-1);
+                }
+                // 从后往前解包，确保列表靠左元素可以位于栈顶，被后续指令先取到
+                while (op_arg-- > 0) {
+                    PUSH(list->get(op_arg));
+                }
+                break;
+            }
+                
 
             default:
                 printf("Unknown bytecode 0x%x\n", op_code);

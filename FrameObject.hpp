@@ -48,6 +48,8 @@ public:
     void pushToStack(PyObject* object);
     PyObject* popFromStack();
 
+    PyObject* getTopInStack();
+
     bool isRootFrame() const;
 
     friend class Interpreter;

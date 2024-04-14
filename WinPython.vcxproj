@@ -134,6 +134,7 @@
     <ClCompile Include="byteCodeFileParser.cpp" />
     <ClCompile Include="CellKlass.cpp" />
     <ClCompile Include="CodeObject.cpp" />
+    <ClCompile Include="DictKlass.cpp" />
     <ClCompile Include="FrameObject.cpp" />
     <ClCompile Include="FunctionKlass.cpp" />
     <ClCompile Include="IntegerKlass.cpp" />
@@ -145,6 +146,7 @@
     <ClCompile Include="NativeFunctionKlass.cpp" />
     <ClCompile Include="nativeFunctions.cpp" />
     <ClCompile Include="PyCell.cpp" />
+    <ClCompile Include="PyDict.cpp" />
     <ClCompile Include="PyFunction.cpp" />
     <ClCompile Include="PyInteger.cpp" />
     <ClCompile Include="PyList.cpp" />
@@ -156,6 +158,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="StringKlass.cpp" />
+    <ClCompile Include="StringTable.cpp" />
     <ClCompile Include="Universe.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -166,6 +169,7 @@
     <ClInclude Include="byteCodeFileParser.hpp" />
     <ClInclude Include="CellKlass.hpp" />
     <ClInclude Include="CodeObject.hpp" />
+    <ClInclude Include="DictKlass.hpp" />
     <ClInclude Include="FrameObject.hpp" />
     <ClInclude Include="FunctionKlass.hpp" />
     <ClInclude Include="IntegerKlass.hpp" />
@@ -177,6 +181,7 @@
     <ClInclude Include="nativeFunctions.hpp" />
     <ClInclude Include="NativeFunctionKlass.hpp" />
     <ClInclude Include="PyCell.hpp" />
+    <ClInclude Include="PyDict.hpp" />
     <ClInclude Include="PyFunction.hpp" />
     <ClInclude Include="PyInteger.hpp" />
     <ClInclude Include="PyList.hpp" />
@@ -184,6 +189,7 @@
     <ClInclude Include="PyObject.hpp" />
     <ClInclude Include="PyString.hpp" />
     <ClInclude Include="StringKlass.hpp" />
+    <ClInclude Include="StringTable.hpp" />
     <ClInclude Include="Universe.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

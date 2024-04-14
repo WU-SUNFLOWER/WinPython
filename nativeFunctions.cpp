@@ -3,6 +3,8 @@
 #include "PyString.hpp"
 #include "Universe.hpp"
 #include "PyInteger.hpp"
+#include "PyDict.hpp"
+#include "DictKlass.hpp"
 #include <algorithm>
 
 PyObject* NativeFunction::len(PyList* args) {
@@ -76,4 +78,56 @@ PyObject* NativeFunction::list_reverse(PyList* args) {
         list->set(length - i - 1, temp);
     }
     return Universe::PyNone;
+}
+
+PyObject* NativeFunction::list_iterator_next(PyList* args) {
+    ListIterator* iter = static_cast<ListIterator*>(args->get(0));
+    return iter->next();
+}
+
+// dict.setdefault(key, value)
+// 先看看字典中是否有key字段，如有则啥也不干
+// 如果没有，则向字典添加键值对(key, value)
+PyObject* NativeFunction::dict_set_default(PyList* args) {
+    PyDict* dict = static_cast<PyDict*>(args->get(0));
+    PyObject* key = args->get(1);
+
+    if (!dict->has(key)) {
+        dict->set(key, args->get(2));
+    }
+
+    return Universe::PyNone;
+}
+
+PyObject* NativeFunction::dict_pop(PyList* args) {
+    PyDict* dict = static_cast<PyDict*>(args->get(0));
+    PyObject* key = args->get(1);
+    PyObject* result = dict->remove(key);
+    if (result == Universe::PyNone) {
+        printf("Can't find key in your dict: ");
+        key->print();
+        exit(-1);
+    }
+    return result;
+}
+
+PyObject* NativeFunction::dict_keys(PyList* args) {
+    PyDict* dict = static_cast<PyDict*>(args->get(0));
+    DictIterator* iter = new DictIterator(dict);
+    iter->setKlass(DictIteratorKlass<DictIterType::Iter_Keys>::getInstance());
+    return iter;
+}
+
+PyObject* NativeFunction::dict_values(PyList* args) {
+    PyDict* dict = static_cast<PyDict*>(args->get(0));
+    DictIterator* iter = new DictIterator(dict);
+    iter->setKlass(DictIteratorKlass<DictIterType::Iter_Values>::getInstance());
+    return iter;
+}
+
+PyObject* NativeFunction::dict_items(PyList* args) {
+    PyDict* dict = static_cast<PyDict*>(args->get(0));
+    DictIterator* iter = new DictIterator(dict);
+    iter->setKlass(DictIteratorKlass<DictIterType::Iter_Items>::getInstance());
+    return iter;
 }

@@ -23,3 +23,9 @@ size_t PyList::index(PyObject* target) {
     }
     return -1;
 }
+
+ListIterator::ListIterator(PyList* owner)
+    : _count(0), _owner(owner)
+{
+    setKlass(ListIteratorKlass::getInstance());
+}

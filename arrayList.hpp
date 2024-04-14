@@ -20,10 +20,14 @@ public:
     void set(size_t index, T elem);
     // 获取指定位置的元素
     T get(size_t index);
-    // 获取数组中最后一个位置的元素
+    // 弹出数组中最后一个位置的元素
     T pop() {
         assert(length > 0);
         return ptr[--length];
+    }
+    // 获取数组中最后一个位置的元素（但不弹出）
+    T top() {
+        return ptr[length - 1];
     }
     // 删除指定位置的元素
     void deleteByIndex(size_t index);

@@ -3,10 +3,39 @@
 #include "StringKlass.hpp"
 #include "IntegerKlass.hpp"
 #include "PyInteger.hpp"
+#include "PyString.hpp"
+#include "PyDict.hpp"
 #include "Universe.hpp"
 #include <algorithm>
+#include "nativeFunctions.hpp"
+#include "StringTable.hpp"
 
 ListKlass* ListKlass::instance = nullptr;
+
+ListIteratorKlass* ListIteratorKlass::instance = nullptr;
+
+ListKlass::ListKlass() {
+
+}
+
+void ListKlass::initialize() {
+    PyDict* dict = new PyDict();
+
+    dict->set(new PyString("append"),
+        PackNativeFunc(NativeFunction::list_append));
+    dict->set(new PyString("insert"),
+        PackNativeFunc(NativeFunction::list_insert));
+    dict->set(new PyString("index"),
+        PackNativeFunc(NativeFunction::list_index));
+    dict->set(new PyString("pop"),
+        PackNativeFunc(NativeFunction::list_pop));
+    dict->set(new PyString("remove"),
+        PackNativeFunc(NativeFunction::list_remove));
+    dict->set(new PyString("reverse"),
+        PackNativeFunc(NativeFunction::list_reverse));
+
+    setKlassDict(dict);
+}
 
 void ListKlass::print(const PyObject* lhs) const {
     const PyList* list = reinterpret_cast<const PyList*>(lhs);
@@ -143,6 +172,11 @@ PyObject* ListKlass::has(PyObject* object, PyObject* target) const {
     return Universe::PyFalse;
 }
 
+PyObject* ListKlass::getIter(PyObject* object) const {
+    checkLegalPyObject(object, this);
+    return new ListIterator(static_cast<PyList*>(object));
+}
+
 PyObject* ListKlass::store_subscr(PyObject* object, 
     PyObject* subscription, PyObject* newObject
 ) const {
@@ -158,7 +192,7 @@ PyObject* ListKlass::store_subscr(PyObject* object,
     return Universe::PyNone;
 }
 
-PyObject* ListKlass::delete_subscr(PyObject* object, 
+void ListKlass::delete_subscr(PyObject* object, 
     PyObject* subscription
 ) const {
     assert(object->getKlass() == this &&
@@ -169,5 +203,28 @@ PyObject* ListKlass::delete_subscr(PyObject* object,
     // Python中不允许对越界下标进行访问
     assert(pos < list->getLength());
     list->deleteByIndex(pos);
-    return Universe::PyNone;
+}
+
+ListIteratorKlass::ListIteratorKlass() {
+    PyDict* dict = new PyDict();
+
+    dict->set(StringTable::str_next,
+        PackNativeFunc(NativeFunction::list_iterator_next));
+
+    setKlassDict(dict);
+}
+
+PyObject* ListIteratorKlass::next(PyObject* object) const {
+    checkLegalPyObject(object, this);
+    ListIterator* iter = static_cast<ListIterator*>(object);
+    PyList* list = iter->getOwner();
+    int count = iter->getCount();
+    if (count < list->getLength()) {
+        PyObject* nextElem = list->get(count);
+        iter->increaseCount();
+        return nextElem;
+    }
+    else {
+        return Universe::PyNone;
+    }
 }

@@ -24,6 +24,9 @@ public:
     PyObject* pop() {
         return _container->pop();
     }
+    PyObject* top() {
+        return _container->top();
+    }
     void insert(size_t index, PyObject* elem) {
         _container->insert(index, elem);
     }
@@ -36,6 +39,23 @@ public:
     }
     void deleteByIndex(size_t idx) {
         _container->deleteByIndex(idx);
+    }
+};
+
+class ListIterator : public PyObject {
+private:
+    PyList* _owner;
+    int _count;
+public:
+    ListIterator(PyList* owner);
+    PyList* getOwner() {
+        return _owner;
+    }
+    int getCount() {
+        return _count;
+    }
+    void increaseCount() {
+        ++_count;
     }
 };
 

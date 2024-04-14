@@ -120,6 +120,15 @@
     <ClCompile Include="ListKlass.cpp">
       <Filter>源文件\klass</Filter>
     </ClCompile>
+    <ClCompile Include="StringTable.cpp">
+      <Filter>源文件\util</Filter>
+    </ClCompile>
+    <ClCompile Include="PyDict.cpp">
+      <Filter>源文件\object_python</Filter>
+    </ClCompile>
+    <ClCompile Include="DictKlass.cpp">
+      <Filter>源文件\klass</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="byteCodeFileParser.hpp">
@@ -198,6 +207,15 @@
       <Filter>头文件\object_python</Filter>
     </ClInclude>
     <ClInclude Include="ListKlass.hpp">
+      <Filter>头文件\klass</Filter>
+    </ClInclude>
+    <ClInclude Include="StringTable.hpp">
+      <Filter>头文件\util</Filter>
+    </ClInclude>
+    <ClInclude Include="PyDict.hpp">
+      <Filter>头文件\object_python</Filter>
+    </ClInclude>
+    <ClInclude Include="DictKlass.hpp">
       <Filter>头文件\klass</Filter>
     </ClInclude>
   </ItemGroup>

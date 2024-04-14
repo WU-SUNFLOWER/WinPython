@@ -6,7 +6,7 @@
 
 class ListKlass : public Klass {
 private:
-    ListKlass() {};
+    ListKlass();
     static ListKlass* instance;
 public:
     static ListKlass* getInstance() {
@@ -15,6 +15,9 @@ public:
         }
         return instance;
     }
+
+    virtual void initialize() override;
+
     virtual void print(const PyObject* object) const override;
 
     // 各种比大小
@@ -33,9 +36,28 @@ public:
         PyObject* subscrption) const override;
     virtual PyObject* store_subscr(PyObject* object,
         PyObject* subscription, PyObject* newObject) const override;
-    virtual PyObject* delete_subscr(PyObject* object,
+    virtual void delete_subscr(PyObject* object,
         PyObject* subscription) const override;
     virtual PyObject* has(PyObject* object, PyObject* target) const override;
+
+    virtual PyObject* getIter(PyObject* object) const override;
+};
+
+class ListIteratorKlass : public Klass {
+private:
+    ListIteratorKlass();
+    static ListIteratorKlass* instance;
+public:
+    static ListIteratorKlass* getInstance() {
+        if (instance == nullptr) {
+            instance = new ListIteratorKlass();
+        }
+        return instance;
+    }
+    virtual PyObject* next(PyObject*) const override; 
+    virtual PyObject* getIter(PyObject* object) const override {
+        return object;
+    };
 };
 
 #endif

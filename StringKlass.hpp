@@ -15,6 +15,8 @@ public:
         return instance;
     }
 
+    virtual void initialize() override;
+
     virtual void print(const PyObject* lhs) const override;
 
     // 各种比大小

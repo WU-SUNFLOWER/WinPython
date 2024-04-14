@@ -4,6 +4,7 @@
 #include "NativeFunctionKlass.hpp"
 #include "PyFunction.hpp"
 #include "PyMethod.hpp"
+#include "PyDict.hpp"
 #include <cstdlib>
 #include <cstdio>
 
@@ -108,10 +109,18 @@ PyObject* PyObject::store_subscr(PyObject* subscription, PyObject* newObject) {
     return getKlass()->store_subscr(this, subscription, newObject);
 }
 
-PyObject* PyObject::delete_subscr(PyObject* subscription) {
-    return getKlass()->delete_subscr(this, subscription);
+void PyObject::delete_subscr(PyObject* subscription) {
+    getKlass()->delete_subscr(this, subscription);
 }
 
 PyObject* PyObject::has(PyObject* target) {
     return getKlass()->has(this, target);
+}
+
+PyObject* PyObject::getIter() {
+    return getKlass()->getIter(this);
+}
+
+PyObject* PyObject::next() {
+    return getKlass()->next(this);
 }
