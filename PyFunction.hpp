@@ -41,6 +41,17 @@ private:
     NativeFuncPointer _nativeFunc;
 
 public:
+
+    // 枚举定义的本质是创建一个新的类型，并不是创建一个类的成员变量
+    // 因此这里不用加static关键字
+    enum CO_FLAGS {
+        // 用于检测函数体是否接收扩展位置参数（*args）
+        CO_VARARGS = 0x4,
+        // 用于检测函数体是否接收扩展键参数（**kwargs）
+        CO_VARKEYWORDS = 0x8,
+        CO_GENERATOR = 0x20,
+    };
+
     PyFunction(CodeObject* codeObject);
     PyFunction(Klass* klass);
     PyFunction(NativeFuncPointer nativeFunc);

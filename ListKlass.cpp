@@ -37,16 +37,13 @@ void ListKlass::initialize() {
     setKlassDict(dict);
 }
 
-void ListKlass::print(const PyObject* lhs) const {
+void ListKlass::print(const PyObject* lhs, int flags) const {
     const PyList* list = reinterpret_cast<const PyList*>(lhs);
     size_t length = list->getLength();
     putchar('[');
     for (size_t i = 0; i < length; ++i) {
         const PyObject* elem = list->get(i);
-        bool isPyString = elem->getKlass() == StringKlass::getInstance();
-        if (isPyString) putchar('"');
         list->get(i)->print();
-        if (isPyString) putchar('"');
         if (i < length - 1) printf(", ");
     }
     putchar(']');

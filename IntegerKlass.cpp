@@ -6,7 +6,7 @@
 
 IntegerKlass* IntegerKlass::instance = nullptr;
 
-void IntegerKlass::print(const PyObject* lhs) const {
+void IntegerKlass::print(const PyObject* lhs, int flags) const {
     const PyInteger* _lhs = static_cast<const PyInteger*>(lhs);
     Klass::checkLegalPyObject(_lhs, this);
     printf("%d", _lhs->getValue());

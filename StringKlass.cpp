@@ -17,15 +17,35 @@ void StringKlass::initialize() {
     setKlassDict(dict);
 }
 
-void StringKlass::print(const PyObject* lhs) const {
+void StringKlass::print(const PyObject* lhs, int flags) const {
     checkLegalPyObject(lhs, this);
     const PyString* _lhs = static_cast<const PyString*>(lhs);
     size_t length = _lhs->getLength();
     const char* ptr = reinterpret_cast<const char*>(_lhs->getValue());
+    
+    static auto printRaw = [](const char* ptr, size_t length) {
+        for (size_t i = 0; i < length; ++i) {
+            putchar(ptr[i]);
+        }        
+    };
 
-    for (size_t i = 0; i < length; ++i) {
-        putchar(ptr[i]);
+    if (flags & FLAG_PyString_PRINT_RAW) {
+        printRaw(ptr, length);
     }
+    else {
+        char quote = '\'';
+        // 如果字符串中已含有单引号，且不含有双引号，则在输出时以双引号包裹字符串
+        if (
+            memchr(ptr, '\'', length) != nullptr &&
+            memchr(ptr, '\"', length) == nullptr
+        ) {
+            quote = '\"';
+        }
+        putchar(quote);
+        printRaw(ptr, length);
+        putchar(quote);
+    }
+
 }
 
 PyObject* StringKlass::less(const PyObject* lhs, const PyObject* rhs) const

@@ -4,7 +4,7 @@
 
 FunctionKlass* FunctionKlass::instance = nullptr;
 
-void FunctionKlass::print(const PyObject* lhs) const {
+void FunctionKlass::print(const PyObject* lhs, int flags) const {
     checkLegalPyObject(lhs, this);
     const PyFunction* _lhs = static_cast<const PyFunction*>(lhs);
     printf("<function: ");

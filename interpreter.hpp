@@ -19,7 +19,8 @@ public:
 
     void makeFunction(int16_t defaultArgCount, bool isClosureFunc);
 
-    void entryIntoNewFrame(uint16_t argNumber);
+    void entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs, 
+        uint8_t argNumber_pos, uint8_t argNumber_kw);
 
     void exitFromCurFrame();
 };

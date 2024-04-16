@@ -4,7 +4,7 @@
 
 MethodKlass* MethodKlass::instance = nullptr;
 
-void MethodKlass::print(const PyObject* lhs) const {
+void MethodKlass::print(const PyObject* lhs, int flags) const {
     checkLegalPyObject(lhs, this);
     const PyMethod* _lhs = static_cast<const PyMethod*>(lhs);
     printf("<method: ");

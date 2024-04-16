@@ -17,10 +17,10 @@ public:
     PyObject* get(PyObject* key) {
         return _map->get(key);
     }
-    PyObject* getKeyByIndex(size_t i) {
+    PyObject* getKeyByIndex(size_t i) const {
         return _map->getKeyByIndex(i);
     }
-    PyObject* getValueByIndex(size_t i) {
+    PyObject* getValueByIndex(size_t i) const {
         return _map->getValueByIndex(i);
     }
     bool has(PyObject* key) {

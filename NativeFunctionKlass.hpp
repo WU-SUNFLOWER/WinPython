@@ -15,6 +15,6 @@ public:
         return instance;
     }
 
-    virtual void print(const PyObject* lhs) const override;
+    virtual void print(const PyObject* lhs, int flags) const override;
 };
 #endif

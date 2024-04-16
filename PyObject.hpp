@@ -24,7 +24,7 @@ public:
 
     /*公用方法 Start*/
 
-    void print() const;
+    void print(int flags = 0) const;
 
     PyObject* add(PyObject* other) const;
     PyObject* sub(PyObject* other) const;

@@ -18,7 +18,7 @@ public:
 
     virtual void initialize() override;
 
-    virtual void print(const PyObject* object) const override;
+    virtual void print(const PyObject* object, int flags) const override;
 
     // 各种比大小
     virtual PyObject* less(const PyObject* lhs, const PyObject* rhs) const override;

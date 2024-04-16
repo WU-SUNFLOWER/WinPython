@@ -17,7 +17,7 @@ public:
 
     virtual void initialize() override;
 
-    virtual void print(const PyObject* object) const override;
+    virtual void print(const PyObject* object, int flags) const override;
     virtual void delete_subscr(PyObject* object, 
         PyObject* subscription) const override;
 };

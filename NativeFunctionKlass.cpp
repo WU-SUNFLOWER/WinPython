@@ -4,7 +4,7 @@
 
 NativeFunctionKlass* NativeFunctionKlass::instance = nullptr;
 
-void NativeFunctionKlass::print(const PyObject* lhs) const {
+void NativeFunctionKlass::print(const PyObject* lhs, int flags) const {
     checkLegalPyObject(lhs, this);
     const PyFunction* _lhs = static_cast<const PyFunction*>(lhs);
     printf("<native function: ");

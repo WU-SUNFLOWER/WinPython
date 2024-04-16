@@ -32,7 +32,19 @@ void DictKlass::initialize() {
     setKlassDict(dict);
 }
 
-void DictKlass::print(const PyObject* object) const {
+void DictKlass::print(const PyObject* object, int flags) const {
+    const PyDict* dict = reinterpret_cast<const PyDict*>(object);
+    size_t length = dict->getSize();
+    putchar('{');
+    for (size_t i = 0; i < length; ++i) {
+        PyObject* key = dict->getKeyByIndex(i);
+        PyObject* value = dict->getValueByIndex(i);
+        key->print();
+        printf(": ");
+        value->print();
+        if (i < length - 1) printf(", ");
+    }
+    putchar('}');
 }
 
 void DictKlass::delete_subscr(PyObject* object, PyObject* subscription) const {

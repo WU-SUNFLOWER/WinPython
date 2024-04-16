@@ -100,7 +100,7 @@ void Interpreter::run(CodeObject* codeObject) {
 
             case ByteCode::Print_Item:
                 lhs = POP();
-                lhs ->print();
+                lhs ->print(FLAG_PyString_PRINT_RAW);
                 break;
 
             case ByteCode::Print_NewLine:
@@ -244,7 +244,21 @@ void Interpreter::run(CodeObject* codeObject) {
             }
 
             case ByteCode::Call_Function: {
-                entryIntoNewFrame(op_arg);
+                //entryIntoNewFrame(op_arg);
+                uint8_t argNumber_pos = op_arg & 0xff;
+                uint8_t argNumber_kw = op_arg >> 8;
+                // 因为调用函数传递键值扩展参数时，key和value都会压栈，所以这里要*2
+                uint8_t argNumber_total = argNumber_pos + 2 * argNumber_kw;
+                // 先把所有参数从栈上弹出来，存到临时列表中去
+                PyList* rawArgs = new PyList(argNumber_total);
+                while (argNumber_total-- > 0) {
+                    rawArgs->set(argNumber_total, POP());
+                }
+                // 发起函数调用，对函数参数的进一步处理在之后发生
+                PyObject* callableObject = POP();
+                entryIntoNewFrame(callableObject, rawArgs, 
+                    argNumber_pos, argNumber_kw);
+                delete rawArgs;
                 break;
             }
             
@@ -278,7 +292,15 @@ void Interpreter::run(CodeObject* codeObject) {
                 }
                 // 如果还是没找到，去看看内建变量表（可能最后会得到None）
                 variableObject = this->_buildins->get(variableName);
-                PUSH(variableObject);
+                if (variableObject != Universe::PyNone) {
+                    PUSH(variableObject);
+                }
+                else {
+                    printf("name '%s' is not defined\n", 
+                        static_cast<PyString*>(variableName)->getValue());
+                    exit(-1);
+                }
+                
                 break;
             }
 
@@ -464,16 +486,34 @@ void Interpreter::makeFunction(int16_t defaultArgCount, bool isClosure) {
 #define isPythonFuncKlass(k) (k == FunctionKlass::getInstance())
 #define isMethod(k) (k == MethodKlass::getInstance())
 
-void Interpreter::entryIntoNewFrame(uint16_t argNumber) {
-    PyList* args = new PyList(argNumber);
+/*
+callableObject —— 从栈上取出来的被调用对象，可能是Python函数、Python方法
+    或者C++内建函数
+
+rawArgs —— 从栈上取出来的用户调用函数传参列表，内容顺序为普通位置参数、位置扩展参数、
+    键值扩展参数
+
+rawArgNumber_pos —— 即用户调用Call_Function时的op_args的低8位，
+    代表普通位置参数、位置扩展参数的总个数
+
+rawArgNumber_kw —— 即用户调用Call_Function时的op_args的高8位，
+    代表扩展键值参数的总个数
+*/
+void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs, 
+    uint8_t rawArgNumber_pos, uint8_t rawArgNumber_kw
+) {
+
+    /*
+        在Python2中，对于普通的位置参数、位置扩展参数（*args），
+        在执行Call_Function指令时都会被记道op_args里传给argNumber。
+
+        在函数CodeObject的argcount中，只会包含普通位置参数的数量。
+
+        op_args的高8位代表扩展键值参数的个数，
+        低8位代表普通位置参数、位置扩展参数的总个数。
+    */
     
-    // 加载调用参数到fastLocal数组中
-    while (argNumber-- > 0) {
-        args->set(argNumber, POP());
-    }
-    
-    // 从栈中弹出callable object
-    PyObject* callableObject = POP();
+    // 取出callableObject的klass，判断函数调用是否合法
     const Klass* klass = callableObject->getKlass();
     if (!isMethod(klass) && !isCommonFuncKlass(klass)) {
         printf("Unknown callable object!");
@@ -497,31 +537,130 @@ void Interpreter::entryIntoNewFrame(uint16_t argNumber) {
         exit(-1);
     }
 
-    // 对于一般的python函数，需要根据形参列表中的默认参数更新实参列表
-    PyList* defaultArgs = calleeFunc->_defaultArgs;
-    if (isPythonFuncKlass(klass) && defaultArgs) {
-        size_t argCnt_orignal = args->getLength();
-        size_t argCnt_total = calleeFunc->funcCode->_argCount;
-        size_t argCnt_default = defaultArgs->getLength();
-        for (size_t i = argCnt_orignal; i < argCnt_total; ++i) {
-            args->set(i, defaultArgs->get(argCnt_default - argCnt_total + i));
-        }
+    // 对于方法，需要向参数列表中添加宿主对象
+    if (isMethod(klass)) {
+        rawArgs->insert(0, owner);
     }
 
-    // 对于方法，还需要向参数列表中添加宿主对象
-    if (isMethod(klass)) {
-        args->insert(0, owner);
+    
+    PyList* finalArgs = new PyList();
+    klass = calleeFunc->getKlass();
+
+    // 对于一般的python函数，还需要进行一系列的参数处理
+    if (isPythonFuncKlass(klass)) {
+
+        CodeObject* code = calleeFunc->funcCode;
+
+        // 初始化位置扩展参数，和键值扩展参数
+        int flags = code->_flag;
+        PyList* posExArgs = nullptr;
+        PyDict* keywordExArgs = nullptr;
+        if (flags & PyFunction::CO_VARARGS) {
+            posExArgs = new PyList();
+        }
+        if (flags & PyFunction::CO_VARKEYWORDS) {
+            keywordExArgs = new PyDict();
+        }
+
+        // 处理函数形参列表中的默认参数值
+        // 这里用最笨的办法，即先把所有的默认参数值写到finalArgs上，再用实参覆盖
+        PyList* defaultArgs = calleeFunc->_defaultArgs;
+        size_t formalArgNumber_total;
+        if (defaultArgs) {
+            size_t formalArgNumber_default = defaultArgs->getLength();
+            formalArgNumber_total = code->_argCount;
+            /* 
+                Python中待默认值参数只能放在无默认值参数后边。
+                
+                且在用户调用Make_Function时，所有的参数默认值已按从左至右的
+                正确顺序放置在函数的defaultArgs列表中
+
+                所以这里大胆从后往前写即可
+            */
+            while (formalArgNumber_default-- > 0) {
+                finalArgs->set(--formalArgNumber_total, 
+                    defaultArgs->get(formalArgNumber_default));
+            }
+        }
+
+        // 将用户调用的实参写入finalArgs中
+        formalArgNumber_total = code->_argCount;
+        /*
+            如果用户传入的rawArgNumber_pos小于等于formalArgNumber_total，
+            说明肯定没有多余的参数作为位置扩展参数（*args），
+            这时直接把用户传入的参数写进finalArgs中即可
+
+            反之需要处理位置扩展参数
+        */
+        
+        if (rawArgNumber_pos <= formalArgNumber_total) {
+            for (size_t i = 0; i < rawArgNumber_pos; ++i) {
+                finalArgs->set(i, rawArgs->get(i));
+            }
+        }
+        else {
+            size_t i = 0;
+            if (posExArgs == nullptr) {
+                printf("The function you want to call takes exactly %lld arguments (%d given)", 
+                    formalArgNumber_total, rawArgNumber_pos);
+                exit(-1);
+            }
+            for (; i < formalArgNumber_total; ++i) {
+                finalArgs->set(i, rawArgs->get(i));
+            }
+            for (; i < rawArgNumber_pos; ++i) {
+                posExArgs->append(rawArgs->get(i));
+            }
+        }
+
+        // 接下来处理扩展键值参数（**kwargs）
+        for (size_t i = 0; i < rawArgNumber_kw; ++i) {
+            PyObject* key = rawArgs->get(rawArgNumber_pos + 2 * i);
+            PyObject* value = rawArgs->get(rawArgNumber_pos + 2 * i + 1);
+            // 先在被调函数的varnames中找一下，看看能不能找到keyword
+            // 如果能找到，说明用户是在尝试为函数的形参赋值
+            // 不能找到，该键值对记入扩展键值参数
+            size_t foundIndex = 0;
+            bool found = false;
+            for (; foundIndex < code->_argCount; ++foundIndex) {
+                if (
+                    isTrue(key->equal(code->_varNames->get(foundIndex)))
+                ) {
+                    found = true;
+                    break;
+                }
+            }
+            if (found) {
+                finalArgs->set(foundIndex, value);
+            }
+            else if (keywordExArgs != nullptr) {
+                keywordExArgs->set(key, value);
+            }
+            else {
+                printf("The function you want to call got an unexpected keyword argument: ");
+                key->print();
+                exit(-1);
+            }
+        }
+
+        // 最后别忘了把扩展参数装载到finalArgs上去
+        if (posExArgs != nullptr) finalArgs->append(posExArgs);
+        if (keywordExArgs != nullptr) finalArgs->append(keywordExArgs);
+
+    }
+    // 对于C++内建函数，直接传参即可
+    else {
+        finalArgs = rawArgs;
     }
 
     // 前期准备工作完毕，发起真正的函数调用
-    klass = calleeFunc->getKlass();
     if (isNativeFuncKlass(klass)) {
-        _curFrame->pushToStack(calleeFunc->callNativeFunc(args));
+        _curFrame->pushToStack(calleeFunc->callNativeFunc(finalArgs));
     }
     else if (isPythonFuncKlass(klass)) {
         // 创建新栈桢
         FrameObject* calleeFrame = 
-            new FrameObject(calleeFunc, _curFrame, args);
+            new FrameObject(calleeFunc, _curFrame, finalArgs);
         /* 
            将与callee绑定的cells（即callee函数运行时
            需要依赖的freevars），装载到新的栈桢上去。

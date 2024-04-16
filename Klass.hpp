@@ -15,7 +15,8 @@ public:
 
     virtual void initialize() { return; };
 
-    virtual void print(const PyObject* lhs) const {};
+#define FLAG_PyString_PRINT_RAW 1
+    virtual void print(const PyObject* lhs, int flags = 0) const {};
 
     static void checkLegalPyObject(const PyObject* obj, const Klass* klass);
 

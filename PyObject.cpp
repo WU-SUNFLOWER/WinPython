@@ -8,9 +8,8 @@
 #include <cstdlib>
 #include <cstdio>
 
-void PyObject::print() const
-{
-    return getKlass()->print(this);
+void PyObject::print(int flags) const {
+    return getKlass()->print(this, flags);
 }
 
 PyObject* PyObject::add(PyObject* other) const {
