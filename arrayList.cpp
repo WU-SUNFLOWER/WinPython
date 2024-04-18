@@ -6,8 +6,8 @@
 #include <algorithm>
 
 template<typename T>
-ArrayList<T>::ArrayList(T defaultElem, size_t n) {
-    capacity = n >= 1 ? n : 1;  // 防止传入≤0的初始大小
+ArrayList<T>::ArrayList(T defaultElem, int64_t n) {
+    capacity = static_cast<size_t>(std::max(1ll, n));
     length = 0;
     _defaultElem = defaultElem;
     ptr = new T[capacity];
@@ -22,8 +22,8 @@ ArrayList<T>::~ArrayList() {
 }
 
 template<typename T>
-void ArrayList<T>::expand() {
-    capacity = std::max(capacity << 1, length);
+void ArrayList<T>::expand(size_t targetLength) {
+    capacity = std::max(capacity << 1, std::max(length + 1, targetLength));
     T* newPtr = new T[capacity];
     for (size_t i = 0; i < capacity; ++i) {
         newPtr[i] = _defaultElem;
@@ -67,9 +67,10 @@ void ArrayList<T>::insert(size_t index, T elem) {
 template<typename T>
 void ArrayList<T>::set(size_t index, T elem) {
     if (length <= index) {
+        expand(index + 1);
         length = index + 1;
     }
-    while (length > capacity) {
+    else {
         expand();
     }
     ptr[index] = elem;
@@ -77,8 +78,7 @@ void ArrayList<T>::set(size_t index, T elem) {
 
 template<typename T>
 T ArrayList<T>::get(size_t index) {
-    assert(index < length);
-    return ptr[index];
+    return index < length ? ptr[index] : _defaultElem;
 }
 
 template<typename T>

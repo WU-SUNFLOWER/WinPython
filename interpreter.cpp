@@ -18,6 +18,7 @@
 #include "ListKlass.hpp"
 #include "StringTable.hpp"
 #include "DictKlass.hpp"
+#include <algorithm>
 
 Interpreter::Interpreter() {
     _curFrame = nullptr;
@@ -550,13 +551,16 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
     if (isPythonFuncKlass(klass)) {
 
         CodeObject* code = calleeFunc->funcCode;
+        const uint8_t* funcName = code->_name->getValue();
+        size_t formalArgNumber_total = code->_argCount;
+        size_t formalArgNumber_default = 0;
 
         // 初始化位置扩展参数，和键值扩展参数
         int flags = code->_flag;
         PyList* posExArgs = nullptr;
         PyDict* keywordExArgs = nullptr;
         if (flags & PyFunction::CO_VARARGS) {
-            posExArgs = new PyList();
+            posExArgs = new PyList(rawArgNumber_pos - formalArgNumber_total);
         }
         if (flags & PyFunction::CO_VARKEYWORDS) {
             keywordExArgs = new PyDict();
@@ -565,10 +569,8 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
         // 处理函数形参列表中的默认参数值
         // 这里用最笨的办法，即先把所有的默认参数值写到finalArgs上，再用实参覆盖
         PyList* defaultArgs = calleeFunc->_defaultArgs;
-        size_t formalArgNumber_total;
         if (defaultArgs) {
-            size_t formalArgNumber_default = defaultArgs->getLength();
-            formalArgNumber_total = code->_argCount;
+            formalArgNumber_default = defaultArgs->getLength();
             /* 
                 Python中待默认值参数只能放在无默认值参数后边。
                 
@@ -577,22 +579,21 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
 
                 所以这里大胆从后往前写即可
             */
-            while (formalArgNumber_default-- > 0) {
-                finalArgs->set(--formalArgNumber_total, 
-                    defaultArgs->get(formalArgNumber_default));
+            size_t cnt_total = formalArgNumber_total;
+            size_t cnt_def = formalArgNumber_default;
+            while (cnt_def-- > 0) {
+                finalArgs->set(--cnt_total, defaultArgs->get(cnt_def));
             }
         }
 
-        // 将用户调用的实参写入finalArgs中
-        formalArgNumber_total = code->_argCount;
-        /*
+        /*  将用户调用的实参写入finalArgs中
+            
             如果用户传入的rawArgNumber_pos小于等于formalArgNumber_total，
             说明肯定没有多余的参数作为位置扩展参数（*args），
             这时直接把用户传入的参数写进finalArgs中即可
 
             反之需要处理位置扩展参数
         */
-        
         if (rawArgNumber_pos <= formalArgNumber_total) {
             for (size_t i = 0; i < rawArgNumber_pos; ++i) {
                 finalArgs->set(i, rawArgs->get(i));
@@ -601,7 +602,9 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
         else {
             size_t i = 0;
             if (posExArgs == nullptr) {
-                printf("The function you want to call takes exactly %lld arguments (%d given)", 
+                printf("%.200s() takes %s %lld arguments (%d given)\n", 
+                    funcName, 
+                    formalArgNumber_default > 0 ? "at most" : "exactly", 
                     formalArgNumber_total, rawArgNumber_pos);
                 exit(-1);
             }
@@ -617,12 +620,20 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
         for (size_t i = 0; i < rawArgNumber_kw; ++i) {
             PyObject* key = rawArgs->get(rawArgNumber_pos + 2 * i);
             PyObject* value = rawArgs->get(rawArgNumber_pos + 2 * i + 1);
+            
+            if (key->getKlass() != StringKlass::getInstance()) {
+                printf("%.200s() keywords must be strings\n", funcName);
+                exit(-1);
+            }
+            
+            const uint8_t* key_str = static_cast<PyString*>(key)->getValue();
+
             // 先在被调函数的varnames中找一下，看看能不能找到keyword
             // 如果能找到，说明用户是在尝试为函数的形参赋值
             // 不能找到，该键值对记入扩展键值参数
             size_t foundIndex = 0;
             bool found = false;
-            for (; foundIndex < code->_argCount; ++foundIndex) {
+            for (; foundIndex < formalArgNumber_total; ++foundIndex) {
                 if (
                     isTrue(key->equal(code->_varNames->get(foundIndex)))
                 ) {
@@ -631,15 +642,42 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
                 }
             }
             if (found) {
+                if (
+                    foundIndex < finalArgs->getLength() && 
+                    finalArgs->get(foundIndex) != nullptr
+                ) {
+                    printf("%.200s() got multiple values for keyword "
+                        "argument '%.400s'\n", funcName, key_str);
+                    exit(-1);
+                }
                 finalArgs->set(foundIndex, value);
             }
             else if (keywordExArgs != nullptr) {
                 keywordExArgs->set(key, value);
             }
             else {
-                printf("The function you want to call got an unexpected keyword argument: ");
-                key->print();
+                printf("%.200s() got an unexpected keyword "
+                    "argument '%.400s'\n", funcName, key_str);
                 exit(-1);
+            }
+        }
+
+        // 检查非扩展位置参数缺失情况
+        if (rawArgNumber_pos < formalArgNumber_total) {
+            size_t border = formalArgNumber_total - formalArgNumber_default;
+            size_t lenFinalArgs = finalArgs->getLength();
+            for (size_t i = rawArgNumber_pos; i < border; ++i) {
+                if (finalArgs->get(i) == nullptr) {
+                    size_t given = 0;
+                    for (size_t j = 0; j < std::min(formalArgNumber_total, lenFinalArgs); ++j) {
+                        if (finalArgs->get(j) != nullptr) ++given;
+                    }
+                    printf("%.200s() takes %s %lld arguments (%lld given)", 
+                        funcName,
+                        formalArgNumber_default > 0 || posExArgs != nullptr ? "at least" : "exactly",
+                        border, given);
+                    exit(-1);
+                }
             }
         }
 

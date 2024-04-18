@@ -2,6 +2,7 @@
 #define ArrayList_Hpp
 
 #include <cassert>
+#include <cstdint>
 
 template <typename T>
 class ArrayList {
@@ -10,9 +11,9 @@ private:
     size_t capacity;  // 数组开辟内存的总长度
     T* ptr;
     T _defaultElem;
-    void expand();
+    void expand(size_t targetLength = 0);
 public:
-    ArrayList(T defaultElem, size_t n = 8);
+    ArrayList(T defaultElem, int64_t n = 8ll);
     ~ArrayList();
     // 向数组中的最后一个位置添加元素
     void push(T elem);

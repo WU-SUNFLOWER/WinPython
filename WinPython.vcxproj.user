@@ -10,6 +10,6 @@
     <LocalDebuggerCommand>
     </LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>C:\Users\Administrator\Desktop\hello5.py</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>C:\Users\Administrator\Desktop\hello.py</LocalDebuggerCommandArguments>
   </PropertyGroup>
 </Project>
