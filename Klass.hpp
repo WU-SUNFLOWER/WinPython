@@ -4,11 +4,21 @@
 #include "map.hpp"
 
 class PyObject;
+class PyString;
+class PyList;
 class PyDict;
+class PyTypeObject;
 
 class Klass {
 private:
     PyDict* _klassDict = nullptr;
+
+    PyString* _name = nullptr;
+
+    Klass* _super = nullptr; // 指向当前klass的父类（基类）
+
+    PyTypeObject* _type_object = nullptr;  // 指向当前klass对应的PyTypeObject对象
+
 protected:
     Klass() {};
 public:
@@ -25,6 +35,27 @@ public:
     };
     PyDict* getKlassDict() const {
         return _klassDict;
+    }
+
+    void setTypeObject(PyTypeObject* object) {
+        _type_object = object;
+    }
+    PyObject* getTypeObject() {
+        return reinterpret_cast<PyObject*>(_type_object);
+    }
+
+    void setName(PyString* name) {
+        _name = name;
+    }
+    PyString* getName() const {
+        return _name;
+    }
+
+    void setSuperKlass(Klass* super) {
+        _super = super;
+    }
+    Klass* getSuperKlass() const {
+        return _super;
     }
 
     // 各种比大小
@@ -55,6 +86,9 @@ public:
     // 迭代器相关
     virtual PyObject* getIter(PyObject* object) const { return 0; }
     virtual PyObject* next(PyObject* object) const { return 0; }
+
+    // 类的实例化
+    virtual PyObject* allocateInstance(PyList* args) { return 0; }
 };
 
 #define checkLegalPyObject_DB(x, y) (Klass::checkLegalPyObject(x, this), Klass::checkLegalPyObject(y, this))

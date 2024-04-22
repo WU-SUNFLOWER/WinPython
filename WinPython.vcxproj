@@ -145,6 +145,7 @@
     <ClCompile Include="MethodKlass.cpp" />
     <ClCompile Include="NativeFunctionKlass.cpp" />
     <ClCompile Include="nativeFunctions.cpp" />
+    <ClCompile Include="ObjectKlass.cpp" />
     <ClCompile Include="PyCell.cpp" />
     <ClCompile Include="PyDict.cpp" />
     <ClCompile Include="PyFunction.cpp" />
@@ -157,8 +158,10 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="PyTypeObject.cpp" />
     <ClCompile Include="StringKlass.cpp" />
     <ClCompile Include="StringTable.cpp" />
+    <ClCompile Include="TypeKlass.cpp" />
     <ClCompile Include="Universe.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -180,6 +183,7 @@
     <ClInclude Include="MethodKlass.hpp" />
     <ClInclude Include="nativeFunctions.hpp" />
     <ClInclude Include="NativeFunctionKlass.hpp" />
+    <ClInclude Include="ObjectKlass.hpp" />
     <ClInclude Include="PyCell.hpp" />
     <ClInclude Include="PyDict.hpp" />
     <ClInclude Include="PyFunction.hpp" />
@@ -188,8 +192,10 @@
     <ClInclude Include="PyMethod.hpp" />
     <ClInclude Include="PyObject.hpp" />
     <ClInclude Include="PyString.hpp" />
+    <ClInclude Include="PyTypeObject.hpp" />
     <ClInclude Include="StringKlass.hpp" />
     <ClInclude Include="StringTable.hpp" />
+    <ClInclude Include="TypeKlass.hpp" />
     <ClInclude Include="Universe.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

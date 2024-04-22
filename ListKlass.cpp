@@ -2,6 +2,7 @@
 #include <cstdio>
 #include "StringKlass.hpp"
 #include "IntegerKlass.hpp"
+#include "PyTypeObject.hpp"
 #include "PyInteger.hpp"
 #include "PyString.hpp"
 #include "PyDict.hpp"
@@ -9,6 +10,7 @@
 #include <algorithm>
 #include "nativeFunctions.hpp"
 #include "StringTable.hpp"
+#include "ObjectKlass.hpp"
 
 ListKlass* ListKlass::instance = nullptr;
 
@@ -35,6 +37,15 @@ void ListKlass::initialize() {
         PackNativeFunc(NativeFunction::list_reverse));
 
     setKlassDict(dict);
+
+    // 实现C++ Klass和Python TypeObject的双向绑定
+    (new PyTypeObject())->setOwnKlass(this);
+
+    // 设置类名
+    setName(StringTable::str_list);
+
+    // 设置基类
+    setSuperKlass(ObjectKlass::getInstance());
 }
 
 void ListKlass::print(const PyObject* lhs, int flags) const {

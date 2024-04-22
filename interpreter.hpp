@@ -7,10 +7,11 @@
 #include "Universe.hpp"
 #include "bytecode.hpp"
 #include "Map.hpp"
+#include "PyDict.hpp"
 
 class Interpreter {
 private:
-    PyObjectMap* _buildins;
+    PyDict* _buildins;
     FrameObject* _curFrame;
     PyObject* _retValue;  // 该成员变量用于在切换栈桢上下文时，缓存callee的返回值
 public:

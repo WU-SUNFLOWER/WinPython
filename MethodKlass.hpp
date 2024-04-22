@@ -16,5 +16,6 @@ public:
     }
 
     virtual void print(const PyObject* lhs, int flags = 0) const override;
+    virtual void initialize() override;
 };
 #endif

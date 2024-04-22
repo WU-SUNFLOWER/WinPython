@@ -1,5 +1,6 @@
 #include "StringKlass.hpp"
 #include "Universe.hpp"
+#include "PyTypeObject.hpp"
 #include "PyString.hpp"
 #include "PyInteger.hpp"
 #include "PyDict.hpp"
@@ -7,6 +8,8 @@
 #include <cstdlib>
 #include <cstring>
 #include "nativeFunctions.hpp"
+#include "StringTable.hpp"
+#include "ObjectKlass.hpp"
 
 StringKlass* StringKlass::instance = nullptr;
 
@@ -15,6 +18,12 @@ void StringKlass::initialize() {
     dict->set(new PyString("upper"),
         PackNativeFunc(NativeFunction::string_upper));
     setKlassDict(dict);
+
+    (new PyTypeObject())->setOwnKlass(this);
+
+    setName(StringTable::str_str);
+
+    setSuperKlass(ObjectKlass::getInstance());
 }
 
 void StringKlass::print(const PyObject* lhs, int flags) const {

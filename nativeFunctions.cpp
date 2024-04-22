@@ -6,9 +6,69 @@
 #include "PyDict.hpp"
 #include "DictKlass.hpp"
 #include <algorithm>
+#include "TypeKlass.hpp"
+#include "PyTypeObject.hpp"
 
 PyObject* NativeFunction::len(PyList* args) {
     return args->get(0)->len();
+}
+
+/*
+class A(object):
+    pass
+class B(A):
+    pass
+b = B()
+isinstance(b, B) # => True
+isinstance(b, A) # => True
+isinstance(b, object) # => True
+
+|---Python World----|-----C++ World------|
+
+                    |----type_object-----|
+                    ↓                    |
+                  object    --own--> ObjectKlass
+                    ↑                    ↑
+                    |                    |
+                  (super)             (super)
+                    |                    |
+                <class 'A'> --own--> User A-Klass
+                    ↑                    ↑
+                    |                    |
+                  (super)             (super)
+                    |                    |
+b --instance--> <class 'B'> --own--> User B-Klass
+|                                        ↑
+|-----------------klass------------------|
+*/
+PyObject* NativeFunction::isinstance(PyList* args) {
+    PyObject* inst = args->get(0);
+    PyTypeObject* cls = static_cast<PyTypeObject*>(args->get(1));
+    if (cls->getKlass() != TypeKlass::getInstance()) {
+        printf("isinstance() arg 2 must be a class");
+        exit(-1);
+    }
+    // 获取与Python inst对象绑定的C++ Klass
+    // 这个klass反映了这个对象是哪个Python类的实例
+    const Klass* klass = inst->getKlass();
+    // 获取cls这个Python type对象（class）是哪个C++ Klass的映射
+    Klass* targetKlass = cls->getOwnKlass();
+    while (klass != nullptr) {
+        if (klass == targetKlass) {
+            return Universe::PyTrue;
+        }
+        klass = klass->getSuperKlass();
+    }
+    return Universe::PyFalse;
+}
+
+PyObject* NativeFunction::type_of(PyList* args) {
+    if (args->getLength() != 1) {
+        printf("type() takes 1 argument");
+        exit(-1);
+    }
+    PyObject* arg = args->get(0);
+    return arg->getKlass()->getTypeObject();
 }
 
 PyObject* NativeFunction::string_upper(PyList* args) {

@@ -1,10 +1,13 @@
 #include "DictKlass.hpp"
+#include "PyTypeObject.hpp"
 #include "PyDict.hpp"
 #include "PyString.hpp"
 #include "nativeFunctions.hpp"
 #include "Universe.hpp"
 #include <cstdio>
 #include <cstdlib>
+#include "StringTable.hpp"
+#include "ObjectKlass.hpp"
 
 DictKlass* DictKlass::instance = nullptr;
 
@@ -30,6 +33,10 @@ void DictKlass::initialize() {
         PackNativeFunc(NativeFunction::dict_items));
 
     setKlassDict(dict);
+
+    (new PyTypeObject())->setOwnKlass(this);
+    setName(StringTable::str_dict);
+    setSuperKlass(ObjectKlass::getInstance());
 }
 
 void DictKlass::print(const PyObject* object, int flags) const {

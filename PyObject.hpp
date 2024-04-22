@@ -17,7 +17,7 @@ public:
     void setKlass(Klass* k) {
         klass = k;
     }
-    const Klass* getKlass() const {
+    Klass* getKlass() const {
         assert(klass != nullptr);
         return klass;
     }

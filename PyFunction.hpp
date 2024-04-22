@@ -19,7 +19,7 @@ private:
     PyString* funcName;
     uint32_t flag;
 
-    PyObjectMap* _globals;
+    PyDict* _globals;
     
     /*
         储存函数的默认参数
@@ -56,7 +56,7 @@ public:
     PyFunction(Klass* klass);
     PyFunction(NativeFuncPointer nativeFunc);
 
-    void setGlobalMap(PyObjectMap* map) {
+    void setGlobalMap(PyDict* map) {
         _globals = map;
     }
     void setDefaultArgs(PyList* args);

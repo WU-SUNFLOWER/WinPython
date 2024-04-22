@@ -1,10 +1,23 @@
 #include "IntegerKlass.hpp"
+#include "PyTypeObject.hpp"
 #include "Universe.hpp"
 #include "PyInteger.hpp"
+#include "StringTable.hpp"
 #include <cstdio>
 #include <cstdlib>
+#include "ObjectKlass.hpp"
+#include "PyList.hpp"
 
 IntegerKlass* IntegerKlass::instance = nullptr;
+
+void IntegerKlass::initialize() {
+
+    (new PyTypeObject())->setOwnKlass(this);
+
+    setName(StringTable::str_int);
+
+    setSuperKlass(ObjectKlass::getInstance());
+}
 
 void IntegerKlass::print(const PyObject* lhs, int flags) const {
     const PyInteger* _lhs = static_cast<const PyInteger*>(lhs);
@@ -96,4 +109,23 @@ PyObject* IntegerKlass::mod(const PyObject* lhs, const PyObject* rhs) const
     checkLegalPyObject_DB(_lhs, _rhs);
     // 检查通过，开始计算
     return new PyInteger(_lhs->getValue() % _rhs->getValue());
+}
+
+PyObject* IntegerKlass::allocateInstance(PyList* args) {
+    if (args == nullptr || args->getLength() <= 0) {
+        return new PyInteger(0);
+    }
+    else {
+        PyObject* firstArg = args->get(0);
+        if (
+            args->getLength() == 1 &&
+            firstArg->getKlass() == IntegerKlass::getInstance()
+        ) {
+            return new PyInteger(static_cast<PyInteger*>(firstArg)->getValue());
+        }
+        else {
+            printf("You call int() with illegal arguments!");
+            exit(-1);
+        }
+    }
 }

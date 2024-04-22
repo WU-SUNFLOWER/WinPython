@@ -9,7 +9,6 @@ private:
     PyObjectMap* _map;
 public:
     PyDict();
-    //PyDict(PyObjectMap* map);
     
     void set(PyObject* key, PyObject* value) {
         _map->set(key, value);

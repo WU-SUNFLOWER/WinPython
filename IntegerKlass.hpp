@@ -15,6 +15,8 @@ public:
         return instance;
     }
 
+    virtual void initialize() override;
+
     virtual void print(const PyObject* lhs, int flags) const override;
 
     // 各种比大小
@@ -31,6 +33,9 @@ public:
     virtual PyObject* mul(const PyObject* lhs, const PyObject* rhs) const override;
     virtual PyObject* div(const PyObject* lhs, const PyObject* rhs) const override;
     virtual PyObject* mod(const PyObject* lhs, const PyObject* rhs) const;
+
+    // 类的实例化
+    virtual PyObject* allocateInstance(PyList* args) override;
 };
 
 #endif

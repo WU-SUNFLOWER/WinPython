@@ -9,7 +9,7 @@ FrameObject::FrameObject(CodeObject* codeObject) {
     _byteCodes = codeObject->_byteCodes;
     
     // 初始化一张空的映射表用于储存本地变量
-    _locals = new PyObjectMap();
+    _locals = new PyDict();
     // 对于入口函数<module>来说，它外面不可能再有全局变量
     // 因此该函数中的变量查询，到它的本地变量为止
     _globals = _locals;

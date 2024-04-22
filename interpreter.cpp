@@ -19,22 +19,38 @@
 #include "StringTable.hpp"
 #include "DictKlass.hpp"
 #include <algorithm>
+#include "TypeKlass.hpp"
+#include "ObjectKlass.hpp"
+#include "PyTypeObject.hpp"
 
 Interpreter::Interpreter() {
     _curFrame = nullptr;
     _retValue = nullptr;
-    _buildins = new PyObjectMap();
+    _buildins = new PyDict();
 
-    _buildins->set(new PyString("True"), Universe::PyTrue);
-    _buildins->set(new PyString("False"), Universe::PyFalse);
-    _buildins->set(Universe::PyNone, Universe::PyNone);
+    _buildins->set(StringTable::str_true, Universe::PyTrue);
+    _buildins->set(StringTable::str_false, Universe::PyFalse);
+    _buildins->set(StringTable::str_none, Universe::PyNone);
     
-    _buildins->set(new PyString("len"), PackNativeFunc(NativeFunction::len));
+    _buildins->set(StringTable::str_len, PackNativeFunc(NativeFunction::len));
+    _buildins->set(StringTable::str_isinstance, PackNativeFunc(NativeFunction::isinstance));
+    _buildins->set(new PyString("typeof"), PackNativeFunc(NativeFunction::type_of));
 
     DictKlass::getInstance()->initialize();
+    FunctionKlass::getInstance()->initialize();
+    IntegerKlass::getInstance()->initialize();
     ListKlass::getInstance()->initialize();
+    MethodKlass::getInstance()->initialize();
+    NativeFunctionKlass::getInstance()->initialize();
     StringKlass::getInstance()->initialize();
+    TypeKlass::getInstance()->initialize();
 
+    _buildins->set(StringTable::str_object, ObjectKlass::getInstance()->getTypeObject());
+    _buildins->set(StringTable::str_type, TypeKlass::getInstance()->getTypeObject());
+    _buildins->set(StringTable::str_int, IntegerKlass::getInstance()->getTypeObject());
+    _buildins->set(StringTable::str_str, StringKlass::getInstance()->getTypeObject());
+    _buildins->set(StringTable::str_list, ListKlass::getInstance()->getTypeObject());
+    _buildins->set(StringTable::str_dict, DictKlass::getInstance()->getTypeObject());
 }
 
 #define POP() (_curFrame->popFromStack())
@@ -486,6 +502,7 @@ void Interpreter::makeFunction(int16_t defaultArgCount, bool isClosure) {
 #define isNativeFuncKlass(k) (k == NativeFunctionKlass::getInstance())
 #define isPythonFuncKlass(k) (k == FunctionKlass::getInstance())
 #define isMethod(k) (k == MethodKlass::getInstance())
+#define isTypeObject(k) (k == TypeKlass::getInstance())
 
 /*
 callableObject —— 从栈上取出来的被调用对象，可能是Python函数、Python方法
@@ -516,7 +533,7 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
     
     // 取出callableObject的klass，判断函数调用是否合法
     const Klass* klass = callableObject->getKlass();
-    if (!isMethod(klass) && !isCommonFuncKlass(klass)) {
+    if (!isMethod(klass) && !isTypeObject(klass) && !isCommonFuncKlass(klass)) {
         printf("Unknown callable object!");
         exit(-1);
     }
@@ -532,7 +549,13 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
     else if (isCommonFuncKlass(klass)) {
         calleeFunc = static_cast<PyFunction*>(callableObject);
     }
-    
+    else if (isTypeObject(klass)) {
+        PyObject* inst = 
+            static_cast<PyTypeObject*>(callableObject)->getOwnKlass()->allocateInstance(rawArgs);
+        PUSH(inst);
+        return;
+    }
+
     if (!calleeFunc) {
         printf("Try to call a function with null pointer");
         exit(-1);
