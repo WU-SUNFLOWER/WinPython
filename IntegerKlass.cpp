@@ -111,7 +111,7 @@ PyObject* IntegerKlass::mod(const PyObject* lhs, const PyObject* rhs) const
     return new PyInteger(_lhs->getValue() % _rhs->getValue());
 }
 
-PyObject* IntegerKlass::allocateInstance(PyList* args) {
+PyObject* IntegerKlass::allocateInstance(PyObject* callable, PyList* args) {
     if (args == nullptr || args->getLength() <= 0) {
         return new PyInteger(0);
     }

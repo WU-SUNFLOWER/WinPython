@@ -578,8 +578,9 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
         calleeFunc = static_cast<PyFunction*>(callableObject);
     }
     else if (isTypeObject(klass)) {
-        PyObject* inst = 
-            static_cast<PyTypeObject*>(callableObject)->getOwnKlass()->allocateInstance(rawArgs);
+        PyObject* inst = static_cast<PyTypeObject*>(callableObject)
+            ->getOwnKlass()
+            ->allocateInstance(callableObject, rawArgs);
         PUSH(inst);
         return;
     }

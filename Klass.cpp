@@ -10,6 +10,9 @@
 #include <cstdlib>
 #include "PyTypeObject.hpp"
 #include "ObjectKlass.hpp"
+#include "TypeKlass.hpp"
+#include "Universe.hpp"
+#include "StringTable.hpp"
 
 PyObject* Klass::createKlass(PyObject* dict, PyObject* supers, PyObject* name) {
     checkLegalPyObject(dict, DictKlass::getInstance());
@@ -38,9 +41,34 @@ PyObject* Klass::createKlass(PyObject* dict, PyObject* supers, PyObject* name) {
     return cls;
 }
 
+void Klass::print(const PyObject* lhs, int flags) const {
+    Klass* klass = lhs->getKlass();
+    putchar('<');
+
+    const PyDict* attrDict = klass->getKlassDict();
+    if (attrDict != nullptr) {
+        const PyObject* moduleName = attrDict->get(StringTable::str_mod);
+        if (moduleName != Universe::PyNone) {
+            moduleName->print(FLAG_PyString_PRINT_RAW);
+            putchar('.');
+        }
+    }
+
+    klass->getName()->print(FLAG_PyString_PRINT_RAW);
+    printf(" object at 0x%p>", lhs);
+}
+
 void Klass::checkLegalPyObject(const PyObject* obj, const Klass* klass) {
     if (obj == nullptr || obj->getKlass() != klass) {
         printf("call IntegerKlass with illegal Python object.");
         exit(-1);
     }
+}
+
+PyObject* Klass::allocateInstance(PyObject* callable, PyList* args) {
+    checkLegalPyObject(callable, TypeKlass::getInstance());
+    PyObject* inst = new PyObject();
+    PyTypeObject* cls = static_cast<PyTypeObject*>(callable);
+    inst->setKlass(cls->getOwnKlass());
+    return inst;
 }

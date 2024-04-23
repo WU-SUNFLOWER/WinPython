@@ -28,7 +28,7 @@ public:
     virtual void initialize() { return; };
 
 #define FLAG_PyString_PRINT_RAW 1
-    virtual void print(const PyObject* lhs, int flags = 0) const {};
+    virtual void print(const PyObject* lhs, int flags = 0) const;
 
     static void checkLegalPyObject(const PyObject* obj, const Klass* klass);
 
@@ -90,7 +90,7 @@ public:
     virtual PyObject* next(PyObject* object) const { return 0; }
 
     // 类的实例化
-    virtual PyObject* allocateInstance(PyList* args) { return 0; }
+    virtual PyObject* allocateInstance(PyObject* callable, PyList* args);
 };
 
 #define checkLegalPyObject_DB(x, y) (Klass::checkLegalPyObject(x, this), Klass::checkLegalPyObject(y, this))

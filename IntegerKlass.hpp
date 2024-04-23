@@ -35,7 +35,7 @@ public:
     virtual PyObject* mod(const PyObject* lhs, const PyObject* rhs) const;
 
     // 类的实例化
-    virtual PyObject* allocateInstance(PyList* args) override;
+    virtual PyObject* allocateInstance(PyObject* callable, PyList* args) override;
 };
 
 #endif
