@@ -62,9 +62,9 @@ PyString* ByteCodeFileParser::getString() {
     return s;
 }
 
-PyList* ByteCodeFileParser::getTuple() {
+PyList* ByteCodeFileParser::getTuple(bool needToCheck) {
     // tuple以`(`字符（0x28）作为起始标志
-    if (fileStream->readByte() != '(') {
+    if (needToCheck && fileStream->readByte() != '(') {
         fileStream->unreadByte();
         return nullptr;
     }
@@ -89,16 +89,19 @@ PyList* ByteCodeFileParser::getTuple() {
             case 's':
                 tuple->append(getString());
                 break;
-            // 
+            // 元素为字符串
             case 't': {
                 PyString* str = getString();
                 tuple->append(str);
                 stringTable.push(str);
                 break;
             }
-            //
+            // 元素为int
             case 'R': 
                 tuple->append(stringTable.get(fileStream->readInt()));
+                break;
+            case '(':
+                tuple->append(getTuple(false));
                 break;
             // 遇到无法解析的object type，直接退出程序
             default:

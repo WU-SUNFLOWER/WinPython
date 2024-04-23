@@ -23,6 +23,8 @@ protected:
     Klass() {};
 public:
 
+    static PyObject* createKlass(PyObject* dict, PyObject* supers, PyObject* name);
+
     virtual void initialize() { return; };
 
 #define FLAG_PyString_PRINT_RAW 1

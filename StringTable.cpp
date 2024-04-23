@@ -5,6 +5,7 @@ PyString* StringTable::str_true = new PyString("True");
 PyString* StringTable::str_false = new PyString("False");
 PyString* StringTable::str_none = new PyString("None");
 PyString* StringTable::str_next = new PyString("__next__");
+PyString* StringTable::str_mod = new PyString("__module__");
 PyString* StringTable::str_list = new PyString("list");
 PyString* StringTable::str_type = new PyString("type");
 PyString* StringTable::str_str = new PyString("str");

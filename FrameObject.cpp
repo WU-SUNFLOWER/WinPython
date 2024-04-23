@@ -28,21 +28,17 @@ FrameObject::FrameObject(CodeObject* codeObject) {
     _blockStack = new ArrayList<Block>({});
 
     _callerFrame = nullptr;
+
+    _isEntryFrame = false;
 }
 
 FrameObject::FrameObject(PyFunction* callee, FrameObject* callerFrame, 
-    PyList* args) : FrameObject(callee->funcCode) {
+    bool isEntryFrame, PyList* args) : FrameObject(callee->funcCode) {
     // 将函数调用所产生栈桢的全局变量表，同步为函数绑定的变量表
     _globals = callee->_globals;
     _callerFrame = callerFrame;
     _fastLocals = args;
-}
-
-FrameObject::~FrameObject() {
-    delete _locals;
-    delete _stack;
-    delete _fastLocals;
-    delete _blockStack;
+    _isEntryFrame = isEntryFrame;
 }
 
 uint8_t FrameObject::getOpCode() {
@@ -78,4 +74,9 @@ PyObject* FrameObject::getTopInStack() {
 bool FrameObject::isRootFrame() const
 {
     return _callerFrame == nullptr;
+}
+
+bool FrameObject::isEntryFrame() const
+{
+    return _isEntryFrame;
 }

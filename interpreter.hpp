@@ -18,6 +18,8 @@ public:
     Interpreter();
     void run(CodeObject* code);
 
+    void evalFrame();
+
     void makeFunction(int16_t defaultArgCount, bool isClosureFunc);
 
     void entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs, 

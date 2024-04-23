@@ -14,8 +14,10 @@ enum ByteCode : uint8_t {
     Print_Item = 0x47,
     Print_NewLine = 0x48,
     Break_Loop = 0x50,
+    Load_Locals = 0x52,
     Return_Value = 0x53,
     Pop_Block = 0x57,
+    Build_Class = 0x59,
     // 判断指令是否含参的边界值
     // op < Have_Argument 表示指令不含参数
     // op >= Have_Argument 表示指令含参数
@@ -44,7 +46,6 @@ enum ByteCode : uint8_t {
     Load_Closure = 0x87,  // 加载free variable到栈顶
     Load_Deref = 0x88,  // 获取cell variable并解引用，再加载到栈顶
     Store_Deref = 0x89,  // 弹出栈顶元素，将其储存为cell variable
-
 
 };
 

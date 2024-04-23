@@ -13,7 +13,7 @@ public:
     void set(PyObject* key, PyObject* value) {
         _map->set(key, value);
     }
-    PyObject* get(PyObject* key) {
+    PyObject* get(PyObject* key) const {
         return _map->get(key);
     }
     PyObject* getKeyByIndex(size_t i) const {

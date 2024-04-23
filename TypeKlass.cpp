@@ -7,6 +7,7 @@
 #include "StringTable.hpp"
 #include "ObjectKlass.hpp"
 #include "Universe.hpp"
+#include "PyDict.hpp"
 
 TypeKlass* TypeKlass::instance = nullptr;
 
@@ -19,10 +20,22 @@ TypeKlass* TypeKlass::getInstance() {
 
 void TypeKlass::print(const PyObject* object, int flag) const {
     checkLegalPyObject(object, this);
+    
     const PyTypeObject* typeObject = reinterpret_cast<const PyTypeObject*>(object);
-    printf("<class ");
-    typeObject->getOwnKlass()->getName()->print();
-    printf(">");
+    printf("<class \"");
+
+    const Klass* ownKlass = typeObject->getOwnKlass();
+    const PyDict* attrDict = ownKlass->getKlassDict();
+    if (attrDict != nullptr) {
+        const PyObject* moduleName = attrDict->get(StringTable::str_mod);
+        if (moduleName != Universe::PyNone) {
+            moduleName->print(FLAG_PyString_PRINT_RAW);
+            putchar('.');
+        }
+    }
+
+    ownKlass->getName()->print(FLAG_PyString_PRINT_RAW);
+    printf("\">");
 }
 
 void TypeKlass::initialize() {

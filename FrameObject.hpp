@@ -35,12 +35,15 @@ private:
     PyString* _byteCodes;
     size_t pc;  // 指令计数器
 
+    bool _isEntryFrame;  // 如果某个Python栈桢是由C++代码主动调用的，该标记会被置为true
+
 public:
     // 该构造函数仅适用于为<module>创建栈桢
     FrameObject(CodeObject* code);
     // 该构造函数用于一般的通过PyFunction创建栈桢
-    FrameObject(PyFunction* callee, FrameObject* callerFrame, PyList* args);
-    ~FrameObject();
+    FrameObject(PyFunction* callee, FrameObject* callerFrame, bool isEntryFrame, PyList* args);
+    // 栈桢上挂的东西由虚拟机统一内存管理，因此析构函数中不需要写任何东西
+    ~FrameObject() {};
 
     uint8_t getOpCode();
     uint16_t getOpArgument();
@@ -52,6 +55,7 @@ public:
     PyObject* getTopInStack();
 
     bool isRootFrame() const;
+    bool isEntryFrame() const;
 
     friend class Interpreter;
 };

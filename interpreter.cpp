@@ -53,6 +53,12 @@ Interpreter::Interpreter() {
     _buildins->set(StringTable::str_dict, DictKlass::getInstance()->getTypeObject());
 }
 
+void Interpreter::run(CodeObject* codeObject) {
+    _curFrame = new FrameObject(codeObject);
+    _curFrame->_locals->set(new PyString("__name__"), new PyString("__main__"));
+    evalFrame();
+}
+
 #define POP() (_curFrame->popFromStack())
 #define TOP() (_curFrame->getTopInStack())
 #define PUSH(x) (_curFrame->pushToStack(x))
@@ -63,10 +69,8 @@ Interpreter::Interpreter() {
 #define Consts (_curFrame->_consts)
 #define StackLength (_curFrame->_stack->getLength())
 
-void Interpreter::run(CodeObject* codeObject) {
+void Interpreter::evalFrame() {
     
-    _curFrame = new FrameObject(codeObject);
-
     while (_curFrame != nullptr && _curFrame->hasMoreCode()) {
         uint8_t op_code = _curFrame->getOpCode();
         bool hasArugment = op_code >= ByteCode::Have_Argument;
@@ -94,6 +98,17 @@ void Interpreter::run(CodeObject* codeObject) {
                 break;
             }
             
+            // 暂时先用list代替一下tuple
+            case ByteCode::Build_Tuple: {
+                PyList* list = new PyList();
+                while (op_arg-- > 0) {
+                    PyObject* temp = POP();
+                    list->set(op_arg, temp);
+                }
+                PUSH(list);
+                break;
+            }
+
             case ByteCode::Build_Map: {
                 PUSH(new PyDict());
                 break;
@@ -372,6 +387,11 @@ void Interpreter::run(CodeObject* codeObject) {
                 _curFrame->_fastLocals->set(op_arg, POP());
                 break;
 
+            case ByteCode::Load_Locals: {
+                PUSH(_curFrame->_locals);
+                break;
+            }
+
             // 弹出栈顶元素，将其挂载到运行时的cells表中
             /*
                 在Python的闭包机制中，只有outer function才有可能调用Store_Deref
@@ -463,6 +483,14 @@ void Interpreter::run(CodeObject* codeObject) {
                 while (op_arg-- > 0) {
                     PUSH(list->get(op_arg));
                 }
+                break;
+            }
+
+            case ByteCode::Build_Class: {
+                PyObject* dict = POP();
+                PyObject* supers = POP();
+                PyObject* name = POP();
+                PUSH(Klass::createKlass(dict, supers, name));
                 break;
             }
                 
@@ -721,7 +749,7 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
     else if (isPythonFuncKlass(klass)) {
         // 创建新栈桢
         FrameObject* calleeFrame = 
-            new FrameObject(calleeFunc, _curFrame, finalArgs);
+            new FrameObject(calleeFunc, _curFrame, false, finalArgs);
         /* 
            将与callee绑定的cells（即callee函数运行时
            需要依赖的freevars），装载到新的栈桢上去。
@@ -750,12 +778,14 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
 void Interpreter::exitFromCurFrame() {
     FrameObject* callerFrame = _curFrame->_callerFrame;
     bool isRoot = _curFrame->isRootFrame();
+    bool isEntry = _curFrame->isEntryFrame();
     // 销毁callee的栈桢
     delete _curFrame;
     // 恢复caller的栈桢
     _curFrame = callerFrame;
-    if (!isRoot) {
-        // 将callee的返回值压入caller的运行时栈
+    // 对于不是Root栈桢也不是由C++代码主动创建的栈桢，
+    // 需要将callee的返回值压入caller的运行时栈
+    if (!isRoot && !isEntry) {
         PUSH(_retValue);
     }
 }
