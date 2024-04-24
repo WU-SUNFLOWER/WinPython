@@ -21,6 +21,7 @@ public:
     static PyString* str_isinstance;
     static PyString* str_object;
     static PyString* str_mod;
+    static PyString* str_init;
 };
 
 #endif

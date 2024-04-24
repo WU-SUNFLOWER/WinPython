@@ -13,6 +13,7 @@
 #include "TypeKlass.hpp"
 #include "Universe.hpp"
 #include "StringTable.hpp"
+#include "interpreter.hpp"
 
 PyObject* Klass::createKlass(PyObject* dict, PyObject* supers, PyObject* name) {
     checkLegalPyObject(dict, DictKlass::getInstance());
@@ -67,8 +68,19 @@ void Klass::checkLegalPyObject(const PyObject* obj, const Klass* klass) {
 
 PyObject* Klass::allocateInstance(PyObject* callable, PyList* args) {
     checkLegalPyObject(callable, TypeKlass::getInstance());
+    // 为实例化的Python对象分配内存
     PyObject* inst = new PyObject();
+
+    // 为Python对象绑定klass
     PyTypeObject* cls = static_cast<PyTypeObject*>(callable);
     inst->setKlass(cls->getOwnKlass());
+    
+    // 调用Python类的__init__函数初始化对象
+    PyObject* constructor = inst->getattr(StringTable::str_init);
+    if (constructor != Universe::PyNone) {
+        args->insert(0, inst);
+        Interpreter::getInstance()->callVirtual(constructor, args);
+    }
+
     return inst;
 }

@@ -23,9 +23,14 @@
 #include "ObjectKlass.hpp"
 #include "PyTypeObject.hpp"
 
+Interpreter* Interpreter::instance = nullptr;
+
 Interpreter::Interpreter() {
     _curFrame = nullptr;
     _retValue = nullptr;
+
+    _status = IS_OK;
+
     _buildins = new PyDict();
 
     _buildins->set(StringTable::str_true, Universe::PyTrue);
@@ -57,6 +62,7 @@ void Interpreter::run(CodeObject* codeObject) {
     _curFrame = new FrameObject(codeObject);
     _curFrame->_locals->set(new PyString("__name__"), new PyString("__main__"));
     evalFrame();
+    destroyCurFrame();
 }
 
 #define POP() (_curFrame->popFromStack())
@@ -71,10 +77,21 @@ void Interpreter::run(CodeObject* codeObject) {
 
 void Interpreter::evalFrame() {
     
-    while (_curFrame != nullptr && _curFrame->hasMoreCode()) {
-        uint8_t op_code = _curFrame->getOpCode();
-        bool hasArugment = op_code >= ByteCode::Have_Argument;
-        uint16_t op_arg = -1;
+    assert(_curFrame != nullptr);
+
+    uint8_t op_code;
+    bool hasArugment;
+    uint16_t op_arg;
+
+    while (_curFrame->hasMoreCode()) {
+
+        if (_status != IS_OK) {
+            goto fast_handle_exception;
+        }
+
+        op_code = _curFrame->getOpCode();
+        hasArugment = op_code >= ByteCode::Have_Argument;
+        op_arg = -1;
 
         // 如果指令含参，则一并取出，取的时候注意用小端序
         if (hasArugment) {
@@ -297,8 +314,9 @@ void Interpreter::evalFrame() {
             case ByteCode::Return_Value:
                 // 因为callee的栈桢即将被销毁，所以需要将返回值临时缓存一下
                 _retValue = POP();
+                _status = IS_RETURN;
                 // 退出并销毁callee栈桢，恢复caller栈桢
-                exitFromCurFrame();
+                //exitFromCurFrame();
                 break;
 
             // 将栈顶元素储存到全局变量
@@ -498,6 +516,16 @@ void Interpreter::evalFrame() {
             default:
                 printf("Unknown bytecode 0x%x\n", op_code);
         }
+    fast_handle_exception:
+        if (_status != IS_OK && _curFrame->_blockStack->getLength() <= 0) {
+            if (_status == IS_RETURN) {
+                _status = IS_OK;
+            }
+            if (_curFrame->isRootFrame() || _curFrame->isEntryFrame()) {
+                return;
+            }
+            exitFromCurFrame();
+        }            
     }
 }
 
@@ -593,6 +621,7 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
     // 对于方法，需要向参数列表中添加宿主对象
     if (isMethod(klass)) {
         rawArgs->insert(0, owner);
+        ++rawArgNumber_pos;
     }
 
     
@@ -772,22 +801,68 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
     }
     else {
         printf("Unknown function object!");
+        exit(-1);
     }
-}
+} 
 
 // 退出并销毁当前栈桢，再把解释器执行上下文切换为caller的栈桢
-void Interpreter::exitFromCurFrame() {
+void Interpreter::destroyCurFrame() {
     FrameObject* callerFrame = _curFrame->_callerFrame;
-    bool isRoot = _curFrame->isRootFrame();
-    bool isEntry = _curFrame->isEntryFrame();
     // 销毁callee的栈桢
     delete _curFrame;
     // 恢复caller的栈桢
     _curFrame = callerFrame;
-    // 对于不是Root栈桢也不是由C++代码主动创建的栈桢，
-    // 需要将callee的返回值压入caller的运行时栈
-    if (!isRoot && !isEntry) {
-        PUSH(_retValue);
-    }
 }
 
+// 对于不是Root栈桢也不是由C++代码主动创建的栈桢，
+// 需要将callee的返回值压入caller的运行时栈
+void Interpreter::exitFromCurFrame() {
+    destroyCurFrame();
+    PUSH(_retValue);
+}
+
+PyObject* Interpreter::callVirtual(PyObject* callable, PyList* args) {
+    Klass* klass = callable->getKlass();
+    if (klass == NativeFunctionKlass::getInstance()) {
+        return static_cast<PyFunction*>(callable)->callNativeFunc(args);
+    }
+    else if (klass == MethodKlass::getInstance()) {
+        PyMethod* method = static_cast<PyMethod*>(callable);
+        PyFunction* func = method->getFunc();
+        if (args == nullptr) {
+            args = new PyList(1);
+        }
+        args->insert(0, method->getOwner());
+        return callVirtual(func, args);
+    }
+    else if (klass == FunctionKlass::getInstance()) {
+        // 创建Python栈桢
+        FrameObject* frame = new FrameObject(
+            static_cast<PyFunction*>(callable),
+            /* 
+                从Python世界的视角来看，即便是被C++代码调用的某个Python函数，
+                在逻辑上也是被某一条Python代码触发的。
+                因此仍然需要指定callerFrame，以便解释器执行完目标函数后，
+                能够退回到Python程序中的正确位置。
+            */
+            _curFrame,
+            /*
+                由C++调用的Python函数的返回值并不会直接被Python程序拿到。
+                因此将isEntryFrame置为true，表示解释器不要自动
+                将返回结果压到caller的栈桢中。
+            */
+            true,
+            args
+        );
+        // 手工执行新栈桢
+        _curFrame = frame;
+        evalFrame();
+        // 手工返回调用Python函数所得的返回值给C++代码
+        destroyCurFrame();
+        return _retValue;
+    }
+    else {
+        printf("Unknown function object!");
+        exit(-1);
+    }
+}

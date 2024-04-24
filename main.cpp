@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
     BufferedInputStream stream(byteCodeFile.c_str());
     ByteCodeFileParser parser(&stream);
     CodeObject* code = parser.parse();
-    Interpreter interpreter;
-    interpreter.run(code);
+    Interpreter* interpreter = interpreter->getInstance();
+    interpreter->run(code);
     return 0;
 }
