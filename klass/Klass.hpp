@@ -74,13 +74,20 @@ public:
     virtual PyObject* mul(const PyObject* lhs, const PyObject* rhs) const { return 0; };
     virtual PyObject* div(const PyObject* lhs, const PyObject* rhs) const { return 0; };
     virtual PyObject* mod(const PyObject* lhs, const PyObject* rhs) const { return 0; };
+    virtual PyObject* inplace_add(PyObject* lhs, PyObject* rhs);
 
     // 其他工具函数
     virtual PyObject* len(const PyObject* object) const { return 0; };
+    // 读取属性
+    virtual PyObject* getattr(PyObject* object, PyObject* attr);
+    // 设置属性
+    virtual void setattr(PyObject* object, PyObject* attr, PyObject* value);
+    // 读取下标
     virtual PyObject* subscr(PyObject* object,
         PyObject* subscrption) const { return 0; }
-    virtual PyObject* store_subscr(PyObject* object, 
-        PyObject* subscription, PyObject* newObject) const { return 0; }
+    // 设置下标
+    virtual void store_subscr(PyObject* object, 
+        PyObject* subscription, PyObject* newObject) const { return; }
     virtual void delete_subscr(PyObject* object,
         PyObject* subscription) const {return;}
     virtual PyObject* has(PyObject* object, PyObject* target) const { return 0; }

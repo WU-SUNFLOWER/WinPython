@@ -106,6 +106,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>klass;object_python;util;framework;object_other;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -129,74 +130,74 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="arrayList.cpp" />
-    <ClCompile Include="Block.cpp" />
-    <ClCompile Include="byteCodeFileParser.cpp" />
-    <ClCompile Include="CellKlass.cpp" />
-    <ClCompile Include="CodeObject.cpp" />
-    <ClCompile Include="DictKlass.cpp" />
-    <ClCompile Include="FrameObject.cpp" />
-    <ClCompile Include="FunctionKlass.cpp" />
-    <ClCompile Include="IntegerKlass.cpp" />
-    <ClCompile Include="interpreter.cpp" />
-    <ClCompile Include="Klass.cpp" />
-    <ClCompile Include="ListKlass.cpp" />
-    <ClCompile Include="map.cpp" />
-    <ClCompile Include="MethodKlass.cpp" />
-    <ClCompile Include="NativeFunctionKlass.cpp" />
-    <ClCompile Include="nativeFunctions.cpp" />
-    <ClCompile Include="ObjectKlass.cpp" />
-    <ClCompile Include="PyCell.cpp" />
-    <ClCompile Include="PyDict.cpp" />
-    <ClCompile Include="PyFunction.cpp" />
-    <ClCompile Include="PyInteger.cpp" />
-    <ClCompile Include="PyList.cpp" />
-    <ClCompile Include="PyMethod.cpp" />
-    <ClCompile Include="PyObject.cpp" />
-    <ClCompile Include="PyString.cpp" />
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="util/arrayList.cpp" />
+    <ClCompile Include="object_other/Block.cpp" />
+    <ClCompile Include="framework/byteCodeFileParser.cpp" />
+    <ClCompile Include="klass/CellKlass.cpp" />
+    <ClCompile Include="object_python/CodeObject.cpp" />
+    <ClCompile Include="klass/DictKlass.cpp" />
+    <ClCompile Include="object_other/FrameObject.cpp" />
+    <ClCompile Include="klass/FunctionKlass.cpp" />
+    <ClCompile Include="klass/IntegerKlass.cpp" />
+    <ClCompile Include="framework/interpreter.cpp" />
+    <ClCompile Include="klass/Klass.cpp" />
+    <ClCompile Include="klass/ListKlass.cpp" />
+    <ClCompile Include="util/map.cpp" />
+    <ClCompile Include="klass/MethodKlass.cpp" />
+    <ClCompile Include="klass/NativeFunctionKlass.cpp" />
+    <ClCompile Include="framework/nativeFunctions.cpp" />
+    <ClCompile Include="klass/ObjectKlass.cpp" />
+    <ClCompile Include="object_python/PyCell.cpp" />
+    <ClCompile Include="object_python/PyDict.cpp" />
+    <ClCompile Include="object_python/PyFunction.cpp" />
+    <ClCompile Include="object_python/PyInteger.cpp" />
+    <ClCompile Include="object_python/PyList.cpp" />
+    <ClCompile Include="object_python/PyMethod.cpp" />
+    <ClCompile Include="object_python/PyObject.cpp" />
+    <ClCompile Include="object_python/PyString.cpp" />
+    <ClCompile Include="framework/main.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="PyTypeObject.cpp" />
-    <ClCompile Include="StringKlass.cpp" />
-    <ClCompile Include="StringTable.cpp" />
-    <ClCompile Include="TypeKlass.cpp" />
-    <ClCompile Include="Universe.cpp" />
+    <ClCompile Include="object_python/PyTypeObject.cpp" />
+    <ClCompile Include="klass/StringKlass.cpp" />
+    <ClCompile Include="util/StringTable.cpp" />
+    <ClCompile Include="klass/TypeKlass.cpp" />
+    <ClCompile Include="object_other/Universe.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="arrayList.hpp" />
-    <ClInclude Include="Block.hpp" />
-    <ClInclude Include="bufferedInputStream.hpp" />
-    <ClInclude Include="bytecode.hpp" />
-    <ClInclude Include="byteCodeFileParser.hpp" />
-    <ClInclude Include="CellKlass.hpp" />
-    <ClInclude Include="CodeObject.hpp" />
-    <ClInclude Include="DictKlass.hpp" />
-    <ClInclude Include="FrameObject.hpp" />
-    <ClInclude Include="FunctionKlass.hpp" />
-    <ClInclude Include="IntegerKlass.hpp" />
-    <ClInclude Include="interpreter.hpp" />
-    <ClInclude Include="Klass.hpp" />
-    <ClInclude Include="ListKlass.hpp" />
-    <ClInclude Include="map.hpp" />
-    <ClInclude Include="MethodKlass.hpp" />
-    <ClInclude Include="nativeFunctions.hpp" />
-    <ClInclude Include="NativeFunctionKlass.hpp" />
-    <ClInclude Include="ObjectKlass.hpp" />
-    <ClInclude Include="PyCell.hpp" />
-    <ClInclude Include="PyDict.hpp" />
-    <ClInclude Include="PyFunction.hpp" />
-    <ClInclude Include="PyInteger.hpp" />
-    <ClInclude Include="PyList.hpp" />
-    <ClInclude Include="PyMethod.hpp" />
-    <ClInclude Include="PyObject.hpp" />
-    <ClInclude Include="PyString.hpp" />
-    <ClInclude Include="PyTypeObject.hpp" />
-    <ClInclude Include="StringKlass.hpp" />
-    <ClInclude Include="StringTable.hpp" />
-    <ClInclude Include="TypeKlass.hpp" />
-    <ClInclude Include="Universe.hpp" />
+    <ClInclude Include="util/arrayList.hpp" />
+    <ClInclude Include="object_other/Block.hpp" />
+    <ClInclude Include="util/bufferedInputStream.hpp" />
+    <ClInclude Include="framework/bytecode.hpp" />
+    <ClInclude Include="framework/byteCodeFileParser.hpp" />
+    <ClInclude Include="klass/CellKlass.hpp" />
+    <ClInclude Include="object_python/CodeObject.hpp" />
+    <ClInclude Include="klass/DictKlass.hpp" />
+    <ClInclude Include="object_other/FrameObject.hpp" />
+    <ClInclude Include="klass/FunctionKlass.hpp" />
+    <ClInclude Include="klass/IntegerKlass.hpp" />
+    <ClInclude Include="framework/interpreter.hpp" />
+    <ClInclude Include="klass/Klass.hpp" />
+    <ClInclude Include="klass/ListKlass.hpp" />
+    <ClInclude Include="util/map.hpp" />
+    <ClInclude Include="klass/MethodKlass.hpp" />
+    <ClInclude Include="framework/nativeFunctions.hpp" />
+    <ClInclude Include="klass/NativeFunctionKlass.hpp" />
+    <ClInclude Include="klass/ObjectKlass.hpp" />
+    <ClInclude Include="object_python/PyCell.hpp" />
+    <ClInclude Include="object_python/PyDict.hpp" />
+    <ClInclude Include="object_python/PyFunction.hpp" />
+    <ClInclude Include="object_python/PyInteger.hpp" />
+    <ClInclude Include="object_python/PyList.hpp" />
+    <ClInclude Include="object_python/PyMethod.hpp" />
+    <ClInclude Include="object_python/PyObject.hpp" />
+    <ClInclude Include="object_python/PyString.hpp" />
+    <ClInclude Include="object_python/PyTypeObject.hpp" />
+    <ClInclude Include="klass/StringKlass.hpp" />
+    <ClInclude Include="util/StringTable.hpp" />
+    <ClInclude Include="klass/TypeKlass.hpp" />
+    <ClInclude Include="object_other/Universe.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

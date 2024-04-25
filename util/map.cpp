@@ -13,9 +13,10 @@ void Map<KEY, VAL>::expand() {
 }
 
 template<typename KEY, typename VAL>
-Map<KEY, VAL>::Map() {
+Map<KEY, VAL>::Map(VAL defaultValue) {
     capacity = 8;
     length = 0;
+    _default = defaultValue;
     ptr = new MapItem<KEY, VAL>[capacity];
 }
 
@@ -48,7 +49,7 @@ VAL Map<KEY, VAL>::remove(KEY key) {
         return ret;
     }
     else {
-        return Universe::PyNone;
+        return _default;
     }
 }
 
@@ -60,7 +61,7 @@ VAL Map<KEY, VAL>::get(KEY key) {
         return ptr[searchIdx].value;
     }
     else {
-        return Universe::PyNone;
+        return _default;
     }
 }
 

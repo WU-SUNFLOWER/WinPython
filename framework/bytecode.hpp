@@ -3,11 +3,13 @@
 
 enum ByteCode : uint8_t {
     Pop_Top = 0x01,  // 无条件弹出栈顶元素
+    Dup_Top = 0x04,
     Binary_Multiply = 0x14,
     Binary_Add = 0x17,
     Binary_Subtract = 0x18,
     Binary_Subscr = 0x19,
     Store_Map = 0x36,
+    Inplace_Add = 0x37,
     Store_Subscr = 0x3c,
     Delete_Subscr = 0x3d,
     Get_Iter = 0x44,
@@ -25,6 +27,7 @@ enum ByteCode : uint8_t {
     Store_Name = 0x5a,  // 弹出栈顶元素出栈，并赋值给参数指定的变量
     Unpack_Sequence = 0x5c,
     For_Iter = 0x5d,
+    Store_Attr = 0x5f,
     Store_Global = 0x61,
     Load_Const = 0x64,  // 将常量列表中的操作数加载到栈中
     Load_Name = 0x65,  // 将参数代表的变量压栈

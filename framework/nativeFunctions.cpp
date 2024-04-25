@@ -9,6 +9,9 @@
 #include "TypeKlass.hpp"
 #include "PyTypeObject.hpp"
 
+/* Macro for returning Py_None from a function */
+#define Py_RETURN_NONE return Universe::PyNone
+
 PyObject* NativeFunction::len(PyList* args) {
     return args->get(0)->len();
 }
@@ -93,7 +96,7 @@ PyObject* NativeFunction::string_upper(PyList* args) {
 PyObject* NativeFunction::list_append(PyList* args) {
     PyList* list = reinterpret_cast<PyList*>(args->get(0));
     list->append(args->get(1));
-    return Universe::PyNone;
+    Py_RETURN_NONE;
 }
 
 PyObject* NativeFunction::list_insert(PyList* args) {
@@ -104,7 +107,7 @@ PyObject* NativeFunction::list_insert(PyList* args) {
         static_cast<size_t>(integer->getValue()), 
         list->getLength());
     list->insert(pos, args->get(2));
-    return Universe::PyNone;
+    Py_RETURN_NONE;
 }
 
 PyObject* NativeFunction::list_index(PyList* args) {
@@ -126,7 +129,7 @@ PyObject* NativeFunction::list_remove(PyList* args) {
             list->deleteByIndex(i--);
         }
     }
-    return Universe::PyNone;
+    Py_RETURN_NONE;
 }
 
 PyObject* NativeFunction::list_reverse(PyList* args) {
@@ -137,7 +140,7 @@ PyObject* NativeFunction::list_reverse(PyList* args) {
         list->set(i, list->get(length - i - 1));
         list->set(length - i - 1, temp);
     }
-    return Universe::PyNone;
+    Py_RETURN_NONE;
 }
 
 PyObject* NativeFunction::list_iterator_next(PyList* args) {
@@ -156,14 +159,14 @@ PyObject* NativeFunction::dict_set_default(PyList* args) {
         dict->set(key, args->get(2));
     }
 
-    return Universe::PyNone;
+    Py_RETURN_NONE;
 }
 
 PyObject* NativeFunction::dict_pop(PyList* args) {
     PyDict* dict = static_cast<PyDict*>(args->get(0));
     PyObject* key = args->get(1);
     PyObject* result = dict->remove(key);
-    if (result == Universe::PyNone) {
+    if (result == nullptr) {
         printf("Can't find key in your dict: ");
         key->print();
         exit(-1);
@@ -190,4 +193,9 @@ PyObject* NativeFunction::dict_items(PyList* args) {
     DictIterator* iter = new DictIterator(dict);
     iter->setKlass(DictIteratorKlass<DictIterType::Iter_Items>::getInstance());
     return iter;
+}
+
+PyObject* NativeFunction::id(PyList* args) {
+    PyObject* object = args->get(0);
+    return new PyInteger(reinterpret_cast<int64_t>(object));
 }

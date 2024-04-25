@@ -6,13 +6,18 @@
 #include "Klass.hpp"
 #include <cassert>
 
+class PyDict;
+
 class PyObject {
 private:
     // 不同类型的python对象通过klass指针的指向不同来区分
     Klass* klass;
+
+    // 用来保存定义在PyObject实例之上的属性
+    PyDict* _self_dict;
 public:
 
-    PyObject() : klass(nullptr) {};
+    PyObject() : klass(nullptr), _self_dict(nullptr) {};
 
     void setKlass(Klass* k) {
         klass = k;
@@ -21,6 +26,11 @@ public:
         assert(klass != nullptr);
         return klass;
     }
+    PyString* getKlassName() const;
+    const uint8_t* getKlassNameAsString() const;
+
+    PyDict* getSelfDict();
+    PyDict* initSelfDict();
 
     /*公用方法 Start*/
 
@@ -32,6 +42,8 @@ public:
     PyObject* div(PyObject* other) const;
     PyObject* mod(PyObject* other) const;
 
+    PyObject* inplace_add(PyObject* other);
+
     PyObject* less(const PyObject* other) const;
     PyObject* less_equal(const PyObject* other) const;
     PyObject* equal(const PyObject* other) const;
@@ -42,11 +54,13 @@ public:
     // 计算长度
     PyObject* len() const;
     // 获取对象属性
-    PyObject* getattr(PyObject* attr) const;
+    PyObject* getattr(PyObject* attr);
+    // 设置对象属性
+    void setattr(PyObject* attr, PyObject* value);
     // 对象取下标
     PyObject* subscr(PyObject* subscription);
     // 对象下标赋新值
-    PyObject* store_subscr(PyObject* subscription, PyObject* newObject);
+    void store_subscr(PyObject* subscription, PyObject* newObject);
     // 对象删除下标对应元素
     void delete_subscr(PyObject* subscription);
     // 检查对象是否包含某些东西

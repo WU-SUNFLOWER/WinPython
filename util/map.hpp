@@ -19,12 +19,13 @@ public:
 template<typename KEY, typename VAL>
 class Map {
 private:
+    VAL _default;
     MapItem<KEY, VAL>* ptr;
     size_t capacity;
     size_t length;
     void expand();
 public:
-    Map();
+    Map(VAL defaultValue);
     ~Map();
     
     // 哈希表的增删改查基础操作

@@ -10,6 +10,7 @@ public:
     static PyObject* len(PyList* args);
     static PyObject* isinstance(PyList* args);
     static PyObject* type_of(PyList* args);
+    static PyObject* id(PyList* args);
 
     static PyObject* string_upper(PyList* args);
 

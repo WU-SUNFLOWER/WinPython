@@ -33,6 +33,7 @@ public:
     virtual PyObject* mul(const PyObject* lhs, const PyObject* rhs) const override;
     virtual PyObject* div(const PyObject* lhs, const PyObject* rhs) const override;
     virtual PyObject* mod(const PyObject* lhs, const PyObject* rhs) const;
+    virtual PyObject* inplace_add(PyObject* lhs, PyObject* rhs) override;
 
     // 类的实例化
     virtual PyObject* allocateInstance(PyObject* callable, PyList* args) override;

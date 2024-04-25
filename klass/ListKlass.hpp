@@ -34,7 +34,7 @@ public:
 
     virtual PyObject* subscr(PyObject* object, 
         PyObject* subscrption) const override;
-    virtual PyObject* store_subscr(PyObject* object,
+    virtual void store_subscr(PyObject* object,
         PyObject* subscription, PyObject* newObject) const override;
     virtual void delete_subscr(PyObject* object,
         PyObject* subscription) const override;

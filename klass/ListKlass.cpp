@@ -146,7 +146,7 @@ PyObject* ListKlass::mul(const PyObject* lhs, const PyObject* rhs) const {
     checkLegalPyObject(rhs, IntegerKlass::getInstance());
     const PyList* list = static_cast<const PyList*>(lhs);
     const PyInteger* integer = static_cast<const PyInteger*>(rhs);
-    int count = integer->getValue();
+    int64_t count = integer->getValue();
     size_t len = list->getLength();
     PyList* result = new PyList(count * len);
     while (count-- > 0) {
@@ -185,7 +185,7 @@ PyObject* ListKlass::getIter(PyObject* object) const {
     return new ListIterator(static_cast<PyList*>(object));
 }
 
-PyObject* ListKlass::store_subscr(PyObject* object, 
+void ListKlass::store_subscr(PyObject* object, 
     PyObject* subscription, PyObject* newObject
 ) const {
     assert(object->getKlass() == this &&
@@ -197,7 +197,6 @@ PyObject* ListKlass::store_subscr(PyObject* object,
     assert(pos < list->getLength());
     // ÖØÐÂ¸³Öµ
     list->set(pos, newObject);
-    return Universe::PyNone;
 }
 
 void ListKlass::delete_subscr(PyObject* object, 
@@ -233,6 +232,6 @@ PyObject* ListIteratorKlass::next(PyObject* object) const {
         return nextElem;
     }
     else {
-        return Universe::PyNone;
+        return nullptr;
     }
 }

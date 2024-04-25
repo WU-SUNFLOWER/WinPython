@@ -31,15 +31,16 @@ Interpreter::Interpreter() {
 
     _status = IS_OK;
 
-    _buildins = new PyDict();
+    _builtins = new PyDict();
 
-    _buildins->set(StringTable::str_true, Universe::PyTrue);
-    _buildins->set(StringTable::str_false, Universe::PyFalse);
-    _buildins->set(StringTable::str_none, Universe::PyNone);
+    _builtins->set(StringTable::str_true, Universe::PyTrue);
+    _builtins->set(StringTable::str_false, Universe::PyFalse);
+    _builtins->set(StringTable::str_none, Universe::PyNone);
     
-    _buildins->set(StringTable::str_len, PackNativeFunc(NativeFunction::len));
-    _buildins->set(StringTable::str_isinstance, PackNativeFunc(NativeFunction::isinstance));
-    _buildins->set(new PyString("typeof"), PackNativeFunc(NativeFunction::type_of));
+    _builtins->set(StringTable::str_len, PackNativeFunc(NativeFunction::len));
+    _builtins->set(StringTable::str_isinstance, PackNativeFunc(NativeFunction::isinstance));
+    _builtins->set(new PyString("typeof"), PackNativeFunc(NativeFunction::type_of));
+    _builtins->set(new PyString("id"), PackNativeFunc(NativeFunction::id));
 
     DictKlass::getInstance()->initialize();
     FunctionKlass::getInstance()->initialize();
@@ -50,12 +51,12 @@ Interpreter::Interpreter() {
     StringKlass::getInstance()->initialize();
     TypeKlass::getInstance()->initialize();
 
-    _buildins->set(StringTable::str_object, ObjectKlass::getInstance()->getTypeObject());
-    _buildins->set(StringTable::str_type, TypeKlass::getInstance()->getTypeObject());
-    _buildins->set(StringTable::str_int, IntegerKlass::getInstance()->getTypeObject());
-    _buildins->set(StringTable::str_str, StringKlass::getInstance()->getTypeObject());
-    _buildins->set(StringTable::str_list, ListKlass::getInstance()->getTypeObject());
-    _buildins->set(StringTable::str_dict, DictKlass::getInstance()->getTypeObject());
+    _builtins->set(StringTable::str_object, ObjectKlass::getInstance()->getTypeObject());
+    _builtins->set(StringTable::str_type, TypeKlass::getInstance()->getTypeObject());
+    _builtins->set(StringTable::str_int, IntegerKlass::getInstance()->getTypeObject());
+    _builtins->set(StringTable::str_str, StringKlass::getInstance()->getTypeObject());
+    _builtins->set(StringTable::str_list, ListKlass::getInstance()->getTypeObject());
+    _builtins->set(StringTable::str_dict, DictKlass::getInstance()->getTypeObject());
 }
 
 void Interpreter::run(CodeObject* codeObject) {
@@ -103,6 +104,10 @@ void Interpreter::evalFrame() {
         switch (op_code) {
             case ByteCode::Pop_Top:
                 POP();
+                break;
+
+            case ByteCode::Dup_Top:
+                PUSH(TOP());
                 break;
 
             case ByteCode::Build_List:{
@@ -166,6 +171,12 @@ void Interpreter::evalFrame() {
                 rhs = POP();  // 右操作数
                 lhs = POP();  // 左操作数
                 PUSH(lhs->add(rhs));
+                break;
+
+            case ByteCode::Inplace_Add:
+                rhs = POP();
+                lhs = POP();
+                PUSH(lhs->inplace_add(rhs));
                 break;
 
             case ByteCode::Binary_Subtract:
@@ -334,15 +345,15 @@ void Interpreter::evalFrame() {
             case ByteCode::Load_Global: {
                 // 先根据指令参数找出要访问变量的变量名
                 PyObject* variableName = _curFrame->_names->get(op_arg);
-                // 再根据变量名索引到Python对象(可能是None)
+                // 再根据变量名索引到Python对象
                 PyObject* variableObject = _curFrame->_globals->get(variableName);
-                if (variableObject != Universe::PyNone) {
+                if (variableObject != nullptr) {
                     PUSH(variableObject);
                     break;
                 }
                 // 如果还是没找到，去看看内建变量表（可能最后会得到None）
-                variableObject = this->_buildins->get(variableName);
-                if (variableObject != Universe::PyNone) {
+                variableObject = this->_builtins->get(variableName);
+                if (variableObject != nullptr) {
                     PUSH(variableObject);
                 }
                 else {
@@ -370,18 +381,18 @@ void Interpreter::evalFrame() {
                 PyObject* variableName = _curFrame->_names->get(op_arg);
                 // 先去本地变量表看看有没有想要找的变量
                 PyObject* variableObject = _curFrame->_locals->get(variableName);
-                if (variableObject != Universe::PyNone) {
+                if (variableObject != nullptr) {
                     PUSH(variableObject);
                     break;
                 }
                 // 没找到的话再去全局变量表里找找
                 variableObject = _curFrame->_globals->get(variableName);
-                if (variableObject != Universe::PyNone) {
+                if (variableObject != nullptr) {
                     PUSH(variableObject);
                     break;
                 }
                 // 如果还是没找到，去看看内建变量表（可能最后会得到None）
-                variableObject = this->_buildins->get(variableName);
+                variableObject = this->_builtins->get(variableName);
                 PUSH(variableObject);
                 break;
             }
@@ -395,7 +406,20 @@ void Interpreter::evalFrame() {
                 PUSH(lhs->getattr(rhs));
                 break;
             }
-
+            
+            /*
+                a.x = 123
+                # LOAD_CONST  2 (123)
+                # LOAD_NAME   1 (a)
+                # STORE_ATTR  2 (x)
+            */
+            case ByteCode::Store_Attr: {
+                PyObject* attr = _curFrame->_names->get(op_arg);
+                lhs = POP();
+                rhs = POP();
+                lhs->setattr(attr, rhs);
+                break;
+            }
 
             case ByteCode::Load_Fast:
                 PUSH(_curFrame->_fastLocals->get(op_arg));
@@ -475,7 +499,7 @@ void Interpreter::evalFrame() {
                 // 如果返回值是None，则说明迭代结束，执行跳转
                 // 注意这里必须用TOP不能用POP，
                 // 因为迭代结束前留在栈上的返回值可能会被后续指令使用
-                if (ret == Universe::PyNone) {
+                if (ret == nullptr) {
                     PC += op_arg;
                 }
                 else {
@@ -512,9 +536,9 @@ void Interpreter::evalFrame() {
                 break;
             }
                 
-
             default:
                 printf("Unknown bytecode 0x%x\n", op_code);
+                exit(-1);
         }
     fast_handle_exception:
         if (_status != IS_OK && _curFrame->_blockStack->getLength() <= 0) {

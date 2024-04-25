@@ -22,7 +22,7 @@ void IntegerKlass::initialize() {
 void IntegerKlass::print(const PyObject* lhs, int flags) const {
     const PyInteger* _lhs = static_cast<const PyInteger*>(lhs);
     Klass::checkLegalPyObject(_lhs, this);
-    printf("%d", _lhs->getValue());
+    printf("%lld", _lhs->getValue());
 }
 
 PyObject* IntegerKlass::less(const PyObject* lhs, const PyObject* rhs) const {
@@ -109,6 +109,13 @@ PyObject* IntegerKlass::mod(const PyObject* lhs, const PyObject* rhs) const
     checkLegalPyObject_DB(_lhs, _rhs);
     // 检查通过，开始计算
     return new PyInteger(_lhs->getValue() % _rhs->getValue());
+}
+
+PyObject* IntegerKlass::inplace_add(PyObject* lhs, PyObject* rhs) {
+    checkLegalPyObject_DB(lhs, rhs);
+    return new PyInteger(
+        static_cast<PyInteger*>(lhs)->getValue() + 
+        static_cast<PyInteger*>(rhs)->getValue());
 }
 
 PyObject* IntegerKlass::allocateInstance(PyObject* callable, PyList* args) {

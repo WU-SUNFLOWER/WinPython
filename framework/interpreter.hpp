@@ -25,7 +25,7 @@ private:
 
     Status _status;
 
-    PyDict* _buildins;
+    PyDict* _builtins;
     FrameObject* _curFrame;
     PyObject* _retValue;  // 该成员变量用于在切换栈桢上下文时，缓存callee的返回值
 public:

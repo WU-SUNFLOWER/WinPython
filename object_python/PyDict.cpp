@@ -2,6 +2,6 @@
 #include "DictKlass.hpp"
 
 PyDict::PyDict() {
-    _map = new PyObjectMap();
+    _map = new PyObjectMap(nullptr);
     setKlass(DictKlass::getInstance());
 }

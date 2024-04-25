@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include "StringTable.hpp"
 #include "ObjectKlass.hpp"
+#include "PyInteger.hpp"
 
 DictKlass* DictKlass::instance = nullptr;
 
@@ -54,10 +55,29 @@ void DictKlass::print(const PyObject* object, int flags) const {
     putchar('}');
 }
 
+PyObject* DictKlass::len(const PyObject* object) const {
+    checkLegalPyObject(object, this);
+    return new PyInteger(static_cast<const PyDict*>(object)->getSize());
+}
+
+PyObject* DictKlass::subscr(PyObject* object, PyObject* subscription) const {
+    checkLegalPyObject(object, this);
+    PyObject* ret = static_cast<PyDict*>(object)->get(subscription);
+    if (ret != nullptr) return ret;
+    printf("Can't find key in your dict: ");
+    subscription->print();
+    exit(-1);
+}
+
+void DictKlass::store_subscr(PyObject* object, PyObject* subscription, PyObject* newObject) const {
+    checkLegalPyObject(object, this);
+    static_cast<PyDict*>(object)->set(subscription, newObject);
+}
+
 void DictKlass::delete_subscr(PyObject* object, PyObject* subscription) const {
     checkLegalPyObject(object, this);
     PyDict* dict = static_cast<PyDict*>(object);
-    if (dict->remove(subscription) == Universe::PyNone) {
+    if (dict->remove(subscription) == nullptr) {
         printf("Can't find key in your dict: ");
         subscription->print();
         exit(-1);
@@ -94,7 +114,7 @@ PyObject* DictIteratorKlass<type>::next(PyObject* object) const {
         return ret;
     }
     else {
-        return Universe::PyNone;
+        return nullptr;
     }
 }
 

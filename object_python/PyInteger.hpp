@@ -7,13 +7,13 @@
 
 class PyInteger: public PyObject {
 private:
-    int32_t value;
+    int64_t value;
 public:
-    PyInteger(int32_t v) : value(v) {
+    PyInteger(int64_t v) : value(v) {
         setKlass(IntegerKlass::getInstance());
     };
     
-    int32_t getValue() const {
+    int64_t getValue() const {
         return value;
     };
     

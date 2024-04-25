@@ -8,6 +8,24 @@
 #include <cstdlib>
 #include <cstdio>
 
+PyString* PyObject::getKlassName() const {
+    assert(klass != nullptr);
+    return getKlass()->getName();
+}
+
+const uint8_t* PyObject::getKlassNameAsString() const {
+    assert(klass != nullptr);
+    return getKlassName()->getValue();
+}
+
+PyDict* PyObject::getSelfDict() {
+    return _self_dict;
+}
+
+PyDict* PyObject::initSelfDict() {
+    return (_self_dict = new PyDict());
+}
+
 void PyObject::print(int flags) const {
     return getKlass()->print(this, flags);
 }
@@ -30,6 +48,10 @@ PyObject* PyObject::div(PyObject* other) const {
 
 PyObject* PyObject::mod(PyObject* other) const {
     return getKlass()->mod(this, other);
+}
+
+PyObject* PyObject::inplace_add(PyObject* other) {
+    return getKlass()->inplace_add(this, other);
 }
 
 PyObject* PyObject::less(const PyObject* other) const {
@@ -84,28 +106,20 @@ PyObject* PyObject::len() const {
     return getKlass()->len(this);
 }
 
-PyObject* PyObject::getattr(PyObject* attr) const {
-    PyObject* ret = getKlass()->getKlassDict()->get(attr);
-    if (ret == Universe::PyNone) return ret;
-    
-    // 如果尝试获取某个对象的方法函数
-    // 则将其由原生函数打包成PyMethod
-    const Klass* retKlass = ret->getKlass();
-    if (retKlass == FunctionKlass::getInstance()
-        || retKlass == NativeFunctionKlass::getInstance()) {
-        ret = new PyMethod(static_cast<PyFunction*>(ret), 
-            const_cast<PyObject*>(this));
-    }
-    
-    return ret;
+PyObject* PyObject::getattr(PyObject* attr) {
+    return getKlass()->getattr(this, attr);
+}
+
+void PyObject::setattr(PyObject* attr, PyObject* value) {
+    getKlass()->setattr(this, attr, value);
 }
 
 PyObject* PyObject::subscr(PyObject* subscription) {
     return getKlass()->subscr(this, subscription);
 }
 
-PyObject* PyObject::store_subscr(PyObject* subscription, PyObject* newObject) {
-    return getKlass()->store_subscr(this, subscription, newObject);
+void PyObject::store_subscr(PyObject* subscription, PyObject* newObject) {
+    getKlass()->store_subscr(this, subscription, newObject);
 }
 
 void PyObject::delete_subscr(PyObject* subscription) {

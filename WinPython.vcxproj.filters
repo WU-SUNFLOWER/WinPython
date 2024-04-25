@@ -45,195 +45,195 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="arrayList.cpp">
+    <ClCompile Include="util/arrayList.cpp">
       <Filter>源文件\util</Filter>
     </ClCompile>
-    <ClCompile Include="PyString.cpp">
+    <ClCompile Include="object_python/PyString.cpp">
       <Filter>源文件\object_python</Filter>
     </ClCompile>
-    <ClCompile Include="PyObject.cpp">
+    <ClCompile Include="object_python/PyObject.cpp">
       <Filter>源文件\object_python</Filter>
     </ClCompile>
-    <ClCompile Include="PyInteger.cpp">
+    <ClCompile Include="object_python/PyInteger.cpp">
       <Filter>源文件\object_python</Filter>
     </ClCompile>
-    <ClCompile Include="CodeObject.cpp">
+    <ClCompile Include="object_python/CodeObject.cpp">
       <Filter>源文件\object_python</Filter>
     </ClCompile>
-    <ClCompile Include="byteCodeFileParser.cpp">
+    <ClCompile Include="framework/byteCodeFileParser.cpp">
       <Filter>源文件\framework</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="framework/main.cpp">
       <Filter>源文件\framework</Filter>
     </ClCompile>
-    <ClCompile Include="interpreter.cpp">
+    <ClCompile Include="framework/interpreter.cpp">
       <Filter>源文件\framework</Filter>
     </ClCompile>
-    <ClCompile Include="map.cpp">
+    <ClCompile Include="util/map.cpp">
       <Filter>源文件\util</Filter>
     </ClCompile>
-    <ClCompile Include="Klass.cpp">
+    <ClCompile Include="klass/Klass.cpp">
       <Filter>源文件\klass</Filter>
     </ClCompile>
-    <ClCompile Include="IntegerKlass.cpp">
+    <ClCompile Include="klass/IntegerKlass.cpp">
       <Filter>源文件\klass</Filter>
     </ClCompile>
-    <ClCompile Include="StringKlass.cpp">
+    <ClCompile Include="klass/StringKlass.cpp">
       <Filter>源文件\klass</Filter>
     </ClCompile>
-    <ClCompile Include="PyFunction.cpp">
+    <ClCompile Include="object_python/PyFunction.cpp">
       <Filter>源文件\object_python</Filter>
     </ClCompile>
-    <ClCompile Include="FunctionKlass.cpp">
+    <ClCompile Include="klass/FunctionKlass.cpp">
       <Filter>源文件\klass</Filter>
     </ClCompile>
-    <ClCompile Include="Universe.cpp">
+    <ClCompile Include="object_other/Universe.cpp">
       <Filter>源文件\object_other</Filter>
     </ClCompile>
-    <ClCompile Include="FrameObject.cpp">
+    <ClCompile Include="object_other/FrameObject.cpp">
       <Filter>源文件\object_other</Filter>
     </ClCompile>
-    <ClCompile Include="Block.cpp">
+    <ClCompile Include="object_other/Block.cpp">
       <Filter>源文件\object_other</Filter>
     </ClCompile>
-    <ClCompile Include="NativeFunctionKlass.cpp">
+    <ClCompile Include="klass/NativeFunctionKlass.cpp">
       <Filter>源文件\klass</Filter>
     </ClCompile>
-    <ClCompile Include="nativeFunctions.cpp">
+    <ClCompile Include="framework/nativeFunctions.cpp">
       <Filter>源文件\framework</Filter>
     </ClCompile>
-    <ClCompile Include="MethodKlass.cpp">
+    <ClCompile Include="klass/MethodKlass.cpp">
       <Filter>源文件\klass</Filter>
     </ClCompile>
-    <ClCompile Include="PyMethod.cpp">
+    <ClCompile Include="object_python/PyMethod.cpp">
       <Filter>源文件\object_python</Filter>
     </ClCompile>
-    <ClCompile Include="CellKlass.cpp">
+    <ClCompile Include="klass/CellKlass.cpp">
       <Filter>源文件\klass</Filter>
     </ClCompile>
-    <ClCompile Include="PyCell.cpp">
+    <ClCompile Include="object_python/PyCell.cpp">
       <Filter>源文件\object_python</Filter>
     </ClCompile>
-    <ClCompile Include="PyList.cpp">
+    <ClCompile Include="object_python/PyList.cpp">
       <Filter>源文件\object_python</Filter>
     </ClCompile>
-    <ClCompile Include="ListKlass.cpp">
+    <ClCompile Include="klass/ListKlass.cpp">
       <Filter>源文件\klass</Filter>
     </ClCompile>
-    <ClCompile Include="StringTable.cpp">
+    <ClCompile Include="util/StringTable.cpp">
       <Filter>源文件\util</Filter>
     </ClCompile>
-    <ClCompile Include="PyDict.cpp">
+    <ClCompile Include="object_python/PyDict.cpp">
       <Filter>源文件\object_python</Filter>
     </ClCompile>
-    <ClCompile Include="DictKlass.cpp">
+    <ClCompile Include="klass/DictKlass.cpp">
       <Filter>源文件\klass</Filter>
     </ClCompile>
-    <ClCompile Include="TypeKlass.cpp">
+    <ClCompile Include="klass/TypeKlass.cpp">
       <Filter>源文件\klass</Filter>
     </ClCompile>
-    <ClCompile Include="PyTypeObject.cpp">
+    <ClCompile Include="object_python/PyTypeObject.cpp">
       <Filter>源文件\object_python</Filter>
     </ClCompile>
-    <ClCompile Include="ObjectKlass.cpp">
+    <ClCompile Include="klass/ObjectKlass.cpp">
       <Filter>源文件\klass</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="byteCodeFileParser.hpp">
+    <ClInclude Include="framework/byteCodeFileParser.hpp">
       <Filter>头文件\framework</Filter>
     </ClInclude>
-    <ClInclude Include="bufferedInputStream.hpp">
+    <ClInclude Include="util/bufferedInputStream.hpp">
       <Filter>头文件\util</Filter>
     </ClInclude>
-    <ClInclude Include="arrayList.hpp">
+    <ClInclude Include="util/arrayList.hpp">
       <Filter>头文件\util</Filter>
     </ClInclude>
-    <ClInclude Include="CodeObject.hpp">
+    <ClInclude Include="object_python/CodeObject.hpp">
       <Filter>头文件\object_python</Filter>
     </ClInclude>
-    <ClInclude Include="PyInteger.hpp">
+    <ClInclude Include="object_python/PyInteger.hpp">
       <Filter>头文件\object_python</Filter>
     </ClInclude>
-    <ClInclude Include="PyObject.hpp">
+    <ClInclude Include="object_python/PyObject.hpp">
       <Filter>头文件\object_python</Filter>
     </ClInclude>
-    <ClInclude Include="PyString.hpp">
+    <ClInclude Include="object_python/PyString.hpp">
       <Filter>头文件\object_python</Filter>
     </ClInclude>
-    <ClInclude Include="bytecode.hpp">
+    <ClInclude Include="framework/bytecode.hpp">
       <Filter>头文件\framework</Filter>
     </ClInclude>
-    <ClInclude Include="interpreter.hpp">
+    <ClInclude Include="framework/interpreter.hpp">
       <Filter>头文件\framework</Filter>
     </ClInclude>
-    <ClInclude Include="map.hpp">
+    <ClInclude Include="util/map.hpp">
       <Filter>头文件\util</Filter>
     </ClInclude>
-    <ClInclude Include="Klass.hpp">
+    <ClInclude Include="klass/Klass.hpp">
       <Filter>头文件\klass</Filter>
     </ClInclude>
-    <ClInclude Include="IntegerKlass.hpp">
+    <ClInclude Include="klass/IntegerKlass.hpp">
       <Filter>头文件\klass</Filter>
     </ClInclude>
-    <ClInclude Include="StringKlass.hpp">
+    <ClInclude Include="klass/StringKlass.hpp">
       <Filter>头文件\klass</Filter>
     </ClInclude>
-    <ClInclude Include="PyFunction.hpp">
+    <ClInclude Include="object_python/PyFunction.hpp">
       <Filter>头文件\object_python</Filter>
     </ClInclude>
-    <ClInclude Include="FunctionKlass.hpp">
+    <ClInclude Include="klass/FunctionKlass.hpp">
       <Filter>头文件\klass</Filter>
     </ClInclude>
-    <ClInclude Include="Universe.hpp">
+    <ClInclude Include="object_other/Universe.hpp">
       <Filter>头文件\object_other</Filter>
     </ClInclude>
-    <ClInclude Include="FrameObject.hpp">
+    <ClInclude Include="object_other/FrameObject.hpp">
       <Filter>头文件\object_other</Filter>
     </ClInclude>
-    <ClInclude Include="Block.hpp">
+    <ClInclude Include="object_other/Block.hpp">
       <Filter>头文件\object_other</Filter>
     </ClInclude>
-    <ClInclude Include="NativeFunctionKlass.hpp">
+    <ClInclude Include="klass/NativeFunctionKlass.hpp">
       <Filter>头文件\klass</Filter>
     </ClInclude>
-    <ClInclude Include="nativeFunctions.hpp">
+    <ClInclude Include="framework/nativeFunctions.hpp">
       <Filter>头文件\framework</Filter>
     </ClInclude>
-    <ClInclude Include="MethodKlass.hpp">
+    <ClInclude Include="klass/MethodKlass.hpp">
       <Filter>头文件\klass</Filter>
     </ClInclude>
-    <ClInclude Include="PyMethod.hpp">
+    <ClInclude Include="object_python/PyMethod.hpp">
       <Filter>头文件\object_python</Filter>
     </ClInclude>
-    <ClInclude Include="CellKlass.hpp">
+    <ClInclude Include="klass/CellKlass.hpp">
       <Filter>头文件\klass</Filter>
     </ClInclude>
-    <ClInclude Include="PyCell.hpp">
+    <ClInclude Include="object_python/PyCell.hpp">
       <Filter>头文件\object_python</Filter>
     </ClInclude>
-    <ClInclude Include="PyList.hpp">
+    <ClInclude Include="object_python/PyList.hpp">
       <Filter>头文件\object_python</Filter>
     </ClInclude>
-    <ClInclude Include="ListKlass.hpp">
+    <ClInclude Include="klass/ListKlass.hpp">
       <Filter>头文件\klass</Filter>
     </ClInclude>
-    <ClInclude Include="StringTable.hpp">
+    <ClInclude Include="util/StringTable.hpp">
       <Filter>头文件\util</Filter>
     </ClInclude>
-    <ClInclude Include="PyDict.hpp">
+    <ClInclude Include="object_python/PyDict.hpp">
       <Filter>头文件\object_python</Filter>
     </ClInclude>
-    <ClInclude Include="DictKlass.hpp">
+    <ClInclude Include="klass/DictKlass.hpp">
       <Filter>头文件\klass</Filter>
     </ClInclude>
-    <ClInclude Include="TypeKlass.hpp">
+    <ClInclude Include="klass/TypeKlass.hpp">
       <Filter>头文件\klass</Filter>
     </ClInclude>
-    <ClInclude Include="PyTypeObject.hpp">
+    <ClInclude Include="object_python/PyTypeObject.hpp">
       <Filter>头文件\object_python</Filter>
     </ClInclude>
-    <ClInclude Include="ObjectKlass.hpp">
+    <ClInclude Include="klass/ObjectKlass.hpp">
       <Filter>头文件\klass</Filter>
     </ClInclude>
   </ItemGroup>
