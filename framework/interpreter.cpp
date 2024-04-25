@@ -391,9 +391,15 @@ void Interpreter::evalFrame() {
                     PUSH(variableObject);
                     break;
                 }
-                // 如果还是没找到，去看看内建变量表（可能最后会得到None）
+                // 如果还是没找到，去看看内建变量表
                 variableObject = this->_builtins->get(variableName);
-                PUSH(variableObject);
+                if (variableObject != nullptr) {
+                    PUSH(variableObject);
+                } else {
+                    printf("name '%s' is not defined\n",
+                        static_cast<PyString*>(variableName)->getValue());
+                    exit(-1);
+                }
                 break;
             }
             
