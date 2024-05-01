@@ -106,7 +106,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>klass;object_python;util;framework;object_other;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>klass;object_python;util;framework;object_other;memory;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -130,6 +130,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="memory\Heap.cpp" />
+    <ClCompile Include="memory\Space.cpp" />
     <ClCompile Include="util/arrayList.cpp" />
     <ClCompile Include="object_other/Block.cpp" />
     <ClCompile Include="framework/byteCodeFileParser.cpp" />
@@ -166,6 +168,8 @@
     <ClCompile Include="object_other/Universe.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="memory\Heap.hpp" />
+    <ClInclude Include="memory\Space.hpp" />
     <ClInclude Include="util/arrayList.hpp" />
     <ClInclude Include="object_other/Block.hpp" />
     <ClInclude Include="util/bufferedInputStream.hpp" />

@@ -39,17 +39,8 @@ Interpreter::Interpreter() {
     
     _builtins->set(StringTable::str_len, PackNativeFunc(NativeFunction::len));
     _builtins->set(StringTable::str_isinstance, PackNativeFunc(NativeFunction::isinstance));
-    _builtins->set(new PyString("typeof"), PackNativeFunc(NativeFunction::type_of));
+    _builtins->set(StringTable::str_typeof, PackNativeFunc(NativeFunction::type_of));
     _builtins->set(new PyString("id"), PackNativeFunc(NativeFunction::id));
-
-    DictKlass::getInstance()->initialize();
-    FunctionKlass::getInstance()->initialize();
-    IntegerKlass::getInstance()->initialize();
-    ListKlass::getInstance()->initialize();
-    MethodKlass::getInstance()->initialize();
-    NativeFunctionKlass::getInstance()->initialize();
-    StringKlass::getInstance()->initialize();
-    TypeKlass::getInstance()->initialize();
 
     _builtins->set(StringTable::str_object, ObjectKlass::getInstance()->getTypeObject());
     _builtins->set(StringTable::str_type, TypeKlass::getInstance()->getTypeObject());
@@ -318,7 +309,6 @@ void Interpreter::evalFrame() {
                 PyObject* callableObject = POP();
                 entryIntoNewFrame(callableObject, rawArgs, 
                     argNumber_pos, argNumber_kw);
-                delete rawArgs;
                 break;
             }
             
@@ -409,7 +399,8 @@ void Interpreter::evalFrame() {
                 // 查找要获取的属性名的name
                 rhs = _curFrame->_names->get(op_arg);
                 // 将查得的属性对象压栈
-                PUSH(lhs->getattr(rhs));
+                PyObject* attr = lhs->getattr(rhs);
+                PUSH(attr);
                 break;
             }
             

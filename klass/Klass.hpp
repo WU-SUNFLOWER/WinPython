@@ -20,12 +20,14 @@ private:
     PyTypeObject* _type_object = nullptr;  // 指向当前klass对应的PyTypeObject对象
 
 protected:
-    Klass() {};
+    Klass();
 public:
 
     static PyObject* createKlass(PyObject* dict, PyObject* supers, PyObject* name);
 
     virtual void initialize() { return; };
+
+    void* operator new(size_t size);
 
 #define FLAG_PyString_PRINT_RAW 1
     virtual void print(const PyObject* lhs, int flags = 0) const;

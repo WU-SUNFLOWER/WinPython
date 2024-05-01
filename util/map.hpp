@@ -7,6 +7,9 @@ class MapItem {
 public:
     KEY key;
     VAL value;
+
+    void* operator new[](size_t size);
+    
     // 无参构造函数
     MapItem() : key(0), value(0) {};
     // 普通构造函数
@@ -28,6 +31,8 @@ public:
     Map(VAL defaultValue);
     ~Map();
     
+    void* operator new(size_t size);
+
     // 哈希表的增删改查基础操作
     void set(KEY key, VAL value);
     VAL remove(KEY key);

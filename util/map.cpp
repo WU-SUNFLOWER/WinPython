@@ -3,12 +3,16 @@
 #include "Universe.hpp"
 
 template<typename KEY, typename VAL>
+void* MapItem<KEY, VAL>::operator new[](size_t size) {
+    return Universe::PyHeap->allocate(size);
+}
+
+template<typename KEY, typename VAL>
 void Map<KEY, VAL>::expand() {
     MapItem<KEY, VAL>* newPtr = new MapItem<KEY, VAL>[capacity <<= 1];
     for (size_t i = 0; i < length; ++i) {
         newPtr[i] = ptr[i];
     }
-    delete[] ptr;
     ptr = newPtr;
 }
 
@@ -22,7 +26,12 @@ Map<KEY, VAL>::Map(VAL defaultValue) {
 
 template<typename KEY, typename VAL>
 Map<KEY, VAL>::~Map() {
-    delete[] ptr;
+
+}
+
+template<typename KEY, typename VAL>
+void* Map<KEY, VAL>::operator new(size_t size) {
+    return Universe::PyHeap->allocate(size);
 }
 
 template<typename KEY, typename VAL>

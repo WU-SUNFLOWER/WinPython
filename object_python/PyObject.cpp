@@ -26,6 +26,10 @@ PyDict* PyObject::initSelfDict() {
     return (_self_dict = new PyDict());
 }
 
+void* PyObject::operator new(size_t size) {
+    return Universe::PyHeap->allocate(size);
+}
+
 void PyObject::print(int flags) const {
     return getKlass()->print(this, flags);
 }

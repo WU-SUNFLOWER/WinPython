@@ -43,6 +43,12 @@
     <Filter Include="源文件\object_other">
       <UniqueIdentifier>{9e3b7b9f-dcbd-4814-9835-5afc8a4aae73}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\memory">
+      <UniqueIdentifier>{60c28951-7b20-4632-a4af-ff160b0942f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\memory">
+      <UniqueIdentifier>{dbcae10d-090f-4c08-9ef0-b5cfd7e10b9b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="util/arrayList.cpp">
@@ -137,6 +143,12 @@
     </ClCompile>
     <ClCompile Include="klass/ObjectKlass.cpp">
       <Filter>源文件\klass</Filter>
+    </ClCompile>
+    <ClCompile Include="memory\Space.cpp">
+      <Filter>源文件\memory</Filter>
+    </ClCompile>
+    <ClCompile Include="memory\Heap.cpp">
+      <Filter>源文件\memory</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -235,6 +247,12 @@
     </ClInclude>
     <ClInclude Include="klass/ObjectKlass.hpp">
       <Filter>头文件\klass</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\Space.hpp">
+      <Filter>头文件\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\Heap.hpp">
+      <Filter>头文件\memory</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

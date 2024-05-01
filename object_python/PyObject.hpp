@@ -32,6 +32,8 @@ public:
     PyDict* getSelfDict();
     PyDict* initSelfDict();
 
+    void* operator new(size_t size);
+
     /*公用方法 Start*/
 
     void print(int flags = 0) const;

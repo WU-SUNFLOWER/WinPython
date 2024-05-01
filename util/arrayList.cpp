@@ -4,13 +4,16 @@
 #include "PyString.hpp"
 #include "Block.hpp"
 #include <algorithm>
+#include "Klass.hpp"
+#include "Universe.hpp"
 
 template<typename T>
 ArrayList<T>::ArrayList(T defaultElem, int64_t n) {
     capacity = static_cast<size_t>(std::max(1ll, n));
     length = 0;
     _defaultElem = defaultElem;
-    ptr = new T[capacity];
+    void* addr = Universe::PyHeap->allocate(sizeof(T) * capacity);
+    ptr = new(addr)T[capacity];
     for (size_t i = 0; i < capacity; ++i) {
         ptr[i] = _defaultElem;
     }
@@ -18,13 +21,16 @@ ArrayList<T>::ArrayList(T defaultElem, int64_t n) {
 
 template<typename T>
 ArrayList<T>::~ArrayList() {
-    delete[] ptr;
+
 }
 
 template<typename T>
 void ArrayList<T>::expand(size_t targetLength) {
     capacity = std::max(capacity << 1, std::max(length + 1, targetLength));
-    T* newPtr = new T[capacity];
+    
+    void* addr = Universe::PyHeap->allocate(sizeof(T) * capacity);
+    T* newPtr = new(addr)T[capacity];
+
     for (size_t i = 0; i < capacity; ++i) {
         newPtr[i] = _defaultElem;
     }
@@ -32,7 +38,6 @@ void ArrayList<T>::expand(size_t targetLength) {
     for (size_t i = 0; i < length; ++i) {
         newPtr[i] = ptr[i];
     }
-    delete[] ptr;
     ptr = newPtr;
 }
 
@@ -89,7 +94,7 @@ void ArrayList<T>::deleteByIndex(size_t idx) {
     --length;
 }
 
-
+template class ArrayList<Klass*>;
 template class ArrayList<PyString*>;
 template class ArrayList<PyObject*>;
 template class ArrayList<Block>;

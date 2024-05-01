@@ -4,6 +4,9 @@
 #include "PyString.hpp"
 
 class StringTable {
+    friend class Universe;
+private:
+    static void initialize();
 public:
     static PyString* str_len;
     static PyString* str_false;
@@ -12,6 +15,7 @@ public:
     static PyString* str_next;
     static PyString* str_list;
     static PyString* str_type;
+    static PyString* str_typeof;
     static PyString* str_str;
     static PyString* str_builtin_func;
     static PyString* str_method;

@@ -3,20 +3,22 @@
 #include <cstring>
 #include <cassert>
 #include "StringKlass.hpp"
+#include "Universe.hpp"
 
-PyString::PyString(const char* str_source) {
-    length = strlen(str_source);
-    ptr = new uint8_t[length + 1];
-    memcpy(ptr, str_source, sizeof(uint8_t) * length);
-    ptr[length] = 0;  // 人工添加一个结束符
-    setKlass(StringKlass::getInstance());
+PyString::PyString(const char* str_source) :
+    PyString(
+        reinterpret_cast<const uint8_t*>(str_source), 
+        strlen(str_source)
+    )
+{
+
 }
 
 PyString::PyString(const uint8_t* source, size_t len_src) {
     length = len_src;
-    ptr = new uint8_t[len_src + 1];
-    memcpy(ptr, source, sizeof(uint8_t) * len_src);
-    ptr[len_src] = 0;
+    ptr = reinterpret_cast<uint8_t*>(Universe::PyHeap->allocate(length + 1));
+    memcpy(ptr, source, sizeof(uint8_t) * length);
+    ptr[length] = 0;
     setKlass(StringKlass::getInstance());
 }
 

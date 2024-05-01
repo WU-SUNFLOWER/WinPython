@@ -4,6 +4,8 @@
 #include <cstdio>
 #include <cstdint>
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #define Buffer_Length 256
 
 class BufferedInputStream {

@@ -18,6 +18,10 @@
 #include "PyMethod.hpp"
 #include "NativeFunctionKlass.hpp"
 
+Klass::Klass() {
+    Universe::PyKlasses->push(this);
+}
+
 PyObject* Klass::createKlass(PyObject* dict, PyObject* supers, PyObject* name) {
     checkLegalPyObject(dict, DictKlass::getInstance());
     checkLegalPyObject(supers, ListKlass::getInstance());
@@ -43,6 +47,10 @@ PyObject* Klass::createKlass(PyObject* dict, PyObject* supers, PyObject* name) {
     cls->setOwnKlass(newKlass);
 
     return cls;
+}
+
+void* Klass::operator new(size_t size) {
+    return Universe::PyHeap->allocateMeta(size);
 }
 
 void Klass::print(const PyObject* lhs, int flags) const {
