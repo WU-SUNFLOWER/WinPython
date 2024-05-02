@@ -15,6 +15,8 @@ public:
         return instance;
     }
 
+    virtual size_t getSize() override;
+
     virtual void initialize() override;
 
     virtual void print(const PyObject* lhs, int flags) const override;
@@ -37,6 +39,8 @@ public:
 
     // 类的实例化
     virtual PyObject* allocateInstance(PyObject* callable, PyList* args) override;
+
+    virtual void oops_do(OopClosure*, PyObject*) override {};
 };
 
 #endif

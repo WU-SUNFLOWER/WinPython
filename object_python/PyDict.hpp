@@ -5,6 +5,7 @@
 #include "map.hpp"
 
 class PyDict : public PyObject {
+    friend class DictKlass;
 private:
     PyObjectMap* _map;
 public:
@@ -43,6 +44,9 @@ public:
     DictIterator(PyDict* owner) : _owner(owner), _count(0) {};
     PyDict* getOwner() {
         return _owner;
+    }
+    PyObject** getOwnerAddr() {
+        return reinterpret_cast<PyObject**>(&_owner);
     }
     int getCount() {
         return _count;

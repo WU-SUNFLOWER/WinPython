@@ -84,6 +84,17 @@ void DictKlass::delete_subscr(PyObject* object, PyObject* subscription) const {
     }
 }
 
+void DictKlass::oops_do(OopClosure* closure, PyObject* object) {
+    checkLegalPyObject(object, this);
+    PyDict* dict = static_cast<PyDict*>(object);
+    closure->do_map(&dict->_map);
+}
+
+template<DictIterType type>
+size_t DictIteratorKlass<type>::getSize() {
+    return sizeof(DictIterator);
+}
+
 template<DictIterType type>
 PyObject* DictIteratorKlass<type>::next(PyObject* object) const {
     checkLegalPyObject(object, this);
@@ -116,6 +127,14 @@ PyObject* DictIteratorKlass<type>::next(PyObject* object) const {
     else {
         return nullptr;
     }
+}
+
+
+template<DictIterType type>
+void DictIteratorKlass<type>::oops_do(OopClosure* closure, PyObject* object) {
+    checkLegalPyObject(object, this);
+    DictIterator* iter = static_cast<DictIterator*>(object);
+    closure->do_oop(iter->getOwnerAddr());
 }
 
 template class DictIteratorKlass<DictIterType::Iter_Keys>;

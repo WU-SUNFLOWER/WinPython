@@ -130,7 +130,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="klass\CodeKlass.cpp" />
     <ClCompile Include="memory\Heap.cpp" />
+    <ClCompile Include="memory\OopClosure.cpp" />
+    <ClCompile Include="memory\ScavengeOopClosure.cpp" />
     <ClCompile Include="memory\Space.cpp" />
     <ClCompile Include="util/arrayList.cpp" />
     <ClCompile Include="object_other/Block.cpp" />
@@ -166,9 +169,13 @@
     <ClCompile Include="util/StringTable.cpp" />
     <ClCompile Include="klass/TypeKlass.cpp" />
     <ClCompile Include="object_other/Universe.cpp" />
+    <ClCompile Include="util\Stack.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="klass\CodeKlass.hpp" />
     <ClInclude Include="memory\Heap.hpp" />
+    <ClInclude Include="memory\OopClosure.hpp" />
+    <ClInclude Include="memory\ScavengeOopClosure.hpp" />
     <ClInclude Include="memory\Space.hpp" />
     <ClInclude Include="util/arrayList.hpp" />
     <ClInclude Include="object_other/Block.hpp" />
@@ -202,6 +209,7 @@
     <ClInclude Include="util/StringTable.hpp" />
     <ClInclude Include="klass/TypeKlass.hpp" />
     <ClInclude Include="object_other/Universe.hpp" />
+    <ClInclude Include="util\Stack.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

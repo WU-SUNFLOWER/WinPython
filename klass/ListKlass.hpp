@@ -16,6 +16,8 @@ public:
         return instance;
     }
 
+    virtual size_t getSize() override;
+
     virtual void initialize() override;
 
     virtual void print(const PyObject* object, int flags) const override;
@@ -41,6 +43,8 @@ public:
     virtual PyObject* has(PyObject* object, PyObject* target) const override;
 
     virtual PyObject* getIter(PyObject* object) const override;
+
+    virtual void oops_do(OopClosure* closure, PyObject* object) override;
 };
 
 class ListIteratorKlass : public Klass {
@@ -58,6 +62,7 @@ public:
     virtual PyObject* getIter(PyObject* object) const override {
         return object;
     };
+    virtual void oops_do(OopClosure* closure, PyObject* object) override;
 };
 
 #endif

@@ -9,6 +9,8 @@ private:
     static ObjectKlass* instance;
 public:
     static ObjectKlass* getInstance();
+    virtual size_t getSize();
+    virtual void oops_do(OopClosure* closure, PyObject* object) override;
 };
 
 #endif

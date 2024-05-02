@@ -23,7 +23,7 @@ PyString::PyString(const uint8_t* source, size_t len_src) {
 }
 
 PyString::~PyString() {
-    delete[] ptr;
+
 }
 
 uint8_t PyString::operator[](size_t index) {

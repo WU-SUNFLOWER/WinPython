@@ -887,3 +887,11 @@ PyObject* Interpreter::callVirtual(PyObject* callable, PyList* args) {
         exit(-1);
     }
 }
+
+/* GC相关接口 开始 */
+void Interpreter::oops_do(OopClosure* closure) {
+    closure->do_oop(reinterpret_cast<PyObject**>(&_builtins));
+    closure->do_oop(&_retValue);
+    if (_curFrame) _curFrame->oops_do(closure);
+}
+/* GC相关接口 结束 */

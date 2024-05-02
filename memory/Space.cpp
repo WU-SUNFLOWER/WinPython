@@ -47,6 +47,6 @@ bool Space::canAlloc(size_t size) {
     return size < _capacity;
 }
 
-bool Space::hasObject(char* addr) {
+bool Space::hasObject(void* addr) {
     return _base <= addr && addr < _end;
 }

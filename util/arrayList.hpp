@@ -4,6 +4,8 @@
 #include <cassert>
 #include <cstdint>
 
+class OopClosure;
+
 template <typename T>
 class ArrayList {
 private:
@@ -39,7 +41,9 @@ public:
     size_t getCapacity() const {
         return capacity;
     }
-
+    // GC相关接口
+    void* operator new(size_t size);
+    void oops_do(OopClosure* closure);
 };
 
 #endif

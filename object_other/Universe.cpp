@@ -15,6 +15,7 @@ PyObject* Universe::PyFalse = nullptr;
 PyObject* Universe::PyNone = nullptr;
 Heap* Universe::PyHeap = nullptr;
 ArrayList<Klass*>* Universe::PyKlasses = nullptr;
+CodeObject* Universe::MainCode = nullptr;
 
 void Universe::genesis() {
     PyHeap = Heap::getInstance();
@@ -41,4 +42,12 @@ void Universe::genesis() {
 
 void Universe::destroy() {
 
+}
+
+void Universe::oops_do(OopClosure* closure) {
+    closure->do_oop(reinterpret_cast<PyObject**>(&PyTrue));
+    closure->do_oop(reinterpret_cast<PyObject**>(&PyFalse));
+    closure->do_oop(reinterpret_cast<PyObject**>(&PyNone));
+    closure->do_oop(reinterpret_cast<PyObject**>(&MainCode));
+    closure->do_array_list(&PyKlasses);
 }

@@ -2,12 +2,16 @@
 #define Hpp_StringTable
 
 #include "PyString.hpp"
+#include "OopClosure.hpp"
 
 class StringTable {
     friend class Universe;
 private:
     static void initialize();
 public:
+
+    static void oops_do(OopClosure* closure);
+
     static PyString* str_len;
     static PyString* str_false;
     static PyString* str_true;

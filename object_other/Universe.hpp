@@ -4,18 +4,8 @@
 #include "Heap.hpp"
 #include "PyObject.hpp"
 #include "arrayList.hpp"
-
-/*
-namespace Universe {
-    extern PyObject* PyTrue;
-    extern PyObject* PyFalse;
-    extern PyObject* PyNone;
-    extern Heap* PyHeap;
-    extern ArrayList<Klass*>* PyKlasses;
-    void genesis();
-    void destroy();
-}
-*/
+#include "CodeObject.hpp"
+#include "OopClosure.hpp"
 
 class Universe {
 public:
@@ -24,9 +14,13 @@ public:
     static PyObject* PyNone;
     static Heap* PyHeap;
     static ArrayList<Klass*>* PyKlasses;
-    
+    // Interpreter启动时的入口代码，在Interpreter->run的时候设置
+    static CodeObject* MainCode;  
+
     static void genesis();
     static void destroy();
+
+    static void oops_do(OopClosure* closure);
 };
 
 #define isTrue(obj) ((obj) == Universe::PyTrue)

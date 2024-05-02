@@ -10,6 +10,10 @@
 
 IntegerKlass* IntegerKlass::instance = nullptr;
 
+size_t IntegerKlass::getSize() {
+    return sizeof(PyInteger);
+}
+
 void IntegerKlass::initialize() {
 
     (new PyTypeObject())->setOwnKlass(this);

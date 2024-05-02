@@ -9,6 +9,7 @@ private:
     static TypeKlass* instance;
 public:
     static TypeKlass* getInstance();
+    virtual size_t getSize() override;
     virtual void print(const PyObject* object, int flag) const override;
     void initialize() override;
 
@@ -16,6 +17,8 @@ public:
     virtual void setattr(PyObject* object, PyObject* attr, PyObject* value) override;
 
     virtual PyObject* equal(const PyObject* lhs, const PyObject* rhs) const override;
+
+    virtual void oops_do(OopClosure* closure, PyObject* object) override;
 };
 
 #endif

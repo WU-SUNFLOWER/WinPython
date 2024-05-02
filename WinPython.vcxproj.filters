@@ -150,6 +150,18 @@
     <ClCompile Include="memory\Heap.cpp">
       <Filter>源文件\memory</Filter>
     </ClCompile>
+    <ClCompile Include="memory\OopClosure.cpp">
+      <Filter>源文件\memory</Filter>
+    </ClCompile>
+    <ClCompile Include="util\Stack.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="memory\ScavengeOopClosure.cpp">
+      <Filter>源文件\memory</Filter>
+    </ClCompile>
+    <ClCompile Include="klass\CodeKlass.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework/byteCodeFileParser.hpp">
@@ -253,6 +265,18 @@
     </ClInclude>
     <ClInclude Include="memory\Heap.hpp">
       <Filter>头文件\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\OopClosure.hpp">
+      <Filter>头文件\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="util\Stack.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\ScavengeOopClosure.hpp">
+      <Filter>头文件\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="klass\CodeKlass.hpp">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -15,6 +15,20 @@ void NativeFunctionKlass::print(const PyObject* lhs, int flags) const {
     printf(">");
 }
 
+void NativeFunctionKlass::oops_do(OopClosure* closure, PyObject* object) {
+    checkLegalPyObject(object, this);
+    PyFunction* func = static_cast<PyFunction*>(object);
+    closure->do_oop(reinterpret_cast<PyObject**>(&func->funcCode));
+    closure->do_oop(reinterpret_cast<PyObject**>(&func->funcName));
+    closure->do_oop(reinterpret_cast<PyObject**>(&func->_globals));
+    closure->do_oop(reinterpret_cast<PyObject**>(&func->_defaultArgs));
+    closure->do_oop(reinterpret_cast<PyObject**>(&func->_freevars));
+}
+
+size_t NativeFunctionKlass::getSize() {
+    return sizeof(PyFunction);
+}
+
 void NativeFunctionKlass::initialize() {
 
     (new PyTypeObject())->setOwnKlass(this);

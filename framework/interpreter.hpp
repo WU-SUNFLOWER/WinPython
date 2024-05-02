@@ -8,6 +8,7 @@
 #include "bytecode.hpp"
 #include "Map.hpp"
 #include "PyDict.hpp"
+#include "OopClosure.hpp"
 
 class Interpreter {
     enum Status {
@@ -50,6 +51,9 @@ public:
     void exitFromCurFrame();
 
     PyObject* callVirtual(PyObject* callable, PyList* args);
+
+    // GC相关接口
+    void oops_do(OopClosure* closure);
 };
 
 #endif

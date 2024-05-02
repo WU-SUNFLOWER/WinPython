@@ -5,11 +5,14 @@
 #include "map.hpp"
 #include "Klass.hpp"
 #include <cassert>
+#include "OopClosure.hpp"
 
 class PyDict;
 
 class PyObject {
 private:
+    uintptr_t _mark_word;
+
     // 不同类型的python对象通过klass指针的指向不同来区分
     Klass* klass;
 
@@ -17,7 +20,7 @@ private:
     PyDict* _self_dict;
 public:
 
-    PyObject() : klass(nullptr), _self_dict(nullptr) {};
+    PyObject() : klass(nullptr), _self_dict(nullptr), _mark_word(0) {};
 
     void setKlass(Klass* k) {
         klass = k;
@@ -73,6 +76,12 @@ public:
     PyObject* next();
 
     /*公用方法 End*/
+    
+    // GC相关接口
+    void* getNewAddr();
+    void setNewAddr(void*);
+    size_t getSize();
+    void oops_do(OopClosure* closure);
 };
 
 typedef Map<PyObject*, PyObject*> PyObjectMap;

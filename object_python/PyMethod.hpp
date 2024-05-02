@@ -6,6 +6,7 @@
 #include "MethodKlass.hpp"
 
 class PyMethod : public PyObject {
+    friend class MethodKlass;
 private:
     PyObject* _owner;
     PyFunction* _func;

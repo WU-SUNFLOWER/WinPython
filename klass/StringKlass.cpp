@@ -10,8 +10,13 @@
 #include "nativeFunctions.hpp"
 #include "StringTable.hpp"
 #include "ObjectKlass.hpp"
+#include "OopClosure.hpp"
 
 StringKlass* StringKlass::instance = nullptr;
+
+size_t StringKlass::getSize() {
+    return sizeof(PyString);
+}
 
 void StringKlass::initialize() {
     PyDict* dict = new PyDict();
@@ -168,4 +173,11 @@ PyObject* StringKlass::has(PyObject* object, PyObject* target) const {
         reinterpret_cast<const char*>(targetStr->getValue())
     );
     return result == nullptr ? Universe::PyFalse : Universe::PyTrue;
+}
+
+void StringKlass::oops_do(OopClosure* closure, PyObject* object) {
+    checkLegalPyObject(object, this);
+    PyString* str = static_cast<PyString*>(object);
+    void** ref = reinterpret_cast<void**>(&(str->ptr));
+    closure->do_raw_mem(ref, str->getLength() + 1);
 }

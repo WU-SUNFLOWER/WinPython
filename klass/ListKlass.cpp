@@ -20,6 +20,10 @@ ListKlass::ListKlass() {
 
 }
 
+size_t ListKlass::getSize() {
+    return sizeof(PyList);
+}
+
 void ListKlass::initialize() {
     PyDict* dict = new PyDict();
 
@@ -185,6 +189,12 @@ PyObject* ListKlass::getIter(PyObject* object) const {
     return new ListIterator(static_cast<PyList*>(object));
 }
 
+void ListKlass::oops_do(OopClosure* closure, PyObject* object) {
+    checkLegalPyObject(object, this);
+    PyList* list = static_cast<PyList*>(object);
+    closure->do_array_list(&list->_container);
+}
+
 void ListKlass::store_subscr(PyObject* object, 
     PyObject* subscription, PyObject* newObject
 ) const {
@@ -234,4 +244,10 @@ PyObject* ListIteratorKlass::next(PyObject* object) const {
     else {
         return nullptr;
     }
+}
+
+void ListIteratorKlass::oops_do(OopClosure* closure, PyObject* object) {
+    checkLegalPyObject(object, this);
+    ListIterator* iter = static_cast<ListIterator*>(object);
+    closure->do_oop(reinterpret_cast<PyObject**>(&iter->_owner));
 }

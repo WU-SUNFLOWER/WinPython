@@ -6,6 +6,7 @@
 #include <algorithm>
 #include "Klass.hpp"
 #include "Universe.hpp"
+#include "OopClosure.hpp"
 
 template<typename T>
 ArrayList<T>::ArrayList(T defaultElem, int64_t n) {
@@ -92,6 +93,35 @@ void ArrayList<T>::deleteByIndex(size_t idx) {
         ptr[i] = ptr[i + 1];
     }
     --length;
+}
+
+template<typename T>
+void ArrayList<T>::oops_do(OopClosure* closure) {
+    closure->do_raw_mem(reinterpret_cast<void**>(&ptr),
+        capacity * sizeof(T));
+}
+
+template<typename T>
+void* ArrayList<T>::operator new(size_t size) {
+    return Universe::PyHeap->allocate(size);
+}
+
+template<>
+void ArrayList<Klass*>::oops_do(OopClosure* closure) {
+    closure->do_raw_mem(reinterpret_cast<void**>(&ptr), 
+        capacity * sizeof(Klass*));
+    for (size_t i = 0; i < length; ++i) {
+        closure->do_klass(&ptr[i]);
+    }
+}
+
+template<>
+void ArrayList<PyObject*>::oops_do(OopClosure* closure) {
+    closure->do_raw_mem(reinterpret_cast<void**>(&ptr),
+        capacity * sizeof(PyObject*));
+    for (size_t i = 0; i < length; ++i) {
+        closure->do_oop(&ptr[i]);
+    }
 }
 
 template class ArrayList<Klass*>;

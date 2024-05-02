@@ -1,6 +1,7 @@
 #ifndef Klass_Hpp
 #define Klass_Hpp
 
+#include "OopClosure.hpp"
 #include "map.hpp"
 
 class PyObject;
@@ -22,6 +23,8 @@ private:
 protected:
     Klass();
 public:
+    // 获取Python对象会占用的空间大小
+    virtual size_t getSize();
 
     static PyObject* createKlass(PyObject* dict, PyObject* supers, PyObject* name);
 
@@ -100,6 +103,10 @@ public:
 
     // 类的实例化
     virtual PyObject* allocateInstance(PyObject* callable, PyList* args);
+
+    // GC相关接口
+    virtual void oops_do(OopClosure* closure);
+    virtual void oops_do(OopClosure* closure, PyObject* object);
 };
 
 #define checkLegalPyObject_DB(x, y) (Klass::checkLegalPyObject(x, this), Klass::checkLegalPyObject(y, this))

@@ -4,11 +4,16 @@
 #include "PyList.hpp"
 #include "PyString.hpp"
 #include "PyObject.hpp"
+#include "CodeKlass.hpp"
 #include <cstdint>
 
 class FrameObject;
 
 class CodeObject : public PyObject {
+    friend class CodeKlass;
+    friend class Interpreter;
+    friend class FrameObject;
+    friend class PyFunction;
 private:
     int32_t _argCount;
     int32_t _nLocals;
@@ -44,15 +49,10 @@ public:
         _name(name),
         _fileName(fileName),
         _lineno(lineno),
-        _notable(notable) {};
-    
-    friend class Interpreter;
-    friend class FrameObject;
-    friend class PyFunction;
-
-    virtual void print() const {};
-    virtual PyObject* add(PyObject* other) const {
-        return nullptr;
+        _notable(notable) 
+    {
+        setKlass(CodeKlass::getInstance());
     };
+
 };
 #endif

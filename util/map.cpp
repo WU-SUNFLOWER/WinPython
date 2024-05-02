@@ -1,6 +1,7 @@
 #include "map.hpp"
 #include "PyObject.hpp"
 #include "Universe.hpp"
+#include "OopClosure.hpp"
 
 template<typename KEY, typename VAL>
 void* MapItem<KEY, VAL>::operator new[](size_t size) {
@@ -97,6 +98,22 @@ size_t Map<KEY, VAL>::getIndex(KEY& key) {
         }
     }
     return -1;
+}
+
+template<typename KEY, typename VAL>
+void Map<KEY, VAL>::oops_do(OopClosure* closure) {
+    closure->do_raw_mem(reinterpret_cast<void**>(&ptr), 
+        capacity * sizeof(MapItem<KEY, VAL>));
+}
+
+template<>
+void Map<PyObject*, PyObject*>::oops_do(OopClosure* closure) {
+    closure->do_raw_mem(reinterpret_cast<void**>(&ptr), 
+        capacity * sizeof(MapItem<PyObject*, PyObject*>));
+    for (size_t i = 0; i < length; ++i) {
+        closure->do_oop(&(ptr[i].key));
+        closure->do_oop(&(ptr[i].value));
+    }
 }
 
 template class Map<PyObject*, PyObject*>;

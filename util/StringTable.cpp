@@ -39,3 +39,27 @@ void StringTable::initialize() {
     str_object = new PyString("object");
     str_isinstance = new PyString("isinstance");
 }
+
+void StringTable::oops_do(OopClosure* closure) {
+
+#define do_oop(x) closure->do_oop(reinterpret_cast<PyObject**>(&x));
+
+    do_oop(str_len);
+    do_oop(str_false);
+    do_oop(str_true);
+    do_oop(str_none);
+    do_oop(str_next);
+    do_oop(str_list);
+    do_oop(str_type);
+    do_oop(str_typeof);
+    do_oop(str_str);
+    do_oop(str_builtin_func);
+    do_oop(str_method);
+    do_oop(str_int);
+    do_oop(str_function);
+    do_oop(str_dict);
+    do_oop(str_isinstance);
+    do_oop(str_object);
+    do_oop(str_mod);
+    do_oop(str_init);
+}

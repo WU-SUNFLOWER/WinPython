@@ -43,6 +43,7 @@ public:
 };
 
 class ListIterator : public PyObject {
+    friend class ListIteratorKlass;
 private:
     PyList* _owner;
     int _count;

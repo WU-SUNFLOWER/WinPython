@@ -1,6 +1,7 @@
 #ifndef FrameObject_Hpp
 #define FrameObject_Hpp
 
+#include "OopClosure.hpp"
 #include "arrayList.hpp"
 #include "CodeObject.hpp"
 #include "map.hpp"
@@ -10,6 +11,7 @@
 #include "PyDict.hpp"
 
 class FrameObject {
+    friend class Interpreter;
 private:
     PyList* _stack;  // 运行时栈
     ArrayList<Block>* _blockStack;  // 这个栈用于处理代码块嵌套的结构
@@ -57,7 +59,8 @@ public:
     bool isRootFrame() const;
     bool isEntryFrame() const;
 
-    friend class Interpreter;
+    // GC相关接口
+    void oops_do(OopClosure* closure);
 };
 
 #endif

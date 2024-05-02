@@ -5,6 +5,7 @@
 #include <cstdint>
 
 class PyString : public PyObject {
+    friend class StringKlass;
 private:
     uint8_t* ptr;
     size_t length;

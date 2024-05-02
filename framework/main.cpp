@@ -49,7 +49,11 @@ int main(int argc, char* argv[]) {
     BufferedInputStream stream(byteCodeFile.c_str());
     ByteCodeFileParser parser(&stream);
     CodeObject* code = parser.parse();
+    Universe::MainCode = code;
+
+    Universe::PyHeap->gc();
+    
     Interpreter* interpreter = interpreter->getInstance();
-    interpreter->run(code);
+    interpreter->run(Universe::MainCode);
     return 0;
 }

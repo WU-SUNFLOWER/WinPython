@@ -16,7 +16,7 @@ public:
     void* allocate(size_t size);
     void clear();
     bool canAlloc(size_t size);
-    bool hasObject(char* addr);
+    bool hasObject(void* addr);
 };
 
 #endif

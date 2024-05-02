@@ -2,6 +2,7 @@
 #define Hpp_DictKlass
 
 #include "Klass.hpp"
+#include "PyDict.hpp"
 
 class DictKlass: public Klass {
 private:
@@ -13,6 +14,10 @@ public:
             instance = new DictKlass();
         }
         return instance;
+    }
+
+    virtual size_t getSize() override {
+        return sizeof(PyDict);
     }
 
     virtual void initialize() override;
@@ -28,6 +33,8 @@ public:
     // 删除下标指定的元素
     virtual void delete_subscr(PyObject* object, 
         PyObject* subscription) const override;
+
+    virtual void oops_do(OopClosure* closure, PyObject* object) override;
 };
 
 enum DictIterType {Iter_Keys, Iter_Values, Iter_Items};
@@ -44,10 +51,13 @@ public:
         }
         return instance;
     }
+    virtual size_t getSize() override;
     virtual PyObject* getIter(PyObject* object) const override {
         return object;
     };
-    virtual PyObject* next(PyObject* object) const override;
+    virtual PyObject* next(PyObject* object) const override; 
+    
+    virtual void oops_do(OopClosure* closure, PyObject* object) override;
 };
 
 #endif

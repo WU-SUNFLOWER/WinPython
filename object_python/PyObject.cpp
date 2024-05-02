@@ -141,3 +141,26 @@ PyObject* PyObject::getIter() {
 PyObject* PyObject::next() {
     return getKlass()->next(this);
 }
+
+/* GC相关接口 开始 */
+void* PyObject::getNewAddr() {
+    if ((_mark_word & 0x2) == 0x2) {
+        return reinterpret_cast<void*>(_mark_word & ~7);
+    }
+    return nullptr;
+}
+
+void PyObject::setNewAddr(void* addr) {
+    if (!addr) return;
+    _mark_word = reinterpret_cast<uintptr_t>(addr) | 0x2;
+}
+
+size_t PyObject::getSize() {
+    return getKlass()->getSize();
+}
+
+void PyObject::oops_do(OopClosure* closure) {
+    closure->do_oop(reinterpret_cast<PyObject**>(&_self_dict));
+    getKlass()->oops_do(closure, this);
+}
+/* GC相关接口 结束 */

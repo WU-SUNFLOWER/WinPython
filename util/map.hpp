@@ -1,6 +1,8 @@
 #ifndef Map_Hpp
 #define Map_Hpp
 
+class OopClosure;
+
 // 哈希表成员对象
 template<typename KEY, typename VAL>
 class MapItem {
@@ -56,5 +58,7 @@ public:
     size_t getCapacity() const {
         return capacity;
     }
+
+    void oops_do(OopClosure* closure);
 };
 #endif

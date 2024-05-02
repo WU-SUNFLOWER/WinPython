@@ -22,6 +22,11 @@ Klass::Klass() {
     Universe::PyKlasses->push(this);
 }
 
+size_t Klass::getSize() {
+    puts("getSize method haven't been modified correctly.");
+    exit(-1);
+}
+
 PyObject* Klass::createKlass(PyObject* dict, PyObject* supers, PyObject* name) {
     checkLegalPyObject(dict, DictKlass::getInstance());
     checkLegalPyObject(supers, ListKlass::getInstance());
@@ -155,4 +160,16 @@ PyObject* Klass::allocateInstance(PyObject* callable, PyList* args) {
     }
 
     return inst;
+}
+
+void Klass::oops_do(OopClosure* closure) {
+    closure->do_oop(reinterpret_cast<PyObject**>(&_klassDict));
+    closure->do_oop(reinterpret_cast<PyObject**>(& _name));
+    closure->do_klass(&_super);
+    closure->do_oop(reinterpret_cast<PyObject**>(& _type_object));
+}
+
+void Klass::oops_do(OopClosure* closure, PyObject* object) {
+    printf("The oops_do method of <class '%s'> haven't been modified correctly!", 
+        object->getKlass()->getName()->getValue());
 }

@@ -1,5 +1,6 @@
 #include "Heap.hpp"
 #include <cstdio>
+#include "ScavengeOopClosure.hpp"
 
 Heap* Heap::instance = nullptr;
 size_t Heap::MaxCapacity = 2 * 1024 * 1024;
@@ -47,7 +48,8 @@ void* Heap::allocateMeta(size_t size) {
 }
 
 void Heap::copyLiveObjects() {
-
+    ScavengeOopClosure closure(eden, survivor, metaspace);
+    closure.scavenge();
 }
 
 void Heap::gc() {

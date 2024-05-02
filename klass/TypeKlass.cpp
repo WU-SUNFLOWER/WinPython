@@ -20,6 +20,10 @@ TypeKlass* TypeKlass::getInstance() {
     return instance;
 }
 
+size_t TypeKlass::getSize() {
+    return sizeof(PyTypeObject);
+}
+
 void TypeKlass::print(const PyObject* object, int flag) const {
     checkLegalPyObject(object, this);
     
@@ -80,4 +84,8 @@ void TypeKlass::setattr(PyObject* object, PyObject* attr, PyObject* value) {
 
 PyObject* TypeKlass::equal(const PyObject* lhs, const PyObject* rhs) const {
     return lhs == rhs ? Universe::PyTrue : Universe::PyFalse;
+}
+
+void TypeKlass::oops_do(OopClosure* closure, PyObject* object) {
+    // Do nothing, since all klass objects are managed by Universe::Klasses.
 }

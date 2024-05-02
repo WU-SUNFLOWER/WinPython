@@ -15,6 +15,8 @@ public:
         return instance;
     }
 
+    virtual size_t getSize() override;
+
     virtual void initialize() override;
 
     virtual void print(const PyObject* lhs, int flags) const override;
@@ -30,6 +32,9 @@ public:
     virtual PyObject* len(const PyObject* strObject) const override;
     virtual PyObject* subscr(PyObject* strObject, PyObject* subscription) const override;
     virtual PyObject* has(PyObject* object, PyObject* target) const override;
+
+    // GC相关接口
+    virtual void oops_do(OopClosure* closure, PyObject* object) override;
 };
 
 #endif

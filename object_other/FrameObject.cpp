@@ -80,3 +80,19 @@ bool FrameObject::isEntryFrame() const
 {
     return _isEntryFrame;
 }
+
+void FrameObject::oops_do(OopClosure* closure) {
+    closure->do_oop(reinterpret_cast<PyObject**>(& _consts));
+    closure->do_oop(reinterpret_cast<PyObject**>(&_names));
+
+    closure->do_oop(reinterpret_cast<PyObject**>(&_globals));
+    closure->do_oop(reinterpret_cast<PyObject**>(&_locals));
+    closure->do_oop(reinterpret_cast<PyObject**>(&_fastLocals));
+    closure->do_oop(reinterpret_cast<PyObject**>(&_cells));
+
+    closure->do_oop(reinterpret_cast<PyObject**>(&_stack));
+
+    closure->do_oop(reinterpret_cast<PyObject**>(&_byteCodes));
+
+    if (_callerFrame) _callerFrame->oops_do(closure);
+}
