@@ -1,4 +1,9 @@
 #ifndef Hpp_Stack
+#define Hpp_Stack
+
+#include <cstdio>
+#include <cstdlib>
+#include <cassert>
 
 template<typename V>
 class Stack {
@@ -15,21 +20,29 @@ public:
         _length = _capacity = 0;
     }
     void push(V elem) {
+        if (_length >= _capacity) {
+            puts("GC stack is overflow!");
+            exit(-1);
+        }
         vector[_length++] = elem;
     }
-    V pop() {
+    inline V pop() {
         return vector[--_length];
     }
-    V top() {
+    inline V top() {
         return vector[_length - 1];
     }
-    size_t getLength() {
+    inline V get(size_t idx) {
+        assert(0 <= idx && idx < _length);
+        return vector[idx];
+    }
+    inline size_t getLength() {
         return _length;
     }
-    size_t getCapacity() {
+    inline size_t getCapacity() {
         return _capacity;
     }
-    bool isEmpty() {
+    inline bool isEmpty() {
         return _length == 0;
     }
 };

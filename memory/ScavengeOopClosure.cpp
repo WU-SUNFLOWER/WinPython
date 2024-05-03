@@ -5,11 +5,12 @@
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
+#include "Block.hpp"
 
 ScavengeOopClosure::ScavengeOopClosure(Space* from, Space* to, Space* meta) :
     _from(from), _to(to), _meta(meta)
 {
-    _oop_stack = new Stack<PyObject*>(1024);
+    _oop_stack = new Stack<PyObject*>(1024 * 1024 * 2);
 }
 
 ScavengeOopClosure::~ScavengeOopClosure() {
@@ -63,7 +64,11 @@ void ScavengeOopClosure::do_oop(PyObject** reference) {
 
 void ScavengeOopClosure::do_array_list(ArrayList<Klass*>** ref) {
     if (ref == nullptr || *ref == nullptr) return;
-    //if (!_from->hasObject(*ref)) return;
+    if ((*ref)->getNewAddr()) {
+        *ref = reinterpret_cast<ArrayList<Klass*>*>((*ref)->getNewAddr());
+        return;
+    }
+
     assert(_from->hasObject(*ref));
     
     size_t size = sizeof(ArrayList<Klass*>);
@@ -73,6 +78,7 @@ void ScavengeOopClosure::do_array_list(ArrayList<Klass*>** ref) {
     }
     void* target = _to->allocate(size);
     memcpy(target, *ref, size);
+    (*ref)->setNewAddr(target);
     *ref = reinterpret_cast<ArrayList<Klass*>*>(target);
     (*ref)->oops_do(this);
 }
@@ -80,14 +86,34 @@ void ScavengeOopClosure::do_array_list(ArrayList<Klass*>** ref) {
 void ScavengeOopClosure::do_array_list(ArrayList<PyObject*>** ref) {
     if (ref == nullptr || *ref == nullptr) return;
     if (!_from->hasObject(*ref)) return;
+    if ((*ref)->getNewAddr()) {
+        *ref = reinterpret_cast<ArrayList<PyObject*>*>((*ref)->getNewAddr());
+        return;
+    }
+
     size_t size = sizeof(ArrayList<PyObject*>);
     if (!_to->canAlloc(size)) {
         puts("Can't allocate more space.");
         exit(-1);
     }
     void* target = _to->allocate(size);
-    memcpy(target, *ref, size);
+    memcpy(target, *ref, size); 
+    (*ref)->setNewAddr(target);
     *ref = reinterpret_cast<ArrayList<PyObject*>*>(target);
+    (*ref)->oops_do(this);
+}
+
+void ScavengeOopClosure::do_array_list(ArrayList<Block>** ref) {
+    if (ref == nullptr || *ref == nullptr) return;
+    if (!_from->hasObject(*ref)) return;
+    size_t size = sizeof(ArrayList<Block>);
+    if (!_to->canAlloc(size)) {
+        puts("Can't allocate more space.");
+        exit(-1);
+    }
+    void* target = _to->allocate(size);
+    memcpy(target, *ref, size);
+    *ref = reinterpret_cast<ArrayList<Block>*>(target);
     (*ref)->oops_do(this);
 }
 

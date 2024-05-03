@@ -36,6 +36,7 @@ public:
     }
     void set(size_t idx, PyObject* obj) {
         _container->set(idx, obj);
+        return;
     }
     void deleteByIndex(size_t idx) {
         _container->deleteByIndex(idx);

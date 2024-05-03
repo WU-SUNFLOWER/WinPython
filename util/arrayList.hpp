@@ -9,11 +9,12 @@ class OopClosure;
 template <typename T>
 class ArrayList {
 private:
+    uintptr_t _mark_word = 0;
     size_t length;  // 数组内有效元素的个数
     size_t capacity;  // 数组开辟内存的总长度
     T* ptr;
     T _defaultElem;
-    void expand(size_t targetLength = 0);
+    ArrayList* expand(size_t targetLength = 0);
 public:
     ArrayList(T defaultElem, int64_t n = 8ll);
     ~ArrayList();
@@ -44,6 +45,8 @@ public:
     // GC相关接口
     void* operator new(size_t size);
     void oops_do(OopClosure* closure);
+    void* getNewAddr();
+    void setNewAddr(void*);
 };
 
 #endif

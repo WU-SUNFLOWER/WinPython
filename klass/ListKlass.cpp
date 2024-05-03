@@ -193,6 +193,7 @@ void ListKlass::oops_do(OopClosure* closure, PyObject* object) {
     checkLegalPyObject(object, this);
     PyList* list = static_cast<PyList*>(object);
     closure->do_array_list(&list->_container);
+    assert(list->_container != nullptr);
 }
 
 void ListKlass::store_subscr(PyObject* object, 

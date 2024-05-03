@@ -5,6 +5,7 @@ enum ByteCode : uint8_t {
     Pop_Top = 0x01,  // 无条件弹出栈顶元素
     Dup_Top = 0x04,
     Binary_Multiply = 0x14,
+    Binary_Module = 0x16,
     Binary_Add = 0x17,
     Binary_Subtract = 0x18,
     Binary_Subscr = 0x19,

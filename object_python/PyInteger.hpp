@@ -6,6 +6,7 @@
 #include <cstdint>
 
 class PyInteger: public PyObject {
+    friend class IntegerKlass;
 private:
     int64_t value;
 public:

@@ -31,6 +31,8 @@ Interpreter::Interpreter() {
 
     _status = IS_OK;
 
+    _temp_stack = new Stack<PyObject**>(2 * 1024 * 1024);
+
     _builtins = new PyDict();
 
     _builtins->set(StringTable::str_true, Universe::PyTrue);
@@ -48,6 +50,8 @@ Interpreter::Interpreter() {
     _builtins->set(StringTable::str_str, StringKlass::getInstance()->getTypeObject());
     _builtins->set(StringTable::str_list, ListKlass::getInstance()->getTypeObject());
     _builtins->set(StringTable::str_dict, DictKlass::getInstance()->getTypeObject());
+
+    _builtins->set(new PyString("sysgc"), PackNativeFunc(NativeFunction::sysgc));
 }
 
 void Interpreter::run(CodeObject* codeObject) {
@@ -145,7 +149,7 @@ void Interpreter::evalFrame() {
 
             case ByteCode::Print_Item:
                 lhs = POP();
-                lhs ->print(FLAG_PyString_PRINT_RAW);
+                lhs->print(FLAG_PyString_PRINT_RAW);
                 break;
 
             case ByteCode::Print_NewLine:
@@ -164,17 +168,25 @@ void Interpreter::evalFrame() {
                 PUSH(lhs->add(rhs));
                 break;
 
+            case ByteCode::Binary_Module:
+                rhs = POP();
+                lhs = POP();
+                PUSH(lhs->mod(rhs));
+                break;
+
             case ByteCode::Inplace_Add:
                 rhs = POP();
                 lhs = POP();
                 PUSH(lhs->inplace_add(rhs));
                 break;
 
-            case ByteCode::Binary_Subtract:
+            case ByteCode::Binary_Subtract: {
                 rhs = POP();  // 右操作数
                 lhs = POP();  // 左操作数
                 PUSH(lhs->sub(rhs));
                 break;
+            }
+
 
             case ByteCode::Binary_Subscr:
                 rhs = POP();  // 右操作数（在此处为要取的下标）
@@ -302,9 +314,11 @@ void Interpreter::evalFrame() {
                 uint8_t argNumber_total = argNumber_pos + 2 * argNumber_kw;
                 // 先把所有参数从栈上弹出来，存到临时列表中去
                 PyList* rawArgs = new PyList(argNumber_total);
+                PUSH_TEMP(rawArgs);
                 while (argNumber_total-- > 0) {
                     rawArgs->set(argNumber_total, POP());
                 }
+                POP_TEMP(1);
                 // 发起函数调用，对函数参数的进一步处理在之后发生
                 PyObject* callableObject = POP();
                 entryIntoNewFrame(callableObject, rawArgs, 
@@ -419,6 +433,7 @@ void Interpreter::evalFrame() {
             }
 
             case ByteCode::Load_Fast:
+                assert(_curFrame->_fastLocals->get(op_arg) != nullptr);
                 PUSH(_curFrame->_fastLocals->get(op_arg));
                 break;
 
@@ -597,7 +612,8 @@ rawArgNumber_kw —— 即用户调用Call_Function时的op_args的高8位，
 void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs, 
     uint8_t rawArgNumber_pos, uint8_t rawArgNumber_kw
 ) {
-
+    PUSH_TEMP(callableObject);
+    PUSH_TEMP(rawArgs);
     /*
         在Python2中，对于普通的位置参数、位置扩展参数（*args），
         在执行Call_Function指令时都会被记道op_args里传给argNumber。
@@ -618,6 +634,8 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
     // 判断callable object的真实类型，提取出真正的callee function
     PyFunction* calleeFunc = nullptr;
     PyObject* owner = nullptr;
+    PUSH_TEMP(calleeFunc);
+    PUSH_TEMP(owner);
     if (isMethod(klass)) {
         PyMethod* method = static_cast<PyMethod*>(callableObject);
         calleeFunc = method->getFunc();
@@ -645,22 +663,25 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
         ++rawArgNumber_pos;
     }
 
-    
-    PyList* finalArgs = new PyList();
     klass = calleeFunc->getKlass();
+    PyList* finalArgs = new PyList();
+    PUSH_TEMP(finalArgs);
 
     // 对于一般的python函数，还需要进行一系列的参数处理
+    PyList* posExArgs = nullptr;
+    PyDict* keywordExArgs = nullptr;
+    CodeObject* code = nullptr;
+    PUSH_TEMP(posExArgs);
+    PUSH_TEMP(keywordExArgs);
+    PUSH_TEMP(code);
     if (isPythonFuncKlass(klass)) {
 
-        CodeObject* code = calleeFunc->funcCode;
-        const uint8_t* funcName = code->_name->getValue();
+        code = calleeFunc->funcCode;
         size_t formalArgNumber_total = code->_argCount;
         size_t formalArgNumber_default = 0;
 
         // 初始化位置扩展参数，和键值扩展参数
         int flags = code->_flag;
-        PyList* posExArgs = nullptr;
-        PyDict* keywordExArgs = nullptr;
         if (flags & PyFunction::CO_VARARGS) {
             posExArgs = new PyList(rawArgNumber_pos - formalArgNumber_total);
         }
@@ -696,7 +717,9 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
 
             反之需要处理位置扩展参数
         */
+        auto funcName = code->_name->getValue();
         if (rawArgNumber_pos <= formalArgNumber_total) {
+            
             for (size_t i = 0; i < rawArgNumber_pos; ++i) {
                 finalArgs->set(i, rawArgs->get(i));
             }
@@ -800,7 +823,7 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
     else if (isPythonFuncKlass(klass)) {
         // 创建新栈桢
         FrameObject* calleeFrame = 
-            new FrameObject(calleeFunc, _curFrame, false, finalArgs);
+            FrameObject::allocate(calleeFunc, _curFrame, false, finalArgs);
         /* 
            将与callee绑定的cells（即callee函数运行时
            需要依赖的freevars），装载到新的栈桢上去。
@@ -824,6 +847,7 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
         printf("Unknown function object!");
         exit(-1);
     }
+    POP_TEMP(8);
 } 
 
 // 退出并销毁当前栈桢，再把解释器执行上下文切换为caller的栈桢
@@ -858,7 +882,7 @@ PyObject* Interpreter::callVirtual(PyObject* callable, PyList* args) {
     }
     else if (klass == FunctionKlass::getInstance()) {
         // 创建Python栈桢
-        FrameObject* frame = new FrameObject(
+        FrameObject* frame = FrameObject::allocate(
             static_cast<PyFunction*>(callable),
             /* 
                 从Python世界的视角来看，即便是被C++代码调用的某个Python函数，
@@ -892,6 +916,11 @@ PyObject* Interpreter::callVirtual(PyObject* callable, PyList* args) {
 void Interpreter::oops_do(OopClosure* closure) {
     closure->do_oop(reinterpret_cast<PyObject**>(&_builtins));
     closure->do_oop(&_retValue);
+
+    for (size_t i = 0; i < _temp_stack->getLength(); ++i) {
+        closure->do_oop(_temp_stack->get(i));
+    }
+
     if (_curFrame) _curFrame->oops_do(closure);
 }
 /* GC相关接口 结束 */

@@ -73,7 +73,9 @@ PyObject* IntegerKlass::add(const PyObject* lhs, const PyObject* rhs) const {
     const PyInteger* _rhs = static_cast<const PyInteger*>(rhs);
     checkLegalPyObject_DB(_lhs, _rhs);
     // 检查通过，开始计算
-    return new PyInteger(_lhs->getValue() + _rhs->getValue());
+    int64_t a = _lhs->getValue();
+    int64_t b = _rhs->getValue();
+    return new PyInteger(a + b);
 }
 
 PyObject* IntegerKlass::sub(const PyObject* lhs, const PyObject* rhs) const {
@@ -82,7 +84,9 @@ PyObject* IntegerKlass::sub(const PyObject* lhs, const PyObject* rhs) const {
     const PyInteger* _rhs = static_cast<const PyInteger*>(rhs);
     checkLegalPyObject_DB(_lhs, _rhs);
     // 检查通过，开始计算
-    return new PyInteger(_lhs->getValue() - _rhs->getValue());
+    int64_t a = _lhs->getValue();
+    int64_t b = _rhs->getValue();
+    return new PyInteger(a - b);
 }
 
 PyObject* IntegerKlass::mul(const PyObject* lhs, const PyObject* rhs) const
@@ -92,7 +96,9 @@ PyObject* IntegerKlass::mul(const PyObject* lhs, const PyObject* rhs) const
     const PyInteger* _rhs = static_cast<const PyInteger*>(rhs);
     checkLegalPyObject_DB(_lhs, _rhs);
     // 检查通过，开始计算
-    return new PyInteger(_lhs->getValue() * _rhs->getValue());
+    int64_t a = _lhs->getValue();
+    int64_t b = _rhs->getValue();
+    return new PyInteger(a * b);
 }
 
 PyObject* IntegerKlass::div(const PyObject* lhs, const PyObject* rhs) const
@@ -101,8 +107,17 @@ PyObject* IntegerKlass::div(const PyObject* lhs, const PyObject* rhs) const
     const PyInteger* _lhs = static_cast<const PyInteger*>(lhs);
     const PyInteger* _rhs = static_cast<const PyInteger*>(rhs);
     checkLegalPyObject_DB(_lhs, _rhs);
+
+    // 除数禁止为零
+    int64_t a = _lhs->getValue();
+    int64_t b = _rhs->getValue();
+    if (b == 0) {
+        printf("division by zero: %lld %% %lld\n", a, b);
+        exit(-1);
+    }
+
     // 检查通过，开始计算
-    return new PyInteger(_lhs->getValue() / _rhs->getValue());
+    return new PyInteger(a / b);
 }
 
 PyObject* IntegerKlass::mod(const PyObject* lhs, const PyObject* rhs) const
@@ -111,15 +126,24 @@ PyObject* IntegerKlass::mod(const PyObject* lhs, const PyObject* rhs) const
     const PyInteger* _lhs = static_cast<const PyInteger*>(lhs);
     const PyInteger* _rhs = static_cast<const PyInteger*>(rhs);
     checkLegalPyObject_DB(_lhs, _rhs);
+    
+    // 除数禁止为零
+    int64_t a = _lhs->getValue();
+    int64_t b = _rhs->getValue();
+    if (b == 0) {
+        printf("division by zero: %lld %% %lld\n", a, b);
+        exit(-1);
+    }    
+    
     // 检查通过，开始计算
-    return new PyInteger(_lhs->getValue() % _rhs->getValue());
+    return new PyInteger(a % b);
 }
 
 PyObject* IntegerKlass::inplace_add(PyObject* lhs, PyObject* rhs) {
     checkLegalPyObject_DB(lhs, rhs);
-    return new PyInteger(
-        static_cast<PyInteger*>(lhs)->getValue() + 
-        static_cast<PyInteger*>(rhs)->getValue());
+    PyInteger* a = static_cast<PyInteger*>(lhs);
+    PyInteger* b = static_cast<PyInteger*>(rhs);
+    return new PyInteger(a->value + b->value);
 }
 
 PyObject* IntegerKlass::allocateInstance(PyObject* callable, PyList* args) {

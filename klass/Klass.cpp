@@ -23,8 +23,7 @@ Klass::Klass() {
 }
 
 size_t Klass::getSize() {
-    puts("getSize method haven't been modified correctly.");
-    exit(-1);
+    return sizeof(PyObject);
 }
 
 PyObject* Klass::createKlass(PyObject* dict, PyObject* supers, PyObject* name) {
@@ -170,6 +169,5 @@ void Klass::oops_do(OopClosure* closure) {
 }
 
 void Klass::oops_do(OopClosure* closure, PyObject* object) {
-    printf("The oops_do method of <class '%s'> haven't been modified correctly!", 
-        object->getKlass()->getName()->getValue());
+    // Do nothing
 }

@@ -6,6 +6,9 @@
 #include <Windows.h>
 #include <filesystem>
 #include <clocale>
+#include <string>
+#include <chrono>
+
 
 typedef void(*Convert_Func)(const char*, const char*);
 
@@ -52,8 +55,16 @@ int main(int argc, char* argv[]) {
     Universe::MainCode = code;
 
     Universe::PyHeap->gc();
-    
+
     Interpreter* interpreter = interpreter->getInstance();
+
+    auto start = std::chrono::high_resolution_clock::now();
     interpreter->run(Universe::MainCode);
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    printf("Time taken: %lld milliseconds.", duration);
+
+
+    
     return 0;
 }

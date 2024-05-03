@@ -7,6 +7,8 @@
 
 class NativeFunction {
 public:
+    static PyObject* sysgc(PyList* args);
+
     static PyObject* len(PyList* args);
     static PyObject* isinstance(PyList* args);
     static PyObject* type_of(PyList* args);

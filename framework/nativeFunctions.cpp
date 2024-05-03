@@ -199,3 +199,8 @@ PyObject* NativeFunction::id(PyList* args) {
     PyObject* object = args->get(0);
     return new PyInteger(reinterpret_cast<int64_t>(object));
 }
+
+PyObject* NativeFunction::sysgc(PyList* args) {
+    Universe::PyHeap->gc();
+    Py_RETURN_NONE;
+}

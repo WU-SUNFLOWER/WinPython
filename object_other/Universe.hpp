@@ -1,6 +1,7 @@
 #ifndef Universe_Hpp
 #define Universe_Hpp
 
+#include "Stack.hpp"
 #include "Heap.hpp"
 #include "PyObject.hpp"
 #include "arrayList.hpp"
@@ -16,6 +17,8 @@ public:
     static ArrayList<Klass*>* PyKlasses;
     // Interpreter启动时的入口代码，在Interpreter->run的时候设置
     static CodeObject* MainCode;  
+
+    static Stack<ArrayList<PyObject*>**>* _temp_array_stack;
 
     static void genesis();
     static void destroy();

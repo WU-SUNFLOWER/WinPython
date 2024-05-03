@@ -17,11 +17,15 @@ Heap* Universe::PyHeap = nullptr;
 ArrayList<Klass*>* Universe::PyKlasses = nullptr;
 CodeObject* Universe::MainCode = nullptr;
 
+Stack<ArrayList<PyObject*>**>* Universe::_temp_array_stack = nullptr;
+
 void Universe::genesis() {
     PyHeap = Heap::getInstance();
     PyKlasses = new ArrayList<Klass*>(nullptr);
 
     StringTable::initialize();
+
+    _temp_array_stack = new Stack<ArrayList<PyObject*>**>(2 * 1024 * 1024);
 
     PyTrue = new PyInteger(1);
     PyFalse = new PyInteger(0);
@@ -50,4 +54,8 @@ void Universe::oops_do(OopClosure* closure) {
     closure->do_oop(reinterpret_cast<PyObject**>(&PyNone));
     closure->do_oop(reinterpret_cast<PyObject**>(&MainCode));
     closure->do_array_list(&PyKlasses);
+
+    for (size_t i = 0; i < _temp_array_stack->getLength(); ++i) {
+        closure->do_array_list(_temp_array_stack->get(i));
+    }
 }
