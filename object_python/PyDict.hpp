@@ -7,9 +7,11 @@
 class PyDict : public PyObject {
     friend class DictKlass;
 private:
-    PyObjectMap* _map;
+    PyObjectMap* _map = nullptr;
+    PyDict() {};
 public:
-    PyDict();
+
+    static PyDict* createDict();
     
     void set(PyObject* key, PyObject* value) {
         _map->set(key, value);

@@ -2,7 +2,8 @@
 #define Hpp_Space
 class Space {
     friend class Heap;
-private:
+//private:
+public:
     char* _base;
     char* _top;
     char* _end;

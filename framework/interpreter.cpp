@@ -1,4 +1,5 @@
 #include "interpreter.hpp"
+#include "Universe.hpp"
 #include "FrameObject.hpp"
 #include "PyFunction.hpp"
 #include <cstdio>
@@ -31,9 +32,7 @@ Interpreter::Interpreter() {
 
     _status = IS_OK;
 
-    _temp_stack = new Stack<PyObject**>(2 * 1024 * 1024);
-
-    _builtins = new PyDict();
+    _builtins = PyDict::createDict();
 
     _builtins->set(StringTable::str_true, Universe::PyTrue);
     _builtins->set(StringTable::str_false, Universe::PyFalse);
@@ -42,7 +41,7 @@ Interpreter::Interpreter() {
     _builtins->set(StringTable::str_len, PackNativeFunc(NativeFunction::len));
     _builtins->set(StringTable::str_isinstance, PackNativeFunc(NativeFunction::isinstance));
     _builtins->set(StringTable::str_typeof, PackNativeFunc(NativeFunction::type_of));
-    _builtins->set(new PyString("id"), PackNativeFunc(NativeFunction::id));
+    _builtins->set(PyString::createString("id"), PackNativeFunc(NativeFunction::id));
 
     _builtins->set(StringTable::str_object, ObjectKlass::getInstance()->getTypeObject());
     _builtins->set(StringTable::str_type, TypeKlass::getInstance()->getTypeObject());
@@ -51,12 +50,12 @@ Interpreter::Interpreter() {
     _builtins->set(StringTable::str_list, ListKlass::getInstance()->getTypeObject());
     _builtins->set(StringTable::str_dict, DictKlass::getInstance()->getTypeObject());
 
-    _builtins->set(new PyString("sysgc"), PackNativeFunc(NativeFunction::sysgc));
+    _builtins->set(PyString::createString("sysgc"), PackNativeFunc(NativeFunction::sysgc));
 }
 
 void Interpreter::run(CodeObject* codeObject) {
     _curFrame = new FrameObject(codeObject);
-    _curFrame->_locals->set(new PyString("__name__"), new PyString("__main__"));
+    _curFrame->_locals->set(PyString::createString("__name__"), PyString::createString("__main__"));
     evalFrame();
     destroyCurFrame();
 }
@@ -106,7 +105,7 @@ void Interpreter::evalFrame() {
                 break;
 
             case ByteCode::Build_List:{
-                PyList* list = new PyList();
+                PyList* list = PyList::createList();
                 while (op_arg-- > 0) {
                     PyObject* temp = POP();
                     list->set(op_arg, temp);
@@ -117,7 +116,7 @@ void Interpreter::evalFrame() {
             
             // 暂时先用list代替一下tuple
             case ByteCode::Build_Tuple: {
-                PyList* list = new PyList();
+                PyList* list = PyList::createList();
                 while (op_arg-- > 0) {
                     PyObject* temp = POP();
                     list->set(op_arg, temp);
@@ -127,7 +126,7 @@ void Interpreter::evalFrame() {
             }
 
             case ByteCode::Build_Map: {
-                PUSH(new PyDict());
+                PUSH(PyDict::createDict());
                 break;
             }
 
@@ -307,22 +306,22 @@ void Interpreter::evalFrame() {
             }
 
             case ByteCode::Call_Function: {
-                //entryIntoNewFrame(op_arg);
+                START_COUNT_TEMP_OBJECTS;
                 uint8_t argNumber_pos = op_arg & 0xff;
                 uint8_t argNumber_kw = op_arg >> 8;
                 // 因为调用函数传递键值扩展参数时，key和value都会压栈，所以这里要*2
                 uint8_t argNumber_total = argNumber_pos + 2 * argNumber_kw;
                 // 先把所有参数从栈上弹出来，存到临时列表中去
-                PyList* rawArgs = new PyList(argNumber_total);
+                PyList* rawArgs = PyList::createList(argNumber_total);
                 PUSH_TEMP(rawArgs);
                 while (argNumber_total-- > 0) {
                     rawArgs->set(argNumber_total, POP());
                 }
-                POP_TEMP(1);
                 // 发起函数调用，对函数参数的进一步处理在之后发生
                 PyObject* callableObject = POP();
                 entryIntoNewFrame(callableObject, rawArgs, 
                     argNumber_pos, argNumber_kw);
+                END_COUNT_TEMP_OBJECTS;
                 break;
             }
             
@@ -576,7 +575,7 @@ void Interpreter::makeFunction(int16_t defaultArgCount, bool isClosure) {
 
     // 处理需要绑定默认参数的函数
     if (defaultArgCount > 0) {
-        PyList* DefaultArgs = new PyList(defaultArgCount);
+        PyList* DefaultArgs = PyList::createList(defaultArgCount);
         while (defaultArgCount-- > 0) {
             DefaultArgs->set(defaultArgCount, POP());
         }
@@ -612,6 +611,7 @@ rawArgNumber_kw —— 即用户调用Call_Function时的op_args的高8位，
 void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs, 
     uint8_t rawArgNumber_pos, uint8_t rawArgNumber_kw
 ) {
+    START_COUNT_TEMP_OBJECTS;
     PUSH_TEMP(callableObject);
     PUSH_TEMP(rawArgs);
     /*
@@ -664,7 +664,7 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
     }
 
     klass = calleeFunc->getKlass();
-    PyList* finalArgs = new PyList();
+    PyList* finalArgs = PyList::createList();
     PUSH_TEMP(finalArgs);
 
     // 对于一般的python函数，还需要进行一系列的参数处理
@@ -683,10 +683,10 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
         // 初始化位置扩展参数，和键值扩展参数
         int flags = code->_flag;
         if (flags & PyFunction::CO_VARARGS) {
-            posExArgs = new PyList(rawArgNumber_pos - formalArgNumber_total);
+            posExArgs = PyList::createList(rawArgNumber_pos - formalArgNumber_total);
         }
         if (flags & PyFunction::CO_VARKEYWORDS) {
-            keywordExArgs = new PyDict();
+            keywordExArgs = PyDict::createDict();
         }
 
         // 处理函数形参列表中的默认参数值
@@ -847,7 +847,7 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
         printf("Unknown function object!");
         exit(-1);
     }
-    POP_TEMP(8);
+    END_COUNT_TEMP_OBJECTS;
 } 
 
 // 退出并销毁当前栈桢，再把解释器执行上下文切换为caller的栈桢
@@ -875,7 +875,7 @@ PyObject* Interpreter::callVirtual(PyObject* callable, PyList* args) {
         PyMethod* method = static_cast<PyMethod*>(callable);
         PyFunction* func = method->getFunc();
         if (args == nullptr) {
-            args = new PyList(1);
+            args = PyList::createList(1);
         }
         args->insert(0, method->getOwner());
         return callVirtual(func, args);
@@ -916,10 +916,6 @@ PyObject* Interpreter::callVirtual(PyObject* callable, PyList* args) {
 void Interpreter::oops_do(OopClosure* closure) {
     closure->do_oop(reinterpret_cast<PyObject**>(&_builtins));
     closure->do_oop(&_retValue);
-
-    for (size_t i = 0; i < _temp_stack->getLength(); ++i) {
-        closure->do_oop(_temp_stack->get(i));
-    }
 
     if (_curFrame) _curFrame->oops_do(closure);
 }

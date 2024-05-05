@@ -1,6 +1,8 @@
 #ifndef Map_Hpp
 #define Map_Hpp
 
+#include <cstdint>
+
 class OopClosure;
 
 // 哈希表成员对象
@@ -24,14 +26,14 @@ public:
 template<typename KEY, typename VAL>
 class Map {
 private:
+    uintptr_t _mark_word = 0;
     VAL _default;
-    MapItem<KEY, VAL>* ptr;
-    size_t capacity;
-    size_t length;
+    size_t capacity = 0;
+    size_t length = 0;
     void expand();
 public:
-    Map(VAL defaultValue);
-    ~Map();
+    MapItem<KEY, VAL>* ptr = nullptr;
+    static Map* createMap(VAL defaultElem);
     
     void* operator new(size_t size);
 
@@ -60,5 +62,7 @@ public:
     }
 
     void oops_do(OopClosure* closure);
+    void* getNewAddr();
+    void setNewAddr(void* addr);
 };
 #endif

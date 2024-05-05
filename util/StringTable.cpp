@@ -20,28 +20,28 @@ PyString* StringTable::str_isinstance = nullptr;
 PyString* StringTable::str_typeof = nullptr;
 
 void StringTable::initialize() {
-    str_len = new PyString("len");
-    str_true = new PyString("True");
-    str_false = new PyString("False");
-    str_none = new PyString("None");
-    str_next = new PyString("__next__");
-    str_mod = new PyString("__module__");
-    str_init = new PyString("__init__");
-    str_list = new PyString("list");
-    str_type = new PyString("type");
-    str_typeof = new PyString("typeof");
-    str_str = new PyString("str");
-    str_builtin_func = new PyString("builtin_function_or_method");
-    str_method = new PyString("method");
-    str_int = new PyString("int");
-    str_function = new PyString("function");
-    str_dict = new PyString("dict");
-    str_object = new PyString("object");
-    str_isinstance = new PyString("isinstance");
+    str_len = PyString::createString("len", false);
+    str_true = PyString::createString("True", false);
+    str_false = PyString::createString("False", false);
+    str_none = PyString::createString("None", false);
+    str_next = PyString::createString("__next__", false);
+    str_mod = PyString::createString("__module__", false);
+    str_init = PyString::createString("__init__", false);
+    str_list = PyString::createString("list", false);
+    str_type = PyString::createString("type", false);
+    str_typeof = PyString::createString("typeof", false);
+    str_str = PyString::createString("str", false);
+    str_builtin_func = PyString::createString("builtin_function_or_method", false);
+    str_method = PyString::createString("method", false);
+    str_int = PyString::createString("int", false);
+    str_function = PyString::createString("function", false);
+    str_dict = PyString::createString("dict", false);
+    str_object = PyString::createString("object", false);
+    str_isinstance = PyString::createString("isinstance", false);
 }
 
 void StringTable::oops_do(OopClosure* closure) {
-
+    /*
 #define do_oop(x) closure->do_oop(reinterpret_cast<PyObject**>(&x));
 
     do_oop(str_len);
@@ -61,5 +61,7 @@ void StringTable::oops_do(OopClosure* closure) {
     do_oop(str_isinstance);
     do_oop(str_object);
     do_oop(str_mod);
-    do_oop(str_init);
+    do_oop(str_init);    
+    */
+
 }

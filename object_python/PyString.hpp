@@ -7,12 +7,12 @@
 class PyString : public PyObject {
     friend class StringKlass;
 private:
-    uint8_t* ptr;
-    size_t length;
+    uint8_t* ptr = nullptr;
+    size_t length = 0;
+    PyString() {};
 public:
-    PyString(const char* str_source);
-    PyString(const uint8_t* source, size_t length);
-    ~PyString();
+    static PyString* createString(const char* str_source, bool isMeta = false);
+    static PyString* createString(const uint8_t* source, size_t len_src, bool isMeta = false);
 
     const uint8_t* getValue() const {
         return ptr;

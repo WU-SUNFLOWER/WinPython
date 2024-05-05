@@ -25,19 +25,19 @@ size_t ListKlass::getSize() {
 }
 
 void ListKlass::initialize() {
-    PyDict* dict = new PyDict();
+    PyDict* dict = PyDict::createDict();
 
-    dict->set(new PyString("append"),
+    dict->set(PyString::createString("append"),
         PackNativeFunc(NativeFunction::list_append));
-    dict->set(new PyString("insert"),
+    dict->set(PyString::createString("insert"),
         PackNativeFunc(NativeFunction::list_insert));
-    dict->set(new PyString("index"),
+    dict->set(PyString::createString("index"),
         PackNativeFunc(NativeFunction::list_index));
-    dict->set(new PyString("pop"),
+    dict->set(PyString::createString("pop"),
         PackNativeFunc(NativeFunction::list_pop));
-    dict->set(new PyString("remove"),
+    dict->set(PyString::createString("remove"),
         PackNativeFunc(NativeFunction::list_remove));
-    dict->set(new PyString("reverse"),
+    dict->set(PyString::createString("reverse"),
         PackNativeFunc(NativeFunction::list_reverse));
 
     setKlassDict(dict);
@@ -135,7 +135,7 @@ PyObject* ListKlass::add(const PyObject* lhs, const PyObject* rhs) const {
     const PyList* b = static_cast<const PyList*>(rhs);
     size_t len_a = a->getLength();
     size_t len_b = b->getLength();
-    PyList* result = new PyList(len_a + len_b);
+    PyList* result = PyList::createList(len_a + len_b);
     for (size_t i = 0; i < len_a; ++i) {
         result->append(a->get(i));
     }
@@ -152,7 +152,7 @@ PyObject* ListKlass::mul(const PyObject* lhs, const PyObject* rhs) const {
     const PyInteger* integer = static_cast<const PyInteger*>(rhs);
     int64_t count = integer->getValue();
     size_t len = list->getLength();
-    PyList* result = new PyList(count * len);
+    PyList* result = PyList::createList(count * len);
     while (count-- > 0) {
         for (size_t i = 0; i < len; ++i) {
             result->append(list->get(i));
@@ -193,7 +193,6 @@ void ListKlass::oops_do(OopClosure* closure, PyObject* object) {
     checkLegalPyObject(object, this);
     PyList* list = static_cast<PyList*>(object);
     closure->do_array_list(&list->_container);
-    assert(list->_container != nullptr);
 }
 
 void ListKlass::store_subscr(PyObject* object, 
@@ -224,7 +223,7 @@ void ListKlass::delete_subscr(PyObject* object,
 }
 
 ListIteratorKlass::ListIteratorKlass() {
-    PyDict* dict = new PyDict();
+    PyDict* dict = PyDict::createDict();
 
     dict->set(StringTable::str_next,
         PackNativeFunc(NativeFunction::list_iterator_next));

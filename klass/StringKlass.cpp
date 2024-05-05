@@ -19,8 +19,8 @@ size_t StringKlass::getSize() {
 }
 
 void StringKlass::initialize() {
-    PyDict* dict = new PyDict();
-    dict->set(new PyString("upper"),
+    PyDict* dict = PyDict::createDict();
+    dict->set(PyString::createString("upper"),
         PackNativeFunc(NativeFunction::string_upper));
     setKlassDict(dict);
 
@@ -159,7 +159,7 @@ PyObject* StringKlass::subscr(PyObject* object, PyObject* subscription) const {
     PyString* strObject = reinterpret_cast<PyString*>(object);
     PyInteger* subscr = reinterpret_cast<PyInteger*>(subscription);
     const uint8_t* address = strObject->getValue() + subscr->getValue();
-    PyString* result = new PyString(address, 1);
+    PyString* result = PyString::createString(address, 1);
     return result;
 }
 

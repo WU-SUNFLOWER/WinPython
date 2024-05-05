@@ -7,11 +7,12 @@
 
 template<typename V>
 class Stack {
-private:
-    V* vector;
-    size_t _length;
-    size_t _capacity;
 public:
+
+    V* vector;
+    size_t _capacity;
+    size_t _length;
+    
     Stack(size_t capacity = 16) : _length(0), _capacity(capacity) {
         vector = new V[capacity];
     }

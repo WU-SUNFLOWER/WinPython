@@ -23,7 +23,7 @@ PyDict* PyObject::getSelfDict() {
 }
 
 PyDict* PyObject::initSelfDict() {
-    return (_self_dict = new PyDict());
+    return (_self_dict = PyDict::createDict());
 }
 
 void* PyObject::operator new(size_t size) {

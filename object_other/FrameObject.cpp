@@ -2,6 +2,7 @@
 #include "interpreter.hpp"
 
 FrameObject::FrameObject(CodeObject* codeObject) {
+    START_COUNT_TEMP_OBJECTS;
     pc = 0;
     _codeObject = codeObject;
     _consts = codeObject->_consts;
@@ -15,7 +16,7 @@ FrameObject::FrameObject(CodeObject* codeObject) {
     PUSH_TEMP(_byteCodes);
 
     // 初始化一张空的映射表用于储存本地变量
-    _locals = new PyDict();
+    _locals = PyDict::createDict();
     PUSH_TEMP(_locals);
     
     // 对于入口函数<module>来说，它外面不可能再有全局变量
@@ -25,7 +26,7 @@ FrameObject::FrameObject(CodeObject* codeObject) {
 
     size_t cellsLength = 
         _codeObject->_cellVars->getLength() + _codeObject->_freeVars->getLength();
-    _cells = cellsLength > 0 ? new PyList(cellsLength) : nullptr;
+    _cells = cellsLength > 0 ? PyList::createList(cellsLength) : nullptr;
     PUSH_TEMP(_cells);
 
     if (_cells) {
@@ -34,36 +35,27 @@ FrameObject::FrameObject(CodeObject* codeObject) {
         }
     }
 
-    _stack = new PyList(_codeObject->_stackSize);
+    _stack = PyList::createList(_codeObject->_stackSize);
     PUSH_TEMP(_stack);
 
-    _blockStack = new ArrayList<Block>({});
-    PUSH_TEMP(_blockStack);
+    _blockStack = new Stack<Block>(10);
 
     _callerFrame = nullptr;
 
     _isEntryFrame = false;
 
-    POP_TEMP(9);
+    END_COUNT_TEMP_OBJECTS;
 
 }
 
-/*
-FrameObject::FrameObject(PyFunction* callee, FrameObject* callerFrame, 
-    bool isEntryFrame, PyList* args) : 
-
-    FrameObject(callee->funcCode) {
-    // 将函数调用所产生栈桢的全局变量表，同步为函数绑定的变量表
-    _globals = callee->_globals;
-    _callerFrame = callerFrame;
-    _fastLocals = args;
-    _isEntryFrame = isEntryFrame;
+FrameObject::~FrameObject() {
+    delete _blockStack;
 }
-*/
 
 FrameObject* FrameObject::allocate(PyFunction* callee, FrameObject* callerFrame,
     bool isEntryFrame, PyList* args
 ) {
+    START_COUNT_TEMP_OBJECTS;
     PUSH_TEMP(callee);
     PUSH_TEMP(callerFrame);
     PUSH_TEMP(args);
@@ -72,7 +64,7 @@ FrameObject* FrameObject::allocate(PyFunction* callee, FrameObject* callerFrame,
     frame->_callerFrame = callerFrame;
     frame->_fastLocals = args;
     frame->_isEntryFrame = isEntryFrame;
-    POP_TEMP(3);
+    END_COUNT_TEMP_OBJECTS(3);
     return frame;
 }
 
@@ -128,8 +120,6 @@ void FrameObject::oops_do(OopClosure* closure) {
     closure->do_oop(reinterpret_cast<PyObject**>(&_stack));
 
     closure->do_oop(reinterpret_cast<PyObject**>(&_byteCodes));
-
-    closure->do_array_list(&_blockStack);
 
     if (_callerFrame) _callerFrame->oops_do(closure);
 }

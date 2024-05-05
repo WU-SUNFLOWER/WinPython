@@ -9,12 +9,13 @@
 #include "Block.hpp"
 #include "PyList.hpp"
 #include "PyDict.hpp"
+#include "Stack.hpp"
 
 class FrameObject {
     friend class Interpreter;
 private:
     PyList* _stack;  // 运行时栈
-    ArrayList<Block>* _blockStack;  // 这个栈用于处理代码块嵌套的结构
+    Stack<Block>* _blockStack;  // 这个栈用于处理代码块嵌套的结构
 
     PyList* _consts;  // 常量列表
     PyList* _names;  // 全局变量名称列表
@@ -42,11 +43,10 @@ private:
 public:
     // 该构造函数仅适用于为<module>创建栈桢
     FrameObject(CodeObject* code);
-    // 该构造函数用于一般的通过PyFunction创建栈桢
-    //FrameObject(PyFunction* callee, FrameObject* callerFrame, bool isEntryFrame, PyList* args);
-    // 栈桢上挂的东西由虚拟机统一内存管理，因此析构函数中不需要写任何东西
-    ~FrameObject() {};
 
+    ~FrameObject();
+
+    // 该工厂函数用于一般的通过PyFunction创建栈桢
     static FrameObject* allocate(PyFunction* callee, FrameObject* callerFrame, bool isEntryFrame, PyList* args);
 
     uint8_t getOpCode();

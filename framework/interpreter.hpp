@@ -32,8 +32,6 @@ private:
     PyObject* _retValue;  // 该成员变量用于在切换栈桢上下文时，缓存callee的返回值
 
 public:
-
-    Stack<PyObject**>* _temp_stack;
     
     // Interpreter也采用单例模式，方便C++代码中有需要随时访问解释器实例对象！
     static Interpreter* getInstance() {
@@ -60,12 +58,5 @@ public:
     // GC相关接口
     void oops_do(OopClosure* closure);
 };
-
-#define PUSH_TEMP(x) \
-    Interpreter::getInstance()->_temp_stack->push(reinterpret_cast<PyObject**>(&x))
-#define POP_TEMP(x) \
-    for (size_t i = 0; i < x; ++i) { \
-        Interpreter::getInstance()->_temp_stack->pop(); \
-    }
 
 #endif

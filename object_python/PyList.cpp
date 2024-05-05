@@ -2,17 +2,15 @@
 #include "ListKlass.hpp"
 #include "Universe.hpp"
 
-PyList::PyList(size_t n) {
-    _container = new ArrayList<PyObject*>(nullptr, n);
-    setKlass(ListKlass::getInstance());
-}
-
-PyList::PyList() : PyList(1) {
-}
-
-PyList::PyList(ArrayList<PyObject*>* rawList) {
-    _container = rawList;
-    setKlass(ListKlass::getInstance());
+PyList* PyList::createList(size_t n) {
+    START_COUNT_TEMP_OBJECTS;
+    PyList* list = new PyList();
+    list->setKlass(ListKlass::getInstance());
+    PUSH_TEMP(list);
+    auto container = ArrayList<PyObject*>::createArrayList(nullptr, n);
+    list->_container = container;
+    END_COUNT_TEMP_OBJECTS;
+    return list;
 }
 
 size_t PyList::index(PyObject* target) {

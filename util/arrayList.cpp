@@ -10,35 +10,75 @@
 #include "interpreter.hpp"
 
 template<typename T>
-ArrayList<T>::ArrayList(T defaultElem, int64_t n) {
-    capacity = static_cast<size_t>(std::max(1ll, n));
-    length = 0;
-    _defaultElem = defaultElem;
-    void* addr = Universe::PyHeap->allocate(sizeof(T) * capacity);
-    ptr = new(addr)T[capacity];
-    for (size_t i = 0; i < capacity; ++i) {
-        ptr[i] = _defaultElem;
-    }
+ArrayList<T>* ArrayList<T>::createArrayList(T defaultElem, int64_t n) {
+    puts("Try to create ArrayList with unknown type");
+    exit(-1);
 }
 
-template<typename T>
-ArrayList<T>::~ArrayList() {
+template<>
+ArrayList<PyObject*>* ArrayList<PyObject*>::createArrayList(
+    PyObject* defaultElem, int64_t n
+) {
+    START_COUNT_TEMP_OBJECTS;
+    if (defaultElem != nullptr) PUSH_TEMP(defaultElem);
+    ArrayList<PyObject*>* object = new ArrayList<PyObject*>();
+    PUSH_TEMP_PYOBJECT_ARRAY(object);
+    
+    object->length = 0;
+    object->_defaultElem = defaultElem;
+    
+    auto capacity = object->capacity = static_cast<size_t>(std::max(1ll, n));
+    auto ptr = reinterpret_cast<PyObject**>(
+        Universe::PyHeap->allocate(sizeof(PyObject*) * capacity)
+    );
+    object->ptr = ptr;
 
+    for (size_t i = 0; i < capacity; ++i) {
+        ptr[i] = defaultElem;
+    }
+    
+    END_COUNT_TEMP_OBJECTS;
+    return object;
+}
+
+template<>
+ArrayList<Klass*>* ArrayList<Klass*>::createArrayList(
+    Klass* defaultElem, int64_t n
+) {
+    START_COUNT_TEMP_OBJECTS;
+    if (defaultElem != nullptr) PUSH_TEMP(defaultElem);
+    ArrayList<Klass*>* object = new ArrayList<Klass*>();
+    PUSH_TEMP_KLASS_ARRAY(object);
+
+    object->length = 0;
+    object->_defaultElem = defaultElem;
+
+    auto capacity = object->capacity = static_cast<size_t>(std::max(1ll, n));
+    auto ptr = reinterpret_cast<Klass**>(
+        Universe::PyHeap->allocate(sizeof(Klass*) * capacity)
+        );
+    object->ptr = ptr;
+
+    for (size_t i = 0; i < capacity; ++i) {
+        ptr[i] = defaultElem;
+    }
+
+    END_COUNT_TEMP_OBJECTS;
+    return object;
 }
 
 template<>
 ArrayList<PyObject*>* ArrayList<PyObject*>::expand(size_t targetLength) {
+    START_COUNT_TEMP_OBJECTS;
+    
     capacity = std::max(capacity << 1, std::max(length + 1, targetLength));
-
     ArrayList<PyObject*>* self = this;
-
-    Universe::_temp_array_stack->push(&self);
+    PUSH_TEMP_PYOBJECT_ARRAY(self);
 
     PyObject** newPtr = reinterpret_cast<PyObject**>(
         Universe::PyHeap->allocate(sizeof(PyObject*) * capacity));
-
     for (size_t i = 0; i < capacity; ++i) {
-        newPtr[i] = _defaultElem;
+        newPtr[i] = self->_defaultElem;
     }
     // 拷贝老缓冲区的数组元素
     for (size_t i = 0; i < length; ++i) {
@@ -46,27 +86,44 @@ ArrayList<PyObject*>* ArrayList<PyObject*>::expand(size_t targetLength) {
     }
     self->ptr = newPtr;
 
-    Universe::_temp_array_stack->pop();
-
+    END_COUNT_TEMP_OBJECTS;
     return self;
 }
 
-template<typename T>
-ArrayList<T>* ArrayList<T>::expand(size_t targetLength) {
-    capacity = std::max(capacity << 1, std::max(length + 1, targetLength));
-    
-    void* addr = Universe::PyHeap->allocate(sizeof(T) * capacity);
-    T* newPtr = new(addr)T[capacity];
+template<>
+ArrayList<Klass*>* ArrayList<Klass*>::expand(size_t targetLength) {
+    START_COUNT_TEMP_OBJECTS;
 
+    capacity = std::max(capacity << 1, std::max(length + 1, targetLength));
+    ArrayList<Klass*>* self = this;
+    PUSH_TEMP_KLASS_ARRAY(self);
+
+    Klass** newPtr = reinterpret_cast<Klass**>(
+        Universe::PyHeap->allocate(sizeof(Klass*) * capacity));
     for (size_t i = 0; i < capacity; ++i) {
-        newPtr[i] = _defaultElem;
+        newPtr[i] = self->_defaultElem;
     }
     // 拷贝老缓冲区的数组元素
     for (size_t i = 0; i < length; ++i) {
-        newPtr[i] = ptr[i];
+        newPtr[i] = self->ptr[i];
     }
-    ptr = newPtr;
-    return this;
+    self->ptr = newPtr;
+
+    END_COUNT_TEMP_OBJECTS;
+    return self;
+}
+
+template<>
+void ArrayList<PyObject*>::push(PyObject* elem) {
+    auto self = this;
+    if (length >= capacity) {
+        START_COUNT_TEMP_OBJECTS;
+        PUSH_TEMP(self);
+        PUSH_TEMP(elem);
+        expand();
+        END_COUNT_TEMP_OBJECTS;
+    }
+    self->ptr[self->length++] = elem;
 }
 
 template<typename T>
@@ -75,7 +132,37 @@ void ArrayList<T>::push(T elem) {
     if (length >= capacity) {
         self = expand();
     }
-    self->ptr[length++] = elem;
+    self->ptr[self->length++] = elem;
+}
+
+
+
+template<>
+void ArrayList<PyObject*>::insert(size_t index, PyObject* elem) {
+    // 第一种情况：在数组尾端添加元素
+    if (index >= length) {
+        set(index, elem);
+        return;
+    }
+    // 第二种情况：在数组中间添加元素
+    else {
+        auto self = this;
+        size_t length = self->length;
+        // 数组满了要先扩容
+        if (length >= self->capacity) {
+            START_COUNT_TEMP_OBJECTS;
+            PUSH_TEMP(self);
+            PUSH_TEMP(elem);
+            self->expand();
+            END_COUNT_TEMP_OBJECTS;
+        }
+        // 挪动元素
+        for (size_t i = length; i > index; --i) {
+            self->ptr[i] = self->ptr[i - 1];
+        }
+        self->ptr[index] = elem;
+        ++(self->length);
+    }
 }
 
 template<typename T>
@@ -88,38 +175,41 @@ void ArrayList<T>::insert(size_t index, T elem) {
     // 第二种情况：在数组中间添加元素
     else {
         auto self = this;
+        size_t length = self->length;
         // 数组满了要先扩容
-        if (length >= capacity) self->expand();
+        if (length >= capacity) {
+            self = self->expand();
+        }
         // 挪动元素
         for (size_t i = length; i > index; --i) {
             self->ptr[i] = self->ptr[i - 1];
         }
         self->ptr[index] = elem;
-        ++length;
+        ++(self->length);
     }
 }
 
+
 template<>
 void ArrayList<PyObject*>::set(size_t index, PyObject* elem) {
-    PUSH_TEMP(elem);
     auto self = this;
-    if (self->length <= index) {
-        self = expand(index + 1);
-        self->length = index + 1;
+    if (self->capacity <= index) {
+        START_COUNT_TEMP_OBJECTS;
+        PUSH_TEMP(elem);
+        PUSH_TEMP(self);
+        expand(index + 1);
+        END_COUNT_TEMP_OBJECTS;
     }
-    else {
-        self = expand();
-    }
+    self->length = std::max(self->length, index + 1);
     self->ptr[index] = elem;
-    POP_TEMP(1);
 }
 
 template<typename T>
 void ArrayList<T>::set(size_t index, T elem) {
     auto self = this;
     if (length <= index) {
-        self->expand(index + 1);
-        length = index + 1;
+        self = self->expand(index + 1);
+        self->length = index + 1;
     }
     self->ptr[index] = elem;
 }
@@ -181,7 +271,4 @@ void ArrayList<PyObject*>::oops_do(OopClosure* closure) {
 }
 
 template class ArrayList<Klass*>;
-template class ArrayList<PyString*>;
 template class ArrayList<PyObject*>;
-template class ArrayList<Block>;
-template class ArrayList<PyObject**>;

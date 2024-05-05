@@ -53,24 +53,19 @@ PyObject* ScavengeOopClosure::copy_and_push(PyObject* object) {
 
 
 void ScavengeOopClosure::do_oop(PyObject** reference) {
-    if (reference == nullptr || *reference == nullptr) {
-        return;
-    }
-    if (!_from->hasObject(*reference)) {
+    if (reference == nullptr || *reference == nullptr || !_from->hasObject(*reference)) {
         return;
     }
     *reference = copy_and_push(*reference);
 }
 
 void ScavengeOopClosure::do_array_list(ArrayList<Klass*>** ref) {
-    if (ref == nullptr || *ref == nullptr) return;
+    if (ref == nullptr || *ref == nullptr || !_from->hasObject(*ref)) return;
     if ((*ref)->getNewAddr()) {
         *ref = reinterpret_cast<ArrayList<Klass*>*>((*ref)->getNewAddr());
         return;
     }
 
-    assert(_from->hasObject(*ref));
-    
     size_t size = sizeof(ArrayList<Klass*>);
     if (!_to->canAlloc(size)) {
         puts("Can't allocate more space.");
@@ -85,7 +80,9 @@ void ScavengeOopClosure::do_array_list(ArrayList<Klass*>** ref) {
 
 void ScavengeOopClosure::do_array_list(ArrayList<PyObject*>** ref) {
     if (ref == nullptr || *ref == nullptr) return;
-    if (!_from->hasObject(*ref)) return;
+    
+    assert(_from->hasObject(*ref));
+    
     if ((*ref)->getNewAddr()) {
         *ref = reinterpret_cast<ArrayList<PyObject*>*>((*ref)->getNewAddr());
         return;
@@ -103,23 +100,16 @@ void ScavengeOopClosure::do_array_list(ArrayList<PyObject*>** ref) {
     (*ref)->oops_do(this);
 }
 
-void ScavengeOopClosure::do_array_list(ArrayList<Block>** ref) {
-    if (ref == nullptr || *ref == nullptr) return;
-    if (!_from->hasObject(*ref)) return;
-    size_t size = sizeof(ArrayList<Block>);
-    if (!_to->canAlloc(size)) {
-        puts("Can't allocate more space.");
-        exit(-1);
-    }
-    void* target = _to->allocate(size);
-    memcpy(target, *ref, size);
-    *ref = reinterpret_cast<ArrayList<Block>*>(target);
-    (*ref)->oops_do(this);
-}
-
 void ScavengeOopClosure::do_map(Map<PyObject*, PyObject*>** ref) {
     if (ref == nullptr || *ref == nullptr) return;
-    if (!_from->hasObject(*ref)) return;
+    
+    assert(_from->hasObject(*ref));
+
+    if ((*ref)->getNewAddr()) {
+        *ref = reinterpret_cast<Map<PyObject*, PyObject*>*>((*ref)->getNewAddr());
+        return;
+    }
+
     size_t size = sizeof(Map<PyObject*, PyObject*>);
     if (!_to->canAlloc(size)) {
         puts("Can't allocate more space.");
@@ -127,7 +117,9 @@ void ScavengeOopClosure::do_map(Map<PyObject*, PyObject*>** ref) {
     }
     void* target = _to->allocate(size);
     memcpy(target, *ref, size);
-    *reinterpret_cast<void**>(ref) = target;
+
+    (*ref)->setNewAddr(target);
+    *ref = reinterpret_cast<Map<PyObject*, PyObject*>*>(target);
     (*ref)->oops_do(this);
 }
 
@@ -141,6 +133,8 @@ void ScavengeOopClosure::do_raw_mem(void** ref, size_t length) {
     void* target = _to->allocate(length);
     memcpy(target, *ref, length);
     *ref = target;
+    assert(Universe::PyHeap->survivor->_base <= (char*)target &&
+        (char*)target <= Universe::PyHeap->survivor->_end);
 }
 
 void ScavengeOopClosure::do_klass(Klass** ref) {

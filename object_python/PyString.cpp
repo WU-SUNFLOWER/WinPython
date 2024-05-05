@@ -5,25 +5,36 @@
 #include "StringKlass.hpp"
 #include "Universe.hpp"
 
-PyString::PyString(const char* str_source) :
-    PyString(
-        reinterpret_cast<const uint8_t*>(str_source), 
-        strlen(str_source)
-    )
-{
+PyString* PyString::createString(
+    const uint8_t* source, size_t len_src, bool isMeta
+) {
+    START_COUNT_TEMP_OBJECTS;
 
+    PyString* str = new PyString();
+    str->length = len_src;
+    str->setKlass(StringKlass::getInstance());
+    PUSH_TEMP(str);
+    
+    uint8_t* ptr = nullptr;
+    if (isMeta) {
+        ptr = reinterpret_cast<uint8_t*>(Universe::PyHeap->allocateMeta(len_src + 1));
+    }
+    else {
+        ptr = reinterpret_cast<uint8_t*>(Universe::PyHeap->allocate(len_src + 1));
+    }
+    memcpy(ptr, source, sizeof(uint8_t) * len_src);
+    ptr[len_src] = 0;
+    str->ptr = ptr;
+
+    END_COUNT_TEMP_OBJECTS;
+    return str;
 }
 
-PyString::PyString(const uint8_t* source, size_t len_src) {
-    length = len_src;
-    ptr = reinterpret_cast<uint8_t*>(Universe::PyHeap->allocate(length + 1));
-    memcpy(ptr, source, sizeof(uint8_t) * length);
-    ptr[length] = 0;
-    setKlass(StringKlass::getInstance());
-}
-
-PyString::~PyString() {
-
+PyString* PyString::createString(const char* str_source, bool isMeta) {
+    return createString(
+        reinterpret_cast<const uint8_t*>(str_source),
+        strlen(str_source),
+        isMeta);
 }
 
 uint8_t PyString::operator[](size_t index) {

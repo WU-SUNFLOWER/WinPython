@@ -9,6 +9,7 @@
 #include "StringTable.hpp"
 #include "ObjectKlass.hpp"
 #include "PyInteger.hpp"
+#include "ScavengeOopClosure.hpp"
 
 DictKlass* DictKlass::instance = nullptr;
 
@@ -20,17 +21,17 @@ DictIteratorKlass<DictIterType::Iter_Items>* DictIteratorKlass<DictIterType::Ite
 
 
 void DictKlass::initialize() {
-    PyDict* dict = new PyDict();
+    PyDict* dict = PyDict::createDict();
 
-    dict->set(new PyString("setdefault"),
+    dict->set(PyString::createString("setdefault"),
         PackNativeFunc(NativeFunction::dict_set_default));
-    dict->set(new PyString("pop"),
+    dict->set(PyString::createString("pop"),
         PackNativeFunc(NativeFunction::dict_pop));
-    dict->set(new PyString("keys"),
+    dict->set(PyString::createString("keys"),
         PackNativeFunc(NativeFunction::dict_keys));
-    dict->set(new PyString("values"),
+    dict->set(PyString::createString("values"),
         PackNativeFunc(NativeFunction::dict_values));
-    dict->set(new PyString("items"),
+    dict->set(PyString::createString("items"),
         PackNativeFunc(NativeFunction::dict_items));
 
     setKlassDict(dict);
@@ -87,7 +88,9 @@ void DictKlass::delete_subscr(PyObject* object, PyObject* subscription) const {
 void DictKlass::oops_do(OopClosure* closure, PyObject* object) {
     checkLegalPyObject(object, this);
     PyDict* dict = static_cast<PyDict*>(object);
-    closure->do_map(&dict->_map);
+    
+    closure->do_map(&dict->_map);    
+
 }
 
 template<DictIterType type>
@@ -113,7 +116,7 @@ PyObject* DictIteratorKlass<type>::next(PyObject* object) const {
                 ret = dict->getValueByIndex(count);
                 break;
             case DictIterType::Iter_Items: {
-                PyList* wrapper = new PyList(2);
+                PyList* wrapper = PyList::createList(2);
                 wrapper->append(dict->getKeyByIndex(count));
                 wrapper->append(dict->getValueByIndex(count));
                 ret = wrapper;

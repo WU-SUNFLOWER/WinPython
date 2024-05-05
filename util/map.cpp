@@ -10,24 +10,44 @@ void* MapItem<KEY, VAL>::operator new[](size_t size) {
 
 template<typename KEY, typename VAL>
 void Map<KEY, VAL>::expand() {
+    START_COUNT_TEMP_OBJECTS;
+    auto self = this;
+    PUSH_TEMP_PYOBJECT_MAP(self);
     MapItem<KEY, VAL>* newPtr = new MapItem<KEY, VAL>[capacity <<= 1];
     for (size_t i = 0; i < length; ++i) {
-        newPtr[i] = ptr[i];
+        newPtr[i] = self->ptr[i];
     }
-    ptr = newPtr;
+    self->ptr = newPtr;
+
+
+    END_COUNT_TEMP_OBJECTS;
+}
+
+template<>
+Map<PyObject*, PyObject*>* Map<PyObject*, PyObject*>::createMap(
+    PyObject* defaultElem
+) {
+    START_COUNT_TEMP_OBJECTS;
+    if (defaultElem) PUSH_TEMP(defaultElem);
+    
+    Map* map = new Map();
+    PUSH_TEMP_PYOBJECT_MAP(map);
+    
+    map->capacity = 8;
+    map->length = 0;
+    map->_default = defaultElem;
+
+    auto addr = new MapItem<PyObject*, PyObject*>[map->capacity];
+    map->ptr = addr;
+
+    END_COUNT_TEMP_OBJECTS;
+    return map;
 }
 
 template<typename KEY, typename VAL>
-Map<KEY, VAL>::Map(VAL defaultValue) {
-    capacity = 8;
-    length = 0;
-    _default = defaultValue;
-    ptr = new MapItem<KEY, VAL>[capacity];
-}
-
-template<typename KEY, typename VAL>
-Map<KEY, VAL>::~Map() {
-
+Map<KEY, VAL>* Map<KEY, VAL>::createMap(VAL defaultElem) {
+    puts("Try to create map with unknown type");
+    exit(-1);
 }
 
 template<typename KEY, typename VAL>
@@ -35,18 +55,38 @@ void* Map<KEY, VAL>::operator new(size_t size) {
     return Universe::PyHeap->allocate(size);
 }
 
+
 template<typename KEY, typename VAL>
 void Map<KEY, VAL>::set(KEY key, VAL value) {
+}
+
+template<>
+void Map<PyObject*, PyObject*>::set(PyObject* key, PyObject* value) {
+    
+    auto self = this;
     // 如果key值在哈希表中已出现过，则直接覆盖对应的value值
-    size_t searchIdx = getIndex(key);
-    if (getIndex(key) != -1) {
-        ptr[searchIdx].value = value;
+    size_t searchIdx = self->getIndex(key);
+    if (searchIdx != -1) {
+        self->ptr[searchIdx].value = value;
         return;
     }
+
+    START_COUNT_TEMP_OBJECTS;
+    PUSH_TEMP(key);
+    PUSH_TEMP(value);
+    PUSH_TEMP_PYOBJECT_MAP(self);
+
+
     // 空间不够要扩容
-    if (length >= capacity) expand();
+    if (self->length >= self->capacity) {
+        self->expand();
+    }
     // 放置新元素
-    ptr[length++] = MapItem<KEY, VAL>(key, value);
+    auto elem = MapItem<PyObject*, PyObject*>(key, value);
+    self->ptr[self->length++] = elem;
+
+
+    END_COUNT_TEMP_OBJECTS;
 }
 
 template<typename KEY, typename VAL>
@@ -108,12 +148,30 @@ void Map<KEY, VAL>::oops_do(OopClosure* closure) {
 
 template<>
 void Map<PyObject*, PyObject*>::oops_do(OopClosure* closure) {
-    closure->do_raw_mem(reinterpret_cast<void**>(&ptr), 
-        capacity * sizeof(MapItem<PyObject*, PyObject*>));
-    for (size_t i = 0; i < length; ++i) {
-        closure->do_oop(&(ptr[i].key));
-        closure->do_oop(&(ptr[i].value));
+    if (ptr != nullptr) {
+
+        closure->do_raw_mem(reinterpret_cast<void**>(&ptr), 
+            capacity * sizeof(MapItem<PyObject*, PyObject*>));
+
+        for (size_t i = 0; i < length; ++i) {
+            closure->do_oop(&(ptr[i].key));
+            closure->do_oop(&(ptr[i].value));
+        }
     }
+}
+
+template<typename KEY, typename VAL>
+void* Map<KEY, VAL>::getNewAddr() {
+    if ((_mark_word & 0x2) == 0x2) {
+        return reinterpret_cast<void*>(_mark_word & ~7);
+    }
+    return nullptr;
+}
+
+template<typename KEY, typename VAL>
+void Map<KEY, VAL>::setNewAddr(void* addr) {
+    if (!addr) return;
+    _mark_word = reinterpret_cast<uintptr_t>(addr) | 0x2;
 }
 
 template class Map<PyObject*, PyObject*>;

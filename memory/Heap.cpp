@@ -3,7 +3,7 @@
 #include "ScavengeOopClosure.hpp"
 
 Heap* Heap::instance = nullptr;
-size_t Heap::MaxCapacity = 25 * 1024 * 1024;
+size_t Heap::MaxCapacity = 50 * 1024 * 1024;
 
 Heap* Heap::getInstance() {
     if (instance == nullptr) {
@@ -38,6 +38,10 @@ Heap::~Heap() {
 void* Heap::allocate(size_t size) {
     if (!eden->canAlloc(size)) {
         gc();
+        if (!eden->canAlloc(size)) {
+            puts("eden space hasn't enough space to allocate.");
+            exit(-1);
+        }
     }
     return eden->allocate(size);
 }
@@ -60,11 +64,9 @@ void Heap::gc() {
     static int count = 0;
     count++;
 
-    /*
     puts("gc starting...");
     puts("  before gc:");
-    printf("  eden's capacity is %llu\n", eden->_capacity);    
-    */
+    printf("  eden's capacity is %llu\n", eden->_capacity);
 
     
     // 将eden中的幸存对象悉数转移到survivor中
@@ -77,11 +79,9 @@ void Heap::gc() {
     survivor = temp;
     survivor->clear();
 
-    /*
     puts("  after gc:");
     printf("  eden's capacity is %llu\n", eden->_capacity);
     puts("gc end");    
-    */
 
 
 

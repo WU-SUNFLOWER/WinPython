@@ -4,6 +4,11 @@
 #include <cstdlib>
 #include "Universe.hpp"
 
+ByteCodeFileParser::ByteCodeFileParser(BufferedInputStream* stream) {
+    fileStream = stream;
+    stringTable = ArrayList<PyObject*>::createArrayList(nullptr);
+}
+
 CodeObject* ByteCodeFileParser::parse() {
     uint32_t magicNumber = fileStream->readInt();
     uint32_t modifiedData = fileStream->readInt();
@@ -57,7 +62,7 @@ PyString* ByteCodeFileParser::getString() {
     for (size_t i = 0; i < length; ++i) {
         tempBuf[i] = fileStream->readByte();
     }
-    PyString* s = new PyString(tempBuf, length);
+    PyString* s = PyString::createString(tempBuf, length, true);
     delete[] tempBuf;
     return s;
 }
@@ -69,7 +74,7 @@ PyList* ByteCodeFileParser::getTuple(bool needToCheck) {
         return nullptr;
     }
     int32_t length = fileStream->readInt();  // tuple中元素的个数
-    PyList* tuple = new PyList(length);
+    PyList* tuple = PyList::createList(length);
     for (int32_t i = 0; i < length; ++i) {
         uint8_t objType = fileStream->readByte();
         switch (objType) {
@@ -93,12 +98,12 @@ PyList* ByteCodeFileParser::getTuple(bool needToCheck) {
             case 't': {
                 PyString* str = getString();
                 tuple->append(str);
-                stringTable.push(str);
+                stringTable->push(str);
                 break;
             }
             // 元素为int
             case 'R': 
-                tuple->append(stringTable.get(fileStream->readInt()));
+                tuple->append(stringTable->get(fileStream->readInt()));
                 break;
             case '(':
                 tuple->append(getTuple(false));
@@ -119,11 +124,11 @@ PyString* ByteCodeFileParser::getName() {
             return getString();
         case 't': {
             PyString* str = getString();
-            stringTable.push(str);
+            stringTable->push(str);
             return str;
         }
         case 'R':
-            return stringTable.get(fileStream->readInt());
+            return reinterpret_cast<PyString*>(stringTable->get(fileStream->readInt()));
         default:
             printf("Unknown Object Type 0x%x When executing ByteCodeFileParser::getName() \n", objType);
             exit(-1);

@@ -5,7 +5,7 @@
 #include "Stack.hpp"
 
 class ScavengeOopClosure : public OopClosure {
-private:
+public:
     Space* _from;
     Space* _to;
     Space* _meta;
@@ -22,8 +22,6 @@ public:
 
     virtual void do_array_list(ArrayList<Klass*>**) override;
     virtual void do_array_list(ArrayList<PyObject*>**) override;
-    virtual void do_array_list(ArrayList<Block>**) override;
-    
 
     virtual void do_map(Map<PyObject*, PyObject*>** addr) override;
     virtual void do_raw_mem(void** addr, size_t length) override;

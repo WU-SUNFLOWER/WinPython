@@ -8,9 +8,9 @@
 class ByteCodeFileParser {
 private:
     BufferedInputStream* fileStream;
-    ArrayList<PyString*> stringTable;
+    ArrayList<PyObject*>* stringTable;
 public:
-    ByteCodeFileParser(BufferedInputStream* stream) : fileStream(stream), stringTable(nullptr) {}
+    ByteCodeFileParser(BufferedInputStream* stream);
     CodeObject* parse();
     CodeObject* parseCodeObject();
     PyString* getByteCodes();

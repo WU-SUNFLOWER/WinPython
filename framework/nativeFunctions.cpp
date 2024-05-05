@@ -88,7 +88,7 @@ PyObject* NativeFunction::string_upper(PyList* args) {
         tempBuffer[i] = 'a' <= ch && ch <= 'z' ? (ch - 'a' + 'A') : ch;
     }
 
-    PyString* ret = new PyString(tempBuffer, length);
+    PyString* ret = PyString::createString(tempBuffer, length);
     delete[] tempBuffer;
     return ret;
 }

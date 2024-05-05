@@ -6,11 +6,13 @@
 class PyList : public PyObject {
     friend class ListKlass;
 private:
-    ArrayList<PyObject*>* _container;
+    ArrayList<PyObject*>* _container = nullptr;
+    PyList() {}
 public:
-    PyList();
-    PyList(size_t n);
-    PyList(ArrayList<PyObject*>* rawList);
+    static PyList* createList(size_t n = 8);
+    //PyList();
+    //PyList(size_t n = 8);
+    //PyList(ArrayList<PyObject*>* rawList);
     
     ArrayList<PyObject*>* getContainer() const {
         return _container;

@@ -10,14 +10,15 @@ template <typename T>
 class ArrayList {
 private:
     uintptr_t _mark_word = 0;
-    size_t length;  // 数组内有效元素的个数
-    size_t capacity;  // 数组开辟内存的总长度
-    T* ptr;
+    size_t length = 0;  // 数组内有效元素的个数
+    size_t capacity = 0;  // 数组开辟内存的总长度
+    T* ptr = nullptr;
     T _defaultElem;
+    
     ArrayList* expand(size_t targetLength = 0);
 public:
-    ArrayList(T defaultElem, int64_t n = 8ll);
-    ~ArrayList();
+    static ArrayList* createArrayList(T defaultElem, int64_t n = 8ll);
+    
     // 向数组中的最后一个位置添加元素
     void push(T elem);
     void insert(size_t index, T elem);

@@ -4,7 +4,8 @@
 #include "Space.hpp"
 
 class Heap {
-private:
+//private:
+public:
     Space* mem_1;
     Space* mem_2;
 

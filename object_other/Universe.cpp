@@ -17,19 +17,29 @@ Heap* Universe::PyHeap = nullptr;
 ArrayList<Klass*>* Universe::PyKlasses = nullptr;
 CodeObject* Universe::MainCode = nullptr;
 
-Stack<ArrayList<PyObject*>**>* Universe::_temp_array_stack = nullptr;
+Stack<ArrayList<PyObject*>**>* Universe::_temp_pyobject_array_stack = nullptr;
+Stack<ArrayList<Klass*>**>* Universe::_temp_klass_array_stack = nullptr;
+Stack<PyObject**>* Universe::_temp_stack = nullptr;
+Stack<Map<PyObject*, PyObject*>**>* Universe::_temp_pyobject_map_stack = nullptr;
 
 void Universe::genesis() {
     PyHeap = Heap::getInstance();
-    PyKlasses = new ArrayList<Klass*>(nullptr);
+
+    _temp_pyobject_array_stack = 
+        new Stack<ArrayList<PyObject*>**>(1024 * 1024);
+    _temp_klass_array_stack =
+        new Stack<ArrayList<Klass*>**>(1024 * 1024);
+    _temp_pyobject_map_stack = 
+        new Stack<Map<PyObject*, PyObject*>**>(1024 * 1024);
+    _temp_stack = 
+        new Stack<PyObject**>(2 * 1024 * 1024);
+    PyKlasses = ArrayList<Klass*>::createArrayList(nullptr);
 
     StringTable::initialize();
 
-    _temp_array_stack = new Stack<ArrayList<PyObject*>**>(2 * 1024 * 1024);
-
     PyTrue = new PyInteger(1);
     PyFalse = new PyInteger(0);
-    PyNone = new PyString("None");
+    PyNone = PyString::createString("None");
 
     DictKlass::getInstance()->initialize();
     FunctionKlass::getInstance()->initialize();
@@ -55,7 +65,16 @@ void Universe::oops_do(OopClosure* closure) {
     closure->do_oop(reinterpret_cast<PyObject**>(&MainCode));
     closure->do_array_list(&PyKlasses);
 
-    for (size_t i = 0; i < _temp_array_stack->getLength(); ++i) {
-        closure->do_array_list(_temp_array_stack->get(i));
+    for (size_t i = 0; i < _temp_stack->getLength(); ++i) {
+        closure->do_oop(_temp_stack->get(i));
+    }
+    for (size_t i = 0; i < _temp_pyobject_array_stack->getLength(); ++i) {
+        closure->do_array_list(_temp_pyobject_array_stack->get(i));
+    }
+    for (size_t i = 0; i < _temp_klass_array_stack->getLength(); ++i) {
+        closure->do_array_list(_temp_klass_array_stack->get(i));
+    }
+    for (size_t i = 0; i < _temp_pyobject_map_stack->getLength(); ++i) {
+        closure->do_map(_temp_pyobject_map_stack->get(i));
     }
 }

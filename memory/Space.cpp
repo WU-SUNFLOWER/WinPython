@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <cstring>
 #include <cstdio>
+#include <cassert>
 
 Space::Space(size_t size) {
     _size = size;
@@ -32,12 +33,13 @@ void* Space::allocate(size_t size) {
     size = (size + 7) & ~7;
     char* start = _top;
     _top += size;
+    assert(_top <= _end);
     _capacity -= size;
     return start;
 }
 
 void Space::clear() {
-    memset(_base, 0x00, _size);
+    //memset(_base, 0x00, _size);
     // ½«_topºÍ_capacity¸´Î»
     _top = (char*)(reinterpret_cast<uint64_t>(_base + 15) & ~15);
     _capacity = _end - _top;
