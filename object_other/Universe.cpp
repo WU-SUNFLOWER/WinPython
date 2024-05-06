@@ -84,11 +84,7 @@ void Universe::refreshTempRefRecordStack(
     int _count_temp_pyobject_arrays,
     int _count_temp_klass_arrays,
     int _count_temp_pyobject_map
-) {
-    //if (_count_temp_objects > 0) {
-    //    printf("%lld -> %lld\n", Universe::_temp_stack->_length, Universe::_temp_stack->_length - _count_temp_objects);
-    //}
-    
+) { 
     _temp_stack->_length -= _count_temp_objects;
     _temp_pyobject_array_stack->_length -= _count_temp_pyobject_arrays;
     _temp_klass_array_stack->_length -= _count_temp_klass_arrays;

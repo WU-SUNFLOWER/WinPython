@@ -73,4 +73,8 @@ public:
             _count_temp_klass_arrays, _count_temp_pyobject_map); \
     }
 
+#define isPyInteger(x) ((uintptr_t)(x) & 1)
+#define toRawInteger(x) ((int64_t)((int64_t)(x) >> 1))
+#define toPyInteger(x) ((PyObject*)(((uintptr_t)(x) << 1) | 1))
+
 #endif

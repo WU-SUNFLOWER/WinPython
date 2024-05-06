@@ -64,9 +64,12 @@ void Heap::gc() {
     static int count = 0;
     count++;
 
+    /*
     puts("gc starting...");
     puts("  before gc:");
-    printf("  eden's capacity is %llu\n", eden->_capacity);
+    printf("  eden's capacity is %llu\n", eden->_capacity);    
+    */
+
 
     
     // 将eden中的幸存对象悉数转移到survivor中
@@ -79,9 +82,12 @@ void Heap::gc() {
     survivor = temp;
     survivor->clear();
 
+    /*
     puts("  after gc:");
     printf("  eden's capacity is %llu\n", eden->_capacity);
-    puts("gc end");    
+    puts("gc end");     
+    */
+   
 
 
 

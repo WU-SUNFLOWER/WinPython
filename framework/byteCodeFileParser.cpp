@@ -51,9 +51,13 @@ CodeObject* ByteCodeFileParser::parseCodeObject() {
 }
 
 PyString* ByteCodeFileParser::getByteCodes() {
-    // 字节码和普通字符串都以`s`(0x73)作为开头
-    assert(fileStream->readByte() == 's');
-    return getString();
+    // 字节码和普通字符串都以`s`(0x73)作为开
+    if (fileStream->readByte() == 's') {
+        return getString();
+    }
+    else {
+        exit(-1);
+    }
 }
 
 PyString* ByteCodeFileParser::getString() {
@@ -84,7 +88,8 @@ PyList* ByteCodeFileParser::getTuple(bool needToCheck) {
                 break;
             // 元素为int
             case 'i':
-                tuple->append(new PyInteger(fileStream->readInt()));
+                //tuple->append(new PyInteger(fileStream->readInt()));
+                tuple->append(toPyInteger(fileStream->readInt()));
                 break;
             // 元素为None Object
             case 'N':
@@ -120,8 +125,10 @@ PyList* ByteCodeFileParser::getTuple(bool needToCheck) {
 PyString* ByteCodeFileParser::getName() {
     uint8_t objType = fileStream->readByte();
     switch (objType) {
-        case 's':
-            return getString();
+        case 's': {
+            PyString* str = getString();
+            return str;
+        }
         case 't': {
             PyString* str = getString();
             stringTable->push(str);

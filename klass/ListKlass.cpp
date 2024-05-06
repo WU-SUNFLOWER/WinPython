@@ -58,7 +58,12 @@ void ListKlass::print(const PyObject* lhs, int flags) const {
     putchar('[');
     for (size_t i = 0; i < length; ++i) {
         const PyObject* elem = list->get(i);
-        list->get(i)->print();
+        if (isPyInteger(elem)) {
+            printf("%lld", toRawInteger(elem));
+        }
+        else {
+            elem->print();
+        }
         if (i < length - 1) printf(", ");
     }
     putchar(']');
@@ -162,13 +167,22 @@ PyObject* ListKlass::mul(const PyObject* lhs, const PyObject* rhs) const {
 }
 
 PyObject* ListKlass::subscr(PyObject* object, PyObject* subscrption) const {
-    assert(object->getKlass() == this);
-    assert(subscrption->getKlass() == IntegerKlass::getInstance());
+    //assert(object->getKlass() == this);
     PyList* list = reinterpret_cast<PyList*>(object);
-    PyInteger* subscr = reinterpret_cast<PyInteger*>(subscrption);
-    size_t pos = subscr->getValue();
+    size_t pos = toRawInteger(subscrption);
+    /*
+    if (isPyInteger(subscrption)) {
+        pos = toRawInteger(subscrption);
+    }
+    else {
+        assert(subscrption->getKlass() == IntegerKlass::getInstance());
+        PyInteger* subscr = reinterpret_cast<PyInteger*>(subscrption);
+        pos = subscr->getValue();
+    }    
+    */
+
     // Python中不允许对越界下标进行访问
-    assert(pos < list->getLength());
+    //assert(pos < list->getLength());
     return list->get(pos);
 }
 
@@ -198,13 +212,25 @@ void ListKlass::oops_do(OopClosure* closure, PyObject* object) {
 void ListKlass::store_subscr(PyObject* object, 
     PyObject* subscription, PyObject* newObject
 ) const {
-    assert(object->getKlass() == this &&
-        subscription->getKlass() == IntegerKlass::getInstance());
+    //checkLegalPyObject(object, this);
+
     PyList* list = reinterpret_cast<PyList*>(object);
-    PyInteger* subscr = reinterpret_cast<PyInteger*>(subscription);
-    size_t pos = subscr->getValue();
+    size_t pos = toRawInteger(subscription);
+    /*
+    if (isPyInteger(subscription)) {
+        pos = toRawInteger(subscription);
+    }
+    else {
+        assert(subscription->getKlass() == IntegerKlass::getInstance());
+        PyInteger* subscr = reinterpret_cast<PyInteger*>(subscription);
+        pos = subscr->getValue();
+    }    
+    */
+
+
+
     // Python中不允许对越界下标进行访问
-    assert(pos < list->getLength());
+    //assert(pos < list->getLength());
     // 重新赋值
     list->set(pos, newObject);
 }

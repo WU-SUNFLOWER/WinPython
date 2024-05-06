@@ -3,6 +3,7 @@
 
 #include <cstdio>
 #include <cstdint>
+#include <cstdlib>
 
 #define _CRT_SECURE_NO_WARNINGS
 
@@ -15,7 +16,9 @@ private:
     unsigned short index;
 public:
     BufferedInputStream(const char* filename) {
-        fp = fopen(filename, "rb");
+        //fp = fopen_s(filename, "rb");
+        fopen_s(&fp, filename, "rb");
+        if (fp == nullptr) exit(-1);
         fread(buffer, sizeof(char), Buffer_Length, fp);
         index = 0;
     }

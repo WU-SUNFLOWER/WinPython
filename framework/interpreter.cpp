@@ -148,7 +148,12 @@ void Interpreter::evalFrame() {
 
             case ByteCode::Print_Item:
                 lhs = POP();
-                lhs->print(FLAG_PyString_PRINT_RAW);
+                if (isPyInteger(lhs)) {
+                    printf("%lld", toRawInteger(lhs));
+                }
+                else {
+                    lhs->print(FLAG_PyString_PRINT_RAW);
+                }
                 break;
 
             case ByteCode::Print_NewLine:
@@ -164,7 +169,12 @@ void Interpreter::evalFrame() {
             case ByteCode::Binary_Add:
                 rhs = POP();  // 右操作数
                 lhs = POP();  // 左操作数
-                PUSH(lhs->add(rhs));
+                if (isPyInteger(lhs) && isPyInteger(rhs)) {
+                    PUSH(toPyInteger(toRawInteger(lhs) + toRawInteger(rhs)));
+                }
+                else {
+                    PUSH(lhs->add(rhs));
+                }
                 break;
 
             case ByteCode::Binary_Module:
@@ -176,13 +186,23 @@ void Interpreter::evalFrame() {
             case ByteCode::Inplace_Add:
                 rhs = POP();
                 lhs = POP();
-                PUSH(lhs->inplace_add(rhs));
+                if (isPyInteger(lhs) && isPyInteger(rhs)) {
+                    PUSH(toPyInteger(toRawInteger(lhs) + toRawInteger(rhs)));
+                }
+                else {
+                    PUSH(lhs->inplace_add(rhs));
+                }
                 break;
 
             case ByteCode::Binary_Subtract: {
                 rhs = POP();  // 右操作数
                 lhs = POP();  // 左操作数
-                PUSH(lhs->sub(rhs));
+                if (isPyInteger(lhs) && isPyInteger(rhs)) {
+                    PUSH(toPyInteger(toRawInteger(lhs) - toRawInteger(rhs)));
+                }
+                else {
+                    PUSH(lhs->sub(rhs));
+                }
                 break;
             }
 
@@ -213,22 +233,52 @@ void Interpreter::evalFrame() {
                 lhs = POP();  // 左操作数
                 switch (op_arg) {
                     case CompareCondition::Less:
-                        PUSH(lhs->less(rhs));
+                        if (isPyInteger(rhs) && isPyInteger(lhs)) {
+                            PUSH(packBoolean(toRawInteger(lhs) < toRawInteger(rhs)));
+                        }
+                        else {
+                            PUSH(lhs->less(rhs));
+                        }
                         break;
                     case CompareCondition::Less_Equal:
-                        PUSH(lhs->less_equal(rhs));
+                        if (isPyInteger(rhs) && isPyInteger(lhs)) {
+                            PUSH(packBoolean(toRawInteger(lhs) <= toRawInteger(rhs)));
+                        }
+                        else {
+                            PUSH(lhs->less_equal(rhs));
+                        }
                         break;
                     case CompareCondition::Equal:
-                        PUSH(lhs->equal(rhs));
+                        if (isPyInteger(rhs) && isPyInteger(lhs)) {
+                            PUSH(packBoolean(toRawInteger(lhs) == toRawInteger(rhs)));
+                        }
+                        else {
+                            PUSH(lhs->equal(rhs));
+                        }
                         break;
                     case CompareCondition::Greater_Equal:
-                        PUSH(lhs->greater_equal(rhs));
+                        if (isPyInteger(rhs) && isPyInteger(lhs)) {
+                            PUSH(packBoolean(toRawInteger(lhs) >= toRawInteger(rhs)));
+                        }
+                        else {
+                            PUSH(lhs->greater_equal(rhs));
+                        }
                         break;
                     case CompareCondition::Greater:
-                        PUSH(lhs->greater(rhs));
+                        if (isPyInteger(rhs) && isPyInteger(lhs)) {
+                            PUSH(packBoolean(toRawInteger(lhs) > toRawInteger(rhs)));
+                        }
+                        else {
+                            PUSH(lhs->greater(rhs));
+                        }
                         break;
                     case CompareCondition::Not_Equal:
-                        PUSH(lhs->not_equal(rhs));
+                        if (isPyInteger(rhs) && isPyInteger(lhs)) {
+                            PUSH(packBoolean(toRawInteger(lhs) != toRawInteger(rhs)));
+                        }
+                        else {
+                            PUSH(lhs->not_equal(rhs));
+                        }
                         break;
                     // is和is not关键字用于比较两个python对象的地址是否一致
                     case CompareCondition::Is:
