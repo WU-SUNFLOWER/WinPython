@@ -45,7 +45,8 @@ void TypeKlass::print(const PyObject* object, int flag) const {
 }
 
 void TypeKlass::initialize() {
-    (new PyTypeObject())->setOwnKlass(this);
+    auto type = new PyTypeObject();
+    type->setOwnKlass(this);
     setName(StringTable::str_type);
     setSuperKlass(ObjectKlass::getInstance());
 }

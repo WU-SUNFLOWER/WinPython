@@ -238,20 +238,6 @@ void* ArrayList<T>::operator new(size_t size) {
     return Universe::PyHeap->allocate(size);
 }
 
-template<typename T>
-void* ArrayList<T>::getNewAddr() {
-    if ((_mark_word & 0x2) == 0x2) {
-        return reinterpret_cast<void*>(_mark_word & ~7);
-    }
-    return nullptr;
-}
-
-template<typename T>
-void ArrayList<T>::setNewAddr(void* addr) {
-    if (!addr) return;
-    _mark_word = reinterpret_cast<uintptr_t>(addr) | 0x2;
-}
-
 template<>
 void ArrayList<Klass*>::oops_do(OopClosure* closure) {
     closure->do_raw_mem(reinterpret_cast<void**>(&ptr), 

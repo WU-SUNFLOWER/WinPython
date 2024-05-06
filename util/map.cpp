@@ -160,18 +160,4 @@ void Map<PyObject*, PyObject*>::oops_do(OopClosure* closure) {
     }
 }
 
-template<typename KEY, typename VAL>
-void* Map<KEY, VAL>::getNewAddr() {
-    if ((_mark_word & 0x2) == 0x2) {
-        return reinterpret_cast<void*>(_mark_word & ~7);
-    }
-    return nullptr;
-}
-
-template<typename KEY, typename VAL>
-void Map<KEY, VAL>::setNewAddr(void* addr) {
-    if (!addr) return;
-    _mark_word = reinterpret_cast<uintptr_t>(addr) | 0x2;
-}
-
 template class Map<PyObject*, PyObject*>;

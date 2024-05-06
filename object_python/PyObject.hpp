@@ -12,15 +12,17 @@ class PyDict;
 class PyObject {
 private:
     uintptr_t _mark_word;
-
     // 不同类型的python对象通过klass指针的指向不同来区分
     Klass* klass;
 
     // 用来保存定义在PyObject实例之上的属性
     PyDict* _self_dict;
+protected:
+    bool isInMeta;
 public:
 
-    PyObject() : klass(nullptr), _self_dict(nullptr), _mark_word(0) {};
+    PyObject() : 
+        klass(nullptr), _self_dict(nullptr), _mark_word(0), isInMeta(false) {};
 
     void setKlass(Klass* k) {
         klass = k;
@@ -35,7 +37,8 @@ public:
     PyDict* getSelfDict();
     PyDict* initSelfDict();
 
-    void* operator new(size_t size);
+    void* operator new(size_t size, bool isInMeta = false);
+    void operator delete(void*, bool);
 
     /*公用方法 Start*/
 
@@ -82,6 +85,9 @@ public:
     void setNewAddr(void*);
     size_t getSize();
     void oops_do(OopClosure* closure);
+    bool isInMetaSpace() const {
+        return isInMeta;
+    }
 };
 
 typedef Map<PyObject*, PyObject*> PyObjectMap;

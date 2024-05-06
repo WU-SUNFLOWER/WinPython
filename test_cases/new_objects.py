@@ -1,9 +1,9 @@
 class A:
     def __init__(self):
-        print('AAA')
+        pass
 
 # i = 0x7FFFFFFF
-i = 10000
+i = 1000000
 while i > 0:
     i = i - 1
     x = A()

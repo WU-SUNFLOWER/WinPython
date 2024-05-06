@@ -22,7 +22,7 @@ public:
     }
     void push(V elem) {
         if (_length >= _capacity) {
-            puts("GC stack is overflow!");
+            printf("GC stack is overflow, whose capacity is %lld\n", _capacity);
             exit(-1);
         }
         vector[_length++] = elem;
@@ -47,5 +47,7 @@ public:
         return _length == 0;
     }
 };
+
+
 
 #endif

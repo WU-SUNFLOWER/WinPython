@@ -26,8 +26,15 @@ PyDict* PyObject::initSelfDict() {
     return (_self_dict = PyDict::createDict());
 }
 
-void* PyObject::operator new(size_t size) {
-    return Universe::PyHeap->allocate(size);
+void* PyObject::operator new(size_t size, bool isInMeta) {
+    return isInMeta ? 
+        Universe::PyHeap->allocateMeta(size) :
+        Universe::PyHeap->allocate(size);
+}
+
+void PyObject::operator delete(void*, bool) {
+    puts("You can't delete a python object directly.");
+    exit(-1);
 }
 
 void PyObject::print(int flags) const {

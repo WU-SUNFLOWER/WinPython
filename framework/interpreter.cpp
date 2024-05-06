@@ -306,14 +306,12 @@ void Interpreter::evalFrame() {
             }
 
             case ByteCode::Call_Function: {
-                START_COUNT_TEMP_OBJECTS;
                 uint8_t argNumber_pos = op_arg & 0xff;
                 uint8_t argNumber_kw = op_arg >> 8;
                 // 因为调用函数传递键值扩展参数时，key和value都会压栈，所以这里要*2
                 uint8_t argNumber_total = argNumber_pos + 2 * argNumber_kw;
                 // 先把所有参数从栈上弹出来，存到临时列表中去
                 PyList* rawArgs = PyList::createList(argNumber_total);
-                PUSH_TEMP(rawArgs);
                 while (argNumber_total-- > 0) {
                     rawArgs->set(argNumber_total, POP());
                 }
@@ -321,7 +319,6 @@ void Interpreter::evalFrame() {
                 PyObject* callableObject = POP();
                 entryIntoNewFrame(callableObject, rawArgs, 
                     argNumber_pos, argNumber_kw);
-                END_COUNT_TEMP_OBJECTS;
                 break;
             }
             
@@ -649,6 +646,7 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
             ->getOwnKlass()
             ->allocateInstance(callableObject, rawArgs);
         PUSH(inst);
+        END_COUNT_TEMP_OBJECTS;
         return;
     }
 
@@ -719,7 +717,6 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
         */
         auto funcName = code->_name->getValue();
         if (rawArgNumber_pos <= formalArgNumber_total) {
-            
             for (size_t i = 0; i < rawArgNumber_pos; ++i) {
                 finalArgs->set(i, rawArgs->get(i));
             }
@@ -875,12 +872,20 @@ PyObject* Interpreter::callVirtual(PyObject* callable, PyList* args) {
         PyMethod* method = static_cast<PyMethod*>(callable);
         PyFunction* func = method->getFunc();
         if (args == nullptr) {
+            START_COUNT_TEMP_OBJECTS;
+            PUSH_TEMP(callable);
+            PUSH_TEMP(method);
+            PUSH_TEMP(func);
             args = PyList::createList(1);
+            END_COUNT_TEMP_OBJECTS;
         }
         args->insert(0, method->getOwner());
         return callVirtual(func, args);
     }
     else if (klass == FunctionKlass::getInstance()) {
+        START_COUNT_TEMP_OBJECTS;
+        PUSH_TEMP(callable);
+        PUSH_TEMP(args);
         // 创建Python栈桢
         FrameObject* frame = FrameObject::allocate(
             static_cast<PyFunction*>(callable),
@@ -899,6 +904,7 @@ PyObject* Interpreter::callVirtual(PyObject* callable, PyList* args) {
             true,
             args
         );
+        END_COUNT_TEMP_OBJECTS;
         // 手工执行新栈桢
         _curFrame = frame;
         evalFrame();

@@ -22,6 +22,8 @@ public:
 
     virtual void print(const PyObject* object, int flags) const override;
 
+    // 工具函数
+    // 
     // 各种比大小
     virtual PyObject* less(const PyObject* lhs, const PyObject* rhs) const override;
     virtual PyObject* less_equal(const PyObject* lhs, const PyObject* rhs) const override;

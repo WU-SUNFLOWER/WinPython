@@ -6,7 +6,8 @@ ObjectKlass* ObjectKlass::instance = nullptr;
 
 ObjectKlass::ObjectKlass() {
     setSuperKlass(nullptr);
-    (new PyTypeObject())->setOwnKlass(this);
+    auto type = new PyTypeObject();
+    type->setOwnKlass(this);
 }
 
 ObjectKlass* ObjectKlass::getInstance() {

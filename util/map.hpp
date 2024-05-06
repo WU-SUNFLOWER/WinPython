@@ -26,13 +26,12 @@ public:
 template<typename KEY, typename VAL>
 class Map {
 private:
-    uintptr_t _mark_word = 0;
     VAL _default;
     size_t capacity = 0;
     size_t length = 0;
+    MapItem<KEY, VAL>* ptr = nullptr;
     void expand();
 public:
-    MapItem<KEY, VAL>* ptr = nullptr;
     static Map* createMap(VAL defaultElem);
     
     void* operator new(size_t size);
@@ -62,7 +61,6 @@ public:
     }
 
     void oops_do(OopClosure* closure);
-    void* getNewAddr();
-    void setNewAddr(void* addr);
+
 };
 #endif

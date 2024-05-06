@@ -2,7 +2,7 @@
 #include "ListKlass.hpp"
 #include "Universe.hpp"
 
-PyList* PyList::createList(size_t n) {
+PyList* PyList::createList(size_t n, bool isInMeta) {
     START_COUNT_TEMP_OBJECTS;
     PyList* list = new PyList();
     list->setKlass(ListKlass::getInstance());

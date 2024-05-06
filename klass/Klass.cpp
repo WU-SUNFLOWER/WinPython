@@ -142,9 +142,14 @@ void Klass::setattr(PyObject* object, PyObject* attr, PyObject* value) {
 }
 
 PyObject* Klass::allocateInstance(PyObject* callable, PyList* args) {
+    START_COUNT_TEMP_OBJECTS;
     checkLegalPyObject(callable, TypeKlass::getInstance());
+    PUSH_TEMP(callable);
+    PUSH_TEMP(args);
+
     // 为实例化的Python对象分配内存
     PyObject* inst = new PyObject();
+    PUSH_TEMP(inst);
 
     // 为Python对象绑定klass
     PyTypeObject* cls = static_cast<PyTypeObject*>(callable);
@@ -158,6 +163,7 @@ PyObject* Klass::allocateInstance(PyObject* callable, PyList* args) {
         Interpreter::getInstance()->callVirtual(constructor, args);
     }
 
+    END_COUNT_TEMP_OBJECTS;
     return inst;
 }
 

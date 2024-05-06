@@ -10,9 +10,10 @@ PyString* PyString::createString(
 ) {
     START_COUNT_TEMP_OBJECTS;
 
-    PyString* str = new PyString();
+    PyString* str = new (isMeta)PyString();
     str->length = len_src;
     str->setKlass(StringKlass::getInstance());
+    str->isInMeta = isMeta;
     PUSH_TEMP(str);
     
     uint8_t* ptr = nullptr;

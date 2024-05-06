@@ -33,7 +33,6 @@ void* Space::allocate(size_t size) {
     size = (size + 7) & ~7;
     char* start = _top;
     _top += size;
-    assert(_top <= _end);
     _capacity -= size;
     return start;
 }

@@ -26,7 +26,9 @@ public:
     static void genesis();
     static void destroy();
 
+    // GC相关接口
     static void oops_do(OopClosure* closure);
+    static void refreshTempRefRecordStack(int, int, int, int);
 };
 
 #define isTrue(obj) ((obj) == Universe::PyTrue)
@@ -66,14 +68,9 @@ public:
 
 #define END_COUNT_TEMP_OBJECTS \
     { \
-        assert(Universe::_temp_stack->_length >= _count_temp_objects); \
-        assert(Universe::_temp_pyobject_array_stack->_length >= _count_temp_pyobject_arrays); \
-        assert(Universe::_temp_klass_array_stack->_length >= _count_temp_klass_arrays); \
-        assert(Universe::_temp_pyobject_map_stack->_length >= _count_temp_pyobject_map); \
-        Universe::_temp_stack->_length -= _count_temp_objects; \
-        Universe::_temp_pyobject_array_stack->_length -= _count_temp_pyobject_arrays; \
-        Universe::_temp_klass_array_stack->_length -= _count_temp_klass_arrays; \
-        Universe::_temp_pyobject_map_stack->_length -= _count_temp_pyobject_map; \
+        Universe::refreshTempRefRecordStack( \
+            _count_temp_objects, _count_temp_pyobject_arrays, \
+            _count_temp_klass_arrays, _count_temp_pyobject_map); \
     }
 
 #endif

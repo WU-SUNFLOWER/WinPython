@@ -1,5 +1,5 @@
 l = []
-size = 500
+size = 1000
 i = size
 
 while i >= 0:
