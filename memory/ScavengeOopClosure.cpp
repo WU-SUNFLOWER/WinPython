@@ -57,7 +57,7 @@ PyObject* ScavengeOopClosure::copy_and_push(PyObject* object) {
 void ScavengeOopClosure::do_oop(PyObject** ref) {
     // 由于python对象可能被多处引用，再之前已经被搬到survivor里去了
     // 所以这里还需要再加一个检测而非assert
-    if (ref == nullptr || *ref == nullptr  || !Is_Valid_Space_Addr(*ref) || !_from->hasObject(*ref)) {
+    if (ref == nullptr || *ref == nullptr  || !Is_Valid_Space_Addr(*ref) || (*ref)->isInMetaSpace() || !_from->hasObject(*ref)) {
         return;
     }
     *ref = copy_and_push(*ref);

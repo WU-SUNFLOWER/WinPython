@@ -23,16 +23,20 @@ ArrayList<PyObject*>* ArrayList<PyObject*>::createArrayList(
 ) {
     START_COUNT_TEMP_OBJECTS;
     if (defaultElem != nullptr) PUSH_TEMP(defaultElem);
-    ArrayList<PyObject*>* object = new ArrayList<PyObject*>();
+    ArrayList<PyObject*>* object = new(isInMeta) ArrayList<PyObject*>();
     PUSH_TEMP_PYOBJECT_ARRAY(object);
     
     object->length = 0;
     object->_defaultElem = defaultElem;
     
     auto capacity = object->capacity = static_cast<size_t>(std::max(1ll, n));
-    auto ptr = reinterpret_cast<PyObject**>(
-        Universe::PyHeap->allocate(sizeof(PyObject*) * capacity)
-    );
+    PyObject** ptr;
+    if (isInMeta) {
+        ptr = (PyObject**)Universe::PyHeap->allocateMeta(sizeof(PyObject*) * capacity);
+    }
+    else {
+        ptr = (PyObject**)Universe::PyHeap->allocate(sizeof(PyObject*) * capacity);
+    }
     object->ptr = ptr;
 
     for (size_t i = 0; i < capacity; ++i) {
@@ -49,16 +53,20 @@ ArrayList<Klass*>* ArrayList<Klass*>::createArrayList(
 ) {
     START_COUNT_TEMP_OBJECTS;
     if (defaultElem != nullptr) PUSH_TEMP(defaultElem);
-    ArrayList<Klass*>* object = new ArrayList<Klass*>();
+    ArrayList<Klass*>* object = new(isInMeta) ArrayList<Klass*>();
     PUSH_TEMP_KLASS_ARRAY(object);
 
     object->length = 0;
     object->_defaultElem = defaultElem;
 
     auto capacity = object->capacity = static_cast<size_t>(std::max(1ll, n));
-    auto ptr = reinterpret_cast<Klass**>(
-        Universe::PyHeap->allocate(sizeof(Klass*) * capacity)
-        );
+    Klass** ptr;
+    if (isInMeta) {
+        ptr = (Klass**)Universe::PyHeap->allocateMeta(sizeof(Klass*) * capacity);
+    }
+    else {
+        ptr = (Klass**)Universe::PyHeap->allocate(sizeof(Klass*) * capacity);
+    }
     object->ptr = ptr;
 
     for (size_t i = 0; i < capacity; ++i) {
@@ -236,8 +244,10 @@ void ArrayList<T>::oops_do(OopClosure* closure) {
 }
 
 template<typename T>
-void* ArrayList<T>::operator new(size_t size) {
-    return Universe::PyHeap->allocate(size);
+void* ArrayList<T>::operator new(size_t size, bool isInMeta) {
+    return isInMeta ?
+        Universe::PyHeap->allocateMeta(size) :
+        Universe::PyHeap->allocate(size);
 }
 
 template<>

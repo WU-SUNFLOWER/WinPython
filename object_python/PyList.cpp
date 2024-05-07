@@ -4,12 +4,11 @@
 
 PyList* PyList::createList(size_t n, bool isInMeta) {
     START_COUNT_TEMP_OBJECTS;
-    //PyList* list = new(isInMeta) PyList();
-    //list->isInMeta = isInMeta;
-    PyList* list = new PyList();
+    PyList* list = new(isInMeta) PyList();
+    list->isInMeta = isInMeta;
     list->setKlass(ListKlass::getInstance());
     PUSH_TEMP(list);
-    auto container = ArrayList<PyObject*>::createArrayList(nullptr, n);
+    auto container = ArrayList<PyObject*>::createArrayList(nullptr, n, isInMeta);
     list->_container = container;
     END_COUNT_TEMP_OBJECTS;
     return list;

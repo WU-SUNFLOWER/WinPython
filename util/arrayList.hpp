@@ -15,7 +15,7 @@ private:
     size_t capacity = 0;  // 数组开辟内存的总长度
     T* ptr = nullptr;
     T _defaultElem;
-    
+
     ArrayList* expand(size_t targetLength = 0);
 public:
     static ArrayList* createArrayList(T defaultElem, int64_t n = 8ll, bool isInMeta = false);
@@ -45,7 +45,7 @@ public:
         return capacity;
     }
     // GC相关接口
-    void* operator new(size_t size);
+    void* operator new(size_t size, bool isInMeta = false);
     void oops_do(OopClosure* closure);
 };
 

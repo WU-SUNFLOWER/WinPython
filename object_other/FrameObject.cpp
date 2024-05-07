@@ -10,10 +10,6 @@ FrameObject::FrameObject(CodeObject* codeObject) {
     _names = codeObject->_names;
     _varNames = codeObject->_varNames;
     _byteCodes = codeObject->_byteCodes;
-    PUSH_TEMP(_codeObject);
-    PUSH_TEMP(_consts);
-    PUSH_TEMP(_names);
-    PUSH_TEMP(_varNames);
 
     // 初始化一张空的映射表用于储存本地变量
     _locals = PyDict::createDict();
