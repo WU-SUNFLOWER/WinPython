@@ -5,8 +5,10 @@
 
 class PyList : public PyObject {
     friend class ListKlass;
-private:
+//private:
+public:
     ArrayList<PyObject*>* _container = nullptr;
+private:
     PyList() {}
 public:
     static PyList* createList(size_t n = 8, bool isInMeta = false);

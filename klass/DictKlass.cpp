@@ -48,9 +48,17 @@ void DictKlass::print(const PyObject* object, int flags) const {
     for (size_t i = 0; i < length; ++i) {
         PyObject* key = dict->getKeyByIndex(i);
         PyObject* value = dict->getValueByIndex(i);
-        key->print();
+        if (isPyInteger(key)) {
+            printf("%lld", toRawInteger(value));
+        } else {
+            key->print();
+        }
         printf(": ");
-        value->print();
+        if (isPyInteger(value)) {
+            printf("%lld", toRawInteger(value));
+        } else {
+            value->print();
+        }
         if (i < length - 1) printf(", ");
     }
     putchar('}');

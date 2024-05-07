@@ -7,4 +7,4 @@ def f(n):
         return 2
     return f(n - 1) + f(n - 2)
     
-print(f(30))
+print(f(25))

@@ -10,14 +10,16 @@
 #include "interpreter.hpp"
 
 template<typename T>
-ArrayList<T>* ArrayList<T>::createArrayList(T defaultElem, int64_t n) {
+ArrayList<T>* ArrayList<T>::createArrayList(
+    T defaultElem, int64_t n, bool isInMeta
+) {
     puts("Try to create ArrayList with unknown type");
     exit(-1);
 }
 
 template<>
 ArrayList<PyObject*>* ArrayList<PyObject*>::createArrayList(
-    PyObject* defaultElem, int64_t n
+    PyObject* defaultElem, int64_t n, bool isInMeta
 ) {
     START_COUNT_TEMP_OBJECTS;
     if (defaultElem != nullptr) PUSH_TEMP(defaultElem);
@@ -43,7 +45,7 @@ ArrayList<PyObject*>* ArrayList<PyObject*>::createArrayList(
 
 template<>
 ArrayList<Klass*>* ArrayList<Klass*>::createArrayList(
-    Klass* defaultElem, int64_t n
+    Klass* defaultElem, int64_t n, bool isInMeta
 ) {
     START_COUNT_TEMP_OBJECTS;
     if (defaultElem != nullptr) PUSH_TEMP(defaultElem);

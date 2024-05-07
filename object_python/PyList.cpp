@@ -4,6 +4,8 @@
 
 PyList* PyList::createList(size_t n, bool isInMeta) {
     START_COUNT_TEMP_OBJECTS;
+    //PyList* list = new(isInMeta) PyList();
+    //list->isInMeta = isInMeta;
     PyList* list = new PyList();
     list->setKlass(ListKlass::getInstance());
     PUSH_TEMP(list);

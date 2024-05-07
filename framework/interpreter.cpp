@@ -180,7 +180,12 @@ void Interpreter::evalFrame() {
             case ByteCode::Binary_Module:
                 rhs = POP();
                 lhs = POP();
-                PUSH(lhs->mod(rhs));
+                if (isPyInteger(lhs) && isPyInteger(rhs)) {
+                    PUSH(toPyInteger(toRawInteger(lhs) % toRawInteger(rhs)));
+                }
+                else {
+                    PUSH(lhs->mod(rhs));
+                }
                 break;
 
             case ByteCode::Inplace_Add:
@@ -231,75 +236,7 @@ void Interpreter::evalFrame() {
             case ByteCode::Compare_Op: {
                 rhs = POP();  // 右操作数
                 lhs = POP();  // 左操作数
-                switch (op_arg) {
-                    case CompareCondition::Less:
-                        if (isPyInteger(rhs) && isPyInteger(lhs)) {
-                            PUSH(packBoolean(toRawInteger(lhs) < toRawInteger(rhs)));
-                        }
-                        else {
-                            PUSH(lhs->less(rhs));
-                        }
-                        break;
-                    case CompareCondition::Less_Equal:
-                        if (isPyInteger(rhs) && isPyInteger(lhs)) {
-                            PUSH(packBoolean(toRawInteger(lhs) <= toRawInteger(rhs)));
-                        }
-                        else {
-                            PUSH(lhs->less_equal(rhs));
-                        }
-                        break;
-                    case CompareCondition::Equal:
-                        if (isPyInteger(rhs) && isPyInteger(lhs)) {
-                            PUSH(packBoolean(toRawInteger(lhs) == toRawInteger(rhs)));
-                        }
-                        else {
-                            PUSH(lhs->equal(rhs));
-                        }
-                        break;
-                    case CompareCondition::Greater_Equal:
-                        if (isPyInteger(rhs) && isPyInteger(lhs)) {
-                            PUSH(packBoolean(toRawInteger(lhs) >= toRawInteger(rhs)));
-                        }
-                        else {
-                            PUSH(lhs->greater_equal(rhs));
-                        }
-                        break;
-                    case CompareCondition::Greater:
-                        if (isPyInteger(rhs) && isPyInteger(lhs)) {
-                            PUSH(packBoolean(toRawInteger(lhs) > toRawInteger(rhs)));
-                        }
-                        else {
-                            PUSH(lhs->greater(rhs));
-                        }
-                        break;
-                    case CompareCondition::Not_Equal:
-                        if (isPyInteger(rhs) && isPyInteger(lhs)) {
-                            PUSH(packBoolean(toRawInteger(lhs) != toRawInteger(rhs)));
-                        }
-                        else {
-                            PUSH(lhs->not_equal(rhs));
-                        }
-                        break;
-                    // is和is not关键字用于比较两个python对象的地址是否一致
-                    case CompareCondition::Is:
-                        PUSH(packBoolean(lhs == rhs));
-                        break;
-                    case CompareCondition::Is_Not:
-                        PUSH(packBoolean(lhs != rhs));
-                        break;
-                    case CompareCondition::In:
-                        PUSH(rhs->has(lhs));
-                        break;
-                    case CompareCondition::Not_In:
-                        PUSH(
-                            rhs->has(lhs) == Universe::PyTrue ? 
-                            Universe::PyFalse : Universe::PyTrue
-                        );
-                        break;
-                    default:
-                        printf("Unknown Compare Condition Code 0x%x\n", op_arg);
-                        exit(-1);
-                }
+                compareTwoPythonObjects(lhs, rhs, op_arg);
                 break;
             }
 
@@ -611,6 +548,76 @@ void Interpreter::evalFrame() {
     }
 }
 
+void Interpreter::compareTwoPythonObjects(PyObject* lhs, PyObject* rhs, uint16_t op) {
+
+    if (isPyInteger(lhs) && isPyInteger(rhs)) {
+        switch (op) {
+            case CompareCondition::Less:
+                PUSH(packBoolean((int64_t)lhs < (int64_t)rhs));
+                break;
+            case CompareCondition::Less_Equal:
+                PUSH(packBoolean((int64_t)lhs <= (int64_t)rhs));
+                break;
+            case CompareCondition::Equal:
+                PUSH(packBoolean((int64_t)lhs == (int64_t)rhs));
+                break;
+            case CompareCondition::Greater_Equal:
+                PUSH(packBoolean((int64_t)lhs >= (int64_t)rhs));
+                break;
+            case CompareCondition::Greater:
+                PUSH(packBoolean((int64_t)lhs > (int64_t)rhs));
+                break;
+            case CompareCondition::Not_Equal:
+                PUSH(packBoolean((int64_t)lhs != (int64_t)rhs));
+                break;
+            default:
+                printf("Illegal compare operator between integers.\n");
+                exit(-1);
+        }
+    }
+    else {
+        if (isPyInteger(lhs)) {
+            lhs = new PyInteger(toRawInteger(lhs));
+        }
+        switch (op) {
+            case CompareCondition::Less:
+                PUSH(lhs->less(rhs));
+                break;
+            case CompareCondition::Less_Equal:
+                PUSH(lhs->less_equal(rhs));
+                break;
+            case CompareCondition::Equal:
+                PUSH(lhs->equal(rhs));
+                break;
+            case CompareCondition::Greater_Equal:
+                PUSH(lhs->greater_equal(rhs));
+                break;
+            case CompareCondition::Greater:
+                PUSH(lhs->greater(rhs));
+                break;
+            case CompareCondition::Not_Equal:
+                PUSH(lhs->not_equal(rhs));
+                break;
+            // is和is not关键字用于比较两个python对象的地址是否一致
+            case CompareCondition::Is:
+                PUSH(packBoolean(lhs == rhs));
+                break;
+            case CompareCondition::Is_Not:
+                PUSH(packBoolean(lhs != rhs));
+                break;
+            case CompareCondition::In:
+                PUSH(rhs->has(lhs));
+                break;
+            case CompareCondition::Not_In:
+                PUSH(packBoolean(rhs->has(lhs) == Universe::PyTrue));
+                break;
+            default:
+                printf("Unknown Compare Condition Code 0x%x\n", op);
+                exit(-1);
+        }
+    }
+}
+
 void Interpreter::makeFunction(int16_t defaultArgCount, bool isClosure) {
     PyFunction* funcObject = new PyFunction(static_cast<CodeObject*>(POP()));
 
@@ -719,12 +726,10 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
     PyList* posExArgs = nullptr;
     PyDict* keywordExArgs = nullptr;
     CodeObject* code = nullptr;
-    PUSH_TEMP(posExArgs);
-    PUSH_TEMP(keywordExArgs);
-    PUSH_TEMP(code);
     if (isPythonFuncKlass(klass)) {
 
         code = calleeFunc->funcCode;
+        PUSH_TEMP(code);
         size_t formalArgNumber_total = code->_argCount;
         size_t formalArgNumber_default = 0;
 
@@ -732,9 +737,11 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
         int flags = code->_flag;
         if (flags & PyFunction::CO_VARARGS) {
             posExArgs = PyList::createList(rawArgNumber_pos - formalArgNumber_total);
+            PUSH_TEMP(posExArgs);
         }
         if (flags & PyFunction::CO_VARKEYWORDS) {
             keywordExArgs = PyDict::createDict();
+            PUSH_TEMP(keywordExArgs);
         }
 
         // 处理函数形参列表中的默认参数值

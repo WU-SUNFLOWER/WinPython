@@ -78,7 +78,7 @@ PyList* ByteCodeFileParser::getTuple(bool needToCheck) {
         return nullptr;
     }
     int32_t length = fileStream->readInt();  // tuple中元素的个数
-    PyList* tuple = PyList::createList(length);
+    PyList* tuple = PyList::createList(length, true);
     for (int32_t i = 0; i < length; ++i) {
         uint8_t objType = fileStream->readByte();
         switch (objType) {

@@ -15,6 +15,7 @@ void CodeKlass::oops_do(OopClosure* closure, PyObject* object) {
     closure->do_oop(reinterpret_cast<PyObject**>(&code->_names));
     closure->do_oop(reinterpret_cast<PyObject**>(&code->_varNames));
     closure->do_oop(reinterpret_cast<PyObject**>(&code->_freeVars));
+    assert(code->_freeVars->_container != nullptr);
     closure->do_oop(reinterpret_cast<PyObject**>(&code->_cellVars));
     //closure->do_oop(reinterpret_cast<PyObject**>(&code->_name));
     //closure->do_oop(reinterpret_cast<PyObject**>(&code->_fileName));

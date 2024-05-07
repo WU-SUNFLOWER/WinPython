@@ -30,7 +30,8 @@ Space::~Space() {
 }
 
 void* Space::allocate(size_t size) {
-    size = (size + 7) & ~7;
+    size = (size + Alignment_Mask) & ~Alignment_Mask;
+    assert(canAlloc(size));
     char* start = _top;
     _top += size;
     _capacity -= size;

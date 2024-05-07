@@ -4,6 +4,7 @@
 FrameObject::FrameObject(CodeObject* codeObject) {
     START_COUNT_TEMP_OBJECTS;
     pc = 0;
+   
     _codeObject = codeObject;
     _consts = codeObject->_consts;
     _names = codeObject->_names;
@@ -13,7 +14,6 @@ FrameObject::FrameObject(CodeObject* codeObject) {
     PUSH_TEMP(_consts);
     PUSH_TEMP(_names);
     PUSH_TEMP(_varNames);
-    PUSH_TEMP(_byteCodes);
 
     // 初始化一张空的映射表用于储存本地变量
     _locals = PyDict::createDict();

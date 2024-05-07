@@ -71,6 +71,7 @@ PyObject* NativeFunction::type_of(PyList* args) {
         exit(-1);
     }
     PyObject* arg = args->get(0);
+    if (isPyInteger(arg)) return IntegerKlass::getInstance()->getTypeObject();
     return arg->getKlass()->getTypeObject();
 }
 

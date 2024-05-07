@@ -8,6 +8,8 @@ class OopClosure;
 
 template <typename T>
 class ArrayList {
+    friend class PyList;
+    friend class ListKlass;
 private:
     size_t length = 0;  // 数组内有效元素的个数
     size_t capacity = 0;  // 数组开辟内存的总长度
@@ -16,7 +18,7 @@ private:
     
     ArrayList* expand(size_t targetLength = 0);
 public:
-    static ArrayList* createArrayList(T defaultElem, int64_t n = 8ll);
+    static ArrayList* createArrayList(T defaultElem, int64_t n = 8ll, bool isInMeta = false);
     
     // 向数组中的最后一个位置添加元素
     void push(T elem);
