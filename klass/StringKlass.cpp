@@ -98,6 +98,7 @@ PyObject* StringKlass::equal(const PyObject* lhs, const PyObject* rhs) const
     
     const PyString* _lhs = static_cast<const PyString*>(lhs);
     const PyString* _rhs = static_cast<const PyString*>(rhs);
+    
     checkLegalPyObject_DB(_lhs, _rhs);
 
     size_t llen = _lhs->getLength(), rlen = _rhs->getLength();
@@ -150,7 +151,7 @@ PyObject* StringKlass::len(const PyObject* strObject) const {
         }
         ++charLength;
     }
-    return new PyInteger(charLength);
+    return toPyInteger(charLength);
 }
 
 PyObject* StringKlass::subscr(PyObject* object, PyObject* subscription) const {

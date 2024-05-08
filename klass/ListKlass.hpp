@@ -35,6 +35,7 @@ public:
     // ∏˜÷÷‘ÀÀ„
     virtual PyObject* add(const PyObject* lhs, const PyObject* rhs) const override;
     virtual PyObject* mul(const PyObject* lhs, const PyObject* rhs) const override;
+    virtual PyObject* len(const PyObject* strObject) const override;
 
     virtual PyObject* subscr(PyObject* object, 
         PyObject* subscrption) const override;

@@ -163,7 +163,12 @@ void Interpreter::evalFrame() {
             case ByteCode::Binary_Multiply:
                 rhs = POP();  // 右操作数
                 lhs = POP();  // 左操作数
-                PUSH(lhs->mul(rhs));
+                if (isPyInteger(lhs) && isPyInteger(rhs)) {
+                    PUSH(toPyInteger(toRawInteger(lhs) * toRawInteger(rhs)));
+                }
+                else {
+                    PUSH(lhs->mul(rhs));
+                }
                 break;
 
             case ByteCode::Binary_Add:
@@ -415,10 +420,19 @@ void Interpreter::evalFrame() {
                 break;
             }
 
-            case ByteCode::Load_Fast:
-                assert(_curFrame->_fastLocals->get(op_arg) != nullptr);
-                PUSH(_curFrame->_fastLocals->get(op_arg));
+            case ByteCode::Load_Fast: {
+                PyObject* elem = _curFrame->_fastLocals->get(op_arg);
+                if (elem != nullptr) {
+                    PUSH(elem);
+                } else {
+                    PyString* varname = 
+                        static_cast<PyString*>(_curFrame->_varNames->get(op_arg));
+                    printf("local variable '%s' referenced before assignment\n",
+                        varname->getValue());
+                    exit(-1);
+                }
                 break;
+            }
 
             case ByteCode::Store_Fast:
                 _curFrame->_fastLocals->set(op_arg, POP());
@@ -442,7 +456,7 @@ void Interpreter::evalFrame() {
             // 获取cell variable并解引用，再加载到栈顶
             case ByteCode::Load_Deref: {
                 PyObject* object = _curFrame->_cells->get(op_arg);
-                if (object->getKlass() == CellKlass::getInstance()) {
+                if (!isPyInteger(object) && object->getKlass() == CellKlass::getInstance()) {
                     PyCell* cell = static_cast<PyCell*>(object);
                     PyObject* temp = cell->getObject();
                     PUSH(temp);
@@ -470,8 +484,7 @@ void Interpreter::evalFrame() {
                     // 找到了之后别忘了把cellObject挂载到栈桢的_cells上去
                     _curFrame->_cells->set(op_arg, cellObject);
                 }
-                assert(cellObject != nullptr);
-                if (cellObject->getKlass() != CellKlass::getInstance()) {
+                if (isPyInteger(cellObject) || cellObject->getKlass() != CellKlass::getInstance()) {
                     cellObject = new PyCell(_curFrame->_cells, op_arg);
                 }
                 PyObject* temp = static_cast<PyCell*>(cellObject)->getObject();
@@ -574,28 +587,30 @@ void Interpreter::compareTwoPythonObjects(PyObject* lhs, PyObject* rhs, uint16_t
                 printf("Illegal compare operator between integers.\n");
                 exit(-1);
         }
-    }
-    else {
-        if (isPyInteger(lhs)) {
-            lhs = new PyInteger(toRawInteger(lhs));
-        }
+    } else {
         switch (op) {
             case CompareCondition::Less:
+                if (isPyInteger(lhs)) lhs = new PyInteger(toRawInteger(lhs));
                 PUSH(lhs->less(rhs));
                 break;
             case CompareCondition::Less_Equal:
+                if (isPyInteger(lhs)) lhs = new PyInteger(toRawInteger(lhs));
                 PUSH(lhs->less_equal(rhs));
                 break;
             case CompareCondition::Equal:
+                if (isPyInteger(lhs)) lhs = new PyInteger(toRawInteger(lhs));
                 PUSH(lhs->equal(rhs));
                 break;
             case CompareCondition::Greater_Equal:
+                if (isPyInteger(lhs)) lhs = new PyInteger(toRawInteger(lhs));
                 PUSH(lhs->greater_equal(rhs));
                 break;
             case CompareCondition::Greater:
+                if (isPyInteger(lhs)) lhs = new PyInteger(toRawInteger(lhs));
                 PUSH(lhs->greater(rhs));
                 break;
             case CompareCondition::Not_Equal:
+                if (isPyInteger(lhs)) lhs = new PyInteger(toRawInteger(lhs));
                 PUSH(lhs->not_equal(rhs));
                 break;
             // is和is not关键字用于比较两个python对象的地址是否一致
@@ -719,7 +734,7 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
     }
 
     klass = calleeFunc->getKlass();
-    PyList* finalArgs = PyList::createList();
+    PyList* finalArgs = PyList::createList(rawArgNumber_pos);
     PUSH_TEMP(finalArgs);
 
     // 对于一般的python函数，还需要进行一系列的参数处理

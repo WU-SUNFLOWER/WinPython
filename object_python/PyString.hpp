@@ -7,10 +7,10 @@
 class PyString : public PyObject {
     friend class StringKlass;
 private:
-    uint8_t* ptr = nullptr;
     size_t length = 0;
     PyString() {};
 public:
+    uint8_t* ptr = nullptr;
     static PyString* createString(const char* str_source, bool isMeta = false);
     static PyString* createString(const uint8_t* source, size_t len_src, bool isMeta = false);
 

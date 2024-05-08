@@ -74,13 +74,6 @@ void Klass::print(const PyObject* lhs, int flags) const {
     printf(" object at 0x%p>", lhs);
 }
 
-void Klass::checkLegalPyObject(const PyObject* obj, const Klass* klass) {
-    if (obj == nullptr || obj->getKlass() != klass) {
-        printf("call IntegerKlass with illegal Python object.");
-        exit(-1);
-    }
-}
-
 PyObject* Klass::inplace_add(PyObject* lhs, PyObject* rhs) {
     printf("unsupported operand type(s) for +=: '%s' and '%s'",
         lhs->getKlassNameAsString(),

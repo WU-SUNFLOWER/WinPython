@@ -35,7 +35,7 @@ public:
 #define FLAG_PyString_PRINT_RAW 1
     virtual void print(const PyObject* lhs, int flags = 0) const;
 
-    static void checkLegalPyObject(const PyObject* obj, const Klass* klass);
+    //static void checkLegalPyObject(const PyObject* obj, const Klass* klass);
 
     void setKlassDict(PyDict* dict) {
         _klassDict = dict;
@@ -109,6 +109,10 @@ public:
     virtual void oops_do(OopClosure* closure, PyObject* object);
 };
 
-#define checkLegalPyObject_DB(x, y) (Klass::checkLegalPyObject(x, this), Klass::checkLegalPyObject(y, this))
+#define checkLegalPyObject(obj, klass) assert(obj != nullptr && obj->getKlass() == klass)
+#define checkLegalPyObject_DB(x, y) { \
+    checkLegalPyObject(x, this); \
+    checkLegalPyObject(y, this); \
+}
 
 #endif

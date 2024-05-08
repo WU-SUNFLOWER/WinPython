@@ -47,7 +47,7 @@ public:
     KEY getKeyByIndex(size_t index);
     KEY getValueByIndex(size_t index);
     // 根据key值，计算哈希表数组下标
-    size_t getIndex(KEY& key);
+    size_t getIndex(KEY key);
 
     MapItem<KEY, VAL>* getPtr() const {
         return ptr;

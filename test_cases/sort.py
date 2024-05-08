@@ -19,4 +19,4 @@ def foo():
         i += 1
     return l
 
-print(foo(l))
+print(foo())

@@ -82,11 +82,18 @@ PyObject* PyObject::less_equal(const PyObject* other) const {
 }
 
 PyObject* PyObject::equal(const PyObject* other) const {
-    if (getKlass() != other->getKlass()) {
-        puts("You can't compare objects of different data types.");
-        exit(-1);
+    if (isPyInteger(this)) {
+        return isPyInteger(other) ? packBoolean(this == other) : Universe::PyFalse;
     }
-    return getKlass()->equal(this, other);
+    else if (isPyInteger(other)) {
+        return Universe::PyFalse;
+    }
+    else {
+        if (getKlass() != other->getKlass()) {
+            return Universe::PyFalse;
+        }
+        return getKlass()->equal(this, other);
+    }
 }
 
 PyObject* PyObject::greater_equal(const PyObject* other) const {

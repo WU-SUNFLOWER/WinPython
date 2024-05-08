@@ -152,25 +152,35 @@ PyObject* ListKlass::add(const PyObject* lhs, const PyObject* rhs) const {
 
 PyObject* ListKlass::mul(const PyObject* lhs, const PyObject* rhs) const {
     checkLegalPyObject(lhs, ListKlass::getInstance());
-    checkLegalPyObject(rhs, IntegerKlass::getInstance());
-    const PyList* list = static_cast<const PyList*>(lhs);
-    const PyInteger* integer = static_cast<const PyInteger*>(rhs);
-    int64_t count = integer->getValue();
-    size_t len = list->getLength();
-    PyList* result = PyList::createList(count * len);
-    while (count-- > 0) {
-        for (size_t i = 0; i < len; ++i) {
-            result->append(list->get(i));
+    if (isPyInteger(rhs)) {
+        const PyList* list = static_cast<const PyList*>(lhs);
+        int64_t count = toRawInteger(rhs);
+        size_t len = list->getLength();
+        PyList* result = PyList::createList(count * len);
+        while (count-- > 0) {
+            for (size_t i = 0; i < len; ++i) {
+                result->append(list->get(i));
+            }
         }
+        return result;
     }
-    return result;
+    else {
+        puts("can't multiply sequence by non-int of type 'list'");
+        exit(-1);
+    }
+}
+
+PyObject* ListKlass::len(const PyObject* o) const {
+    const PyList* list = static_cast<const PyList*>(o);
+    return toPyInteger(list->getLength());
 }
 
 PyObject* ListKlass::subscr(PyObject* object, PyObject* subscrption) const {
-    //assert(object->getKlass() == this);
+
+    checkLegalPyObject(object, this);
+
     PyList* list = reinterpret_cast<PyList*>(object);
-    size_t pos = toRawInteger(subscrption);
-    /*
+    size_t pos;
     if (isPyInteger(subscrption)) {
         pos = toRawInteger(subscrption);
     }
@@ -178,11 +188,13 @@ PyObject* ListKlass::subscr(PyObject* object, PyObject* subscrption) const {
         assert(subscrption->getKlass() == IntegerKlass::getInstance());
         PyInteger* subscr = reinterpret_cast<PyInteger*>(subscrption);
         pos = subscr->getValue();
-    }    
-    */
+    }
 
     // Python中不允许对越界下标进行访问
-    //assert(pos < list->getLength());
+    if (pos >= list->getLength()) {
+        puts("list index out of range");
+        exit(-1);
+    }
     return list->get(pos);
 }
 
@@ -212,11 +224,11 @@ void ListKlass::oops_do(OopClosure* closure, PyObject* object) {
 void ListKlass::store_subscr(PyObject* object, 
     PyObject* subscription, PyObject* newObject
 ) const {
-    //checkLegalPyObject(object, this);
+    checkLegalPyObject(object, this);
 
     PyList* list = reinterpret_cast<PyList*>(object);
-    size_t pos = toRawInteger(subscription);
-    /*
+    size_t pos;
+    
     if (isPyInteger(subscription)) {
         pos = toRawInteger(subscription);
     }
@@ -224,13 +236,14 @@ void ListKlass::store_subscr(PyObject* object,
         assert(subscription->getKlass() == IntegerKlass::getInstance());
         PyInteger* subscr = reinterpret_cast<PyInteger*>(subscription);
         pos = subscr->getValue();
-    }    
-    */
-
-
+    }
 
     // Python中不允许对越界下标进行访问
-    //assert(pos < list->getLength());
+    if (pos >= list->getLength()) {
+        puts("list index out of range");
+        exit(-1);
+    }
+
     // 重新赋值
     list->set(pos, newObject);
 }
@@ -241,10 +254,18 @@ void ListKlass::delete_subscr(PyObject* object,
     assert(object->getKlass() == this &&
         subscription->getKlass() == IntegerKlass::getInstance());
     PyList* list = reinterpret_cast<PyList*>(object);
-    PyInteger* subscr = reinterpret_cast<PyInteger*>(subscription);
-    size_t pos = subscr->getValue();
+    size_t pos;
+    if (isPyInteger(subscription)) {
+        pos = toRawInteger(subscription);
+    }
+    else {
+        pos = reinterpret_cast<PyInteger*>(subscription)->getValue();
+    }
     // Python中不允许对越界下标进行访问
-    assert(pos < list->getLength());
+    if (pos >= list->getLength()) {
+        puts("list index out of range");
+        exit(-1);
+    }
     list->deleteByIndex(pos);
 }
 

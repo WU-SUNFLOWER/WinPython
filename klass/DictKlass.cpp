@@ -49,7 +49,7 @@ void DictKlass::print(const PyObject* object, int flags) const {
         PyObject* key = dict->getKeyByIndex(i);
         PyObject* value = dict->getValueByIndex(i);
         if (isPyInteger(key)) {
-            printf("%lld", toRawInteger(value));
+            printf("%lld", toRawInteger(key));
         } else {
             key->print();
         }
@@ -74,7 +74,12 @@ PyObject* DictKlass::subscr(PyObject* object, PyObject* subscription) const {
     PyObject* ret = static_cast<PyDict*>(object)->get(subscription);
     if (ret != nullptr) return ret;
     printf("Can't find key in your dict: ");
-    subscription->print();
+    if (isPyInteger(subscription)) {
+        printf("%lld", toRawInteger(subscription));
+    }
+    else {
+        subscription->print();
+    }
     exit(-1);
 }
 
@@ -88,7 +93,12 @@ void DictKlass::delete_subscr(PyObject* object, PyObject* subscription) const {
     PyDict* dict = static_cast<PyDict*>(object);
     if (dict->remove(subscription) == nullptr) {
         printf("Can't find key in your dict: ");
-        subscription->print();
+        if (isPyInteger(subscription)) {
+            printf("%lld", toRawInteger(subscription));
+        }
+        else {
+            subscription->print();
+        }
         exit(-1);
     }
 }

@@ -117,7 +117,7 @@ VAL Map<KEY, VAL>::get(KEY key) {
 
 template<typename KEY, typename VAL>
 bool Map<KEY, VAL>::has(KEY key) {
-    return getIndex(key) >= 0;
+    return getIndex(key) != -1;
 }
 
 template<typename KEY, typename VAL>
@@ -130,13 +130,24 @@ KEY Map<KEY, VAL>::getValueByIndex(size_t index) {
     return ptr[index].value;
 }
 
-template<typename KEY, typename VAL>
-size_t Map<KEY, VAL>::getIndex(KEY& key) {
+template<>
+size_t Map<PyObject*, PyObject*>::getIndex(PyObject* targetKey) {
     for (size_t i = 0; i < length; ++i) {
-        if (ptr[i].key->equal(key) == Universe::PyTrue) {
+        auto curkey = ptr[i].key;
+        bool cur_isInt = isPyInteger(curkey);
+        bool target_isInt = isPyInteger(targetKey);
+        if (
+            cur_isInt && target_isInt && curkey == targetKey ||
+            !cur_isInt && !target_isInt && curkey->equal(targetKey) == Universe::PyTrue
+        ) {
             return i;
         }
     }
+    return -1;
+}
+
+template<typename KEY, typename VAL>
+size_t Map<KEY, VAL>::getIndex(KEY key) {
     return -1;
 }
 

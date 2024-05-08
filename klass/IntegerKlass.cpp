@@ -25,7 +25,7 @@ void IntegerKlass::initialize() {
 
 void IntegerKlass::print(const PyObject* lhs, int flags) const {
     const PyInteger* _lhs = static_cast<const PyInteger*>(lhs);
-    Klass::checkLegalPyObject(_lhs, this);
+    checkLegalPyObject(_lhs, this);
     printf("%lld", _lhs->getValue());
 }
 
