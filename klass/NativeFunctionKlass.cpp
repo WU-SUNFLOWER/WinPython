@@ -30,10 +30,8 @@ size_t NativeFunctionKlass::getSize() {
 }
 
 void NativeFunctionKlass::initialize() {
-
     (new PyTypeObject())->setOwnKlass(this);
-
     setName(StringTable::str_builtin_func);
-
-    setSuperKlass(ObjectKlass::getInstance());
+    addSuper(ObjectKlass::getInstance());
+    orderSupers();
 }

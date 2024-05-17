@@ -12,6 +12,8 @@ private:
     PyList() {}
 public:
     static PyList* createList(size_t n = 8, bool isInMeta = false);
+
+    static PyList* copyList(PyList* src, bool isInMeta = false);
     
     ArrayList<PyObject*>* getContainer() const {
         return _container;

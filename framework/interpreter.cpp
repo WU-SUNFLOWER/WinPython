@@ -23,6 +23,8 @@
 #include "TypeKlass.hpp"
 #include "ObjectKlass.hpp"
 #include "PyTypeObject.hpp"
+#include "FloatKlass.hpp"
+#include "PyFloat.hpp"
 
 Interpreter* Interpreter::instance = nullptr;
 
@@ -49,6 +51,7 @@ Interpreter::Interpreter() {
     _builtins->set(StringTable::str_str, StringKlass::getInstance()->getTypeObject());
     _builtins->set(StringTable::str_list, ListKlass::getInstance()->getTypeObject());
     _builtins->set(StringTable::str_dict, DictKlass::getInstance()->getTypeObject());
+    _builtins->set(StringTable::str_float, FloatKlass::getInstance()->getTypeObject());
 
     _builtins->set(PyString::createString("sysgc"), PackNativeFunc(NativeFunction::sysgc));
 }
@@ -166,6 +169,10 @@ void Interpreter::evalFrame() {
                 if (isPyInteger(lhs) && isPyInteger(rhs)) {
                     PUSH(toPyInteger(toRawInteger(lhs) * toRawInteger(rhs)));
                 }
+                else if (isPyInteger(lhs) && rhs->getKlass() == FloatKlass::getInstance())
+                {
+                    PUSH(rhs->mul(lhs));
+                }
                 else {
                     PUSH(lhs->mul(rhs));
                 }
@@ -177,10 +184,66 @@ void Interpreter::evalFrame() {
                 if (isPyInteger(lhs) && isPyInteger(rhs)) {
                     PUSH(toPyInteger(toRawInteger(lhs) + toRawInteger(rhs)));
                 }
-                else {
+                else if (isPyInteger(lhs) && rhs->getKlass() == FloatKlass::getInstance())
+                {
+                    PUSH(rhs->add(lhs));
+                }
+                else{
+
                     PUSH(lhs->add(rhs));
                 }
                 break;
+
+            case ByteCode::Binary_Divide:
+                rhs = POP();  // 右操作数
+                lhs = POP();  // 左操作数
+                if (isPyInteger(lhs) && isPyInteger(rhs)) {
+                    int64_t lhs_value = toRawInteger(lhs);
+                    int64_t rhs_value = toRawInteger(rhs);
+                    if (rhs_value == 0) {
+                        printf("division by zero");
+                        exit(-1);
+                    }
+                    PUSH(new PyFloat((double)lhs_value / (double)rhs_value));
+                }
+                else if (isPyInteger(lhs) && rhs->getKlass() == FloatKlass::getInstance()) {
+                    if (static_cast<PyFloat*>(rhs)->getValue() == 0.0){
+                        printf("division by zero");
+                        exit(-1);
+                    }
+                    PUSH(new PyFloat(toRawInteger(lhs) / static_cast<PyFloat*>(rhs)->getValue()));
+                }
+               
+                else {
+                    PUSH(lhs->div(rhs));
+                }
+                break;
+
+            case ByteCode::Binary_FloorDivide:
+                rhs = POP();  
+                lhs = POP();  
+                if (isPyInteger(lhs) && isPyInteger(rhs)) {
+                    int64_t lhs_value = toRawInteger(lhs);
+                    int64_t rhs_value = toRawInteger(rhs);
+                    if (rhs_value == 0) {
+                        fprintf(stderr, "ZeroDivisionError: division by zero\n");
+                        exit(-1);
+                    }
+                    
+                    PUSH(toPyInteger(lhs_value / rhs_value));
+                }
+                else {
+                    
+                    double lhs_value = isPyInteger(lhs) ? (double)toRawInteger(lhs) : static_cast<PyFloat*>(lhs)->getValue();
+                    double rhs_value = isPyInteger(rhs) ? (double)toRawInteger(rhs) : static_cast<PyFloat*>(rhs)->getValue();
+                    if (rhs_value == 0.0) {
+                        fprintf(stderr, "ZeroDivisionError: division by zero\n");
+                        exit(-1);
+                    }
+                    PUSH(new PyFloat(floor(lhs_value / rhs_value)));
+                }
+                break;
+
 
             case ByteCode::Binary_Module:
                 rhs = POP();
@@ -204,17 +267,26 @@ void Interpreter::evalFrame() {
                 }
                 break;
 
-            case ByteCode::Binary_Subtract: {
+            case ByteCode::Binary_Subtract:
                 rhs = POP();  // 右操作数
                 lhs = POP();  // 左操作数
                 if (isPyInteger(lhs) && isPyInteger(rhs)) {
                     PUSH(toPyInteger(toRawInteger(lhs) - toRawInteger(rhs)));
                 }
                 else {
-                    PUSH(lhs->sub(rhs));
+                    if (isPyInteger(lhs)) {
+                        // 如果 lhs 是整数，就将它转换为浮点数
+                        double lhsValue = static_cast<double>(toRawInteger(lhs));
+                        PyObject* lhsFloat = new PyFloat(lhsValue);
+                        PUSH(lhsFloat->sub(rhs));
+                    }
+                    else {
+                        PUSH(lhs->sub(rhs));
+                    }
                 }
                 break;
-            }
+
+
 
 
             case ByteCode::Binary_Subscr:
@@ -249,10 +321,11 @@ void Interpreter::evalFrame() {
             // 该指令执行的是绝对地址跳转
             case ByteCode::Pop_Jump_If_False:
                 lhs = POP();
-                if (lhs == Universe::PyFalse) {
+                if (!isPyTrue(lhs)) { 
                     PC = op_arg;
                 }
                 break;
+
             
             // 无条件的绝对地址跳转
             case ByteCode::Jump_Absolute:
@@ -656,14 +729,6 @@ void Interpreter::makeFunction(int16_t defaultArgCount, bool isClosure) {
     PUSH(funcObject);
 }
 
-#define isCommonFuncKlass(k) \
-    (k == FunctionKlass::getInstance() || \
-    k == NativeFunctionKlass::getInstance())
-#define isNativeFuncKlass(k) (k == NativeFunctionKlass::getInstance())
-#define isPythonFuncKlass(k) (k == FunctionKlass::getInstance())
-#define isMethod(k) (k == MethodKlass::getInstance())
-#define isTypeObject(k) (k == TypeKlass::getInstance())
-
 /*
 callableObject —— 从栈上取出来的被调用对象，可能是Python函数、Python方法
     或者C++内建函数
@@ -893,6 +958,12 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
         // 创建新栈桢
         FrameObject* calleeFrame = 
             FrameObject::allocate(calleeFunc, _curFrame, false, finalArgs);
+
+        if (owner) {
+            calleeFrame->_globals->set(StringTable::str_class, 
+                owner->getKlass()->getTypeObject());
+        }
+
         /* 
            将与callee绑定的cells（即callee函数运行时
            需要依赖的freevars），装载到新的栈桢上去。

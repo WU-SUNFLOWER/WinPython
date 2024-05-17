@@ -2,6 +2,7 @@
 #include "PyInteger.hpp"
 #include <cassert>
 #include <cstdlib>
+#include <cstring> 
 #include "Universe.hpp"
 
 ByteCodeFileParser::ByteCodeFileParser(BufferedInputStream* stream) {
@@ -31,7 +32,7 @@ CodeObject* ByteCodeFileParser::parseCodeObject() {
 
     PyString* byteCodes = getByteCodes();
     PyList* consts = getTuple();
-    PyList* names = getTuple();  
+    PyList* names = getTuple();
     PyList* varNames = getTuple();
     PyList* freeVars = getTuple();
     PyList* callVars = getTuple();
@@ -40,7 +41,7 @@ CodeObject* ByteCodeFileParser::parseCodeObject() {
     // CodeObject对象的名称
     // 全局CodeObject对象的名称默认为"<module>"
     // 函数对应的CodeObject对象的名称与函数名一致
-    PyString* name = getName();  
+    PyString* name = getName();
     int32_t beginLineNo = fileStream->readInt();
     PyString* lnotab = getNoTable();
 
@@ -71,6 +72,21 @@ PyString* ByteCodeFileParser::getString() {
     return s;
 }
 
+PyFloat* ByteCodeFileParser::getFloat() {
+    if (1) {
+        return getFloatValue();
+    }
+    else {
+        exit(-1);
+    }
+}
+
+PyFloat* ByteCodeFileParser::getFloatValue() {
+    double value = fileStream->readDouble();
+    return PyFloat::createFloat(value);
+}
+
+
 PyList* ByteCodeFileParser::getTuple(bool needToCheck) {
     // tuple以`(`字符（0x28）作为起始标志
     if (needToCheck && fileStream->readByte() != '(') {
@@ -83,40 +99,46 @@ PyList* ByteCodeFileParser::getTuple(bool needToCheck) {
         uint8_t objType = fileStream->readByte();
         switch (objType) {
             // 元素为Code Object
-            case 'c':
-                tuple->append(parseCodeObject());
-                break;
+        case 'c':
+            tuple->append(parseCodeObject());
+            break;
             // 元素为int
-            case 'i':
-                //tuple->append(new PyInteger(fileStream->readInt()));
-                tuple->append(toPyInteger(fileStream->readInt()));
-                break;
+        case 'i':
+            //tuple->append(new PyInteger(fileStream->readInt()));
+            tuple->append(toPyInteger(fileStream->readInt()));
+            break;
             // 元素为None Object
-            case 'N':
-                tuple->append(Universe::PyNone);
-                break;
+        case 'N':
+            tuple->append(Universe::PyNone);
+            break;
             // 元素为字符串
-            case 's':
-                tuple->append(getString());
-                break;
+        case 's':
+            tuple->append(getString());
+            break;
             // 元素为字符串
-            case 't': {
-                PyString* str = getString();
-                tuple->append(str);
-                stringTable->push(str);
-                break;
-            }
+        case 't': {
+            PyString* str = getString();
+            tuple->append(str);
+            stringTable->push(str);
+            break;
+        }
+                // 元素为float
+        case 'f':
+            tuple->append(getFloat());
+            break;
             // 元素为int
-            case 'R': 
-                tuple->append(stringTable->get(fileStream->readInt()));
-                break;
-            case '(':
-                tuple->append(getTuple(false));
-                break;
+        case 'R':
+            tuple->append(stringTable->get(fileStream->readInt()));
+            break;
+        case '(':
+            tuple->append(getTuple(false));
+            break;
+
+
             // 遇到无法解析的object type，直接退出程序
-            default:
-                printf("Unknown Object Type 0x%x\n", objType);
-                exit(-1);
+        default:
+            printf("Unknown Object Type 0x%x\n", objType);
+            exit(-1);
         }
     }
     return tuple;
@@ -125,20 +147,20 @@ PyList* ByteCodeFileParser::getTuple(bool needToCheck) {
 PyString* ByteCodeFileParser::getName() {
     uint8_t objType = fileStream->readByte();
     switch (objType) {
-        case 's': {
-            PyString* str = getString();
-            return str;
-        }
-        case 't': {
-            PyString* str = getString();
-            stringTable->push(str);
-            return str;
-        }
-        case 'R':
-            return reinterpret_cast<PyString*>(stringTable->get(fileStream->readInt()));
-        default:
-            printf("Unknown Object Type 0x%x When executing ByteCodeFileParser::getName() \n", objType);
-            exit(-1);
+    case 's': {
+        PyString* str = getString();
+        return str;
+    }
+    case 't': {
+        PyString* str = getString();
+        stringTable->push(str);
+        return str;
+    }
+    case 'R':
+        return reinterpret_cast<PyString*>(stringTable->get(fileStream->readInt()));
+    default:
+        printf("Unknown Object Type 0x%x When executing ByteCodeFileParser::getName() \n", objType);
+        exit(-1);
     }
 }
 

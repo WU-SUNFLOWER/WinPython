@@ -50,7 +50,8 @@ enum ByteCode : uint8_t {
     Load_Closure = 0x87,  // 加载free variable到栈顶
     Load_Deref = 0x88,  // 获取cell variable并解引用，再加载到栈顶
     Store_Deref = 0x89,  // 弹出栈顶元素，将其储存为cell variable
-
+    Binary_Divide = 0x15,
+    Binary_FloorDivide = 0x1a,
 };
 
 enum CompareCondition : uint8_t {

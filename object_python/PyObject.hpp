@@ -49,6 +49,7 @@ public:
     PyObject* mul(PyObject* other) const;
     PyObject* div(PyObject* other) const;
     PyObject* mod(PyObject* other) const;
+    PyObject* floor_div(PyObject* other) const;
 
     PyObject* inplace_add(PyObject* other);
 
@@ -58,6 +59,8 @@ public:
     PyObject* greater_equal(const PyObject* other) const;
     PyObject* greater(const PyObject* other) const;
     PyObject* not_equal(const PyObject* other) const;
+
+    PyObject* isBoolTrue();
 
     // 计算长度
     PyObject* len() const;
@@ -80,6 +83,10 @@ public:
 
     /*公用方法 End*/
     
+    virtual PyObject* rsub(const PyObject* minuend) const {
+        return nullptr;
+    }
+
     // GC相关接口
     void* getNewAddr();
     void setNewAddr(void*);

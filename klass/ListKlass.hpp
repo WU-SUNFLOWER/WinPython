@@ -37,7 +37,7 @@ public:
     virtual PyObject* mul(const PyObject* lhs, const PyObject* rhs) const override;
     virtual PyObject* len(const PyObject* strObject) const override;
 
-    virtual PyObject* subscr(PyObject* object, 
+    virtual PyObject* subscr(PyObject* object,
         PyObject* subscrption) const override;
     virtual void store_subscr(PyObject* object,
         PyObject* subscription, PyObject* newObject) const override;
@@ -48,6 +48,8 @@ public:
     virtual PyObject* getIter(PyObject* object) const override;
 
     virtual void oops_do(OopClosure* closure, PyObject* object) override;
+
+    virtual PyObject* isBoolTrue(PyObject* object) override;
 };
 
 class ListIteratorKlass : public Klass {
@@ -61,7 +63,7 @@ public:
         }
         return instance;
     }
-    virtual PyObject* next(PyObject*) const override; 
+    virtual PyObject* next(PyObject*) const override;
     virtual PyObject* getIter(PyObject* object) const override {
         return object;
     };

@@ -56,9 +56,14 @@ PyObject* PyObject::mul(PyObject* other) const {
 PyObject* PyObject::div(PyObject* other) const {
     return getKlass()->div(this, other);
 }
-
+ 
 PyObject* PyObject::mod(PyObject* other) const {
     return getKlass()->mod(this, other);
+}
+
+PyObject* PyObject::floor_div(PyObject* other) const
+{
+    return getKlass()->floor_div(this, other);
 }
 
 PyObject* PyObject::inplace_add(PyObject* other) {
@@ -150,6 +155,10 @@ PyObject* PyObject::has(PyObject* target) {
 
 PyObject* PyObject::getIter() {
     return getKlass()->getIter(this);
+}
+
+PyObject* PyObject::isBoolTrue() {
+    return getKlass()->isBoolTrue(this);
 }
 
 PyObject* PyObject::next() {

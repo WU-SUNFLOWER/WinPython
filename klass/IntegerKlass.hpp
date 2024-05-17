@@ -41,6 +41,7 @@ public:
     virtual PyObject* allocateInstance(PyObject* callable, PyList* args) override;
 
     virtual void oops_do(OopClosure*, PyObject*) override {};
+    virtual PyObject* isBoolTrue(PyObject* object) override;
 };
 
 #endif

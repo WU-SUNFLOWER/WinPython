@@ -27,6 +27,11 @@ public:
     static PyString* str_object;
     static PyString* str_mod;
     static PyString* str_init;
+    static PyString* str_bool;
+    static PyString* str_NoneType;
+    static PyString* str_float;
+    static PyString* str_mro;
+    static PyString* str_class;
 };
 
 #endif

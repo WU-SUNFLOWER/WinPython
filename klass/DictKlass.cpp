@@ -38,7 +38,7 @@ void DictKlass::initialize() {
 
     (new PyTypeObject())->setOwnKlass(this);
     setName(StringTable::str_dict);
-    setSuperKlass(ObjectKlass::getInstance());
+    addSuper(ObjectKlass::getInstance());
 }
 
 void DictKlass::print(const PyObject* object, int flags) const {
@@ -157,6 +157,18 @@ void DictIteratorKlass<type>::oops_do(OopClosure* closure, PyObject* object) {
     DictIterator* iter = static_cast<DictIterator*>(object);
     closure->do_oop(iter->getOwnerAddr());
 }
+
+PyObject* DictKlass::isBoolTrue(PyObject* object) {
+    PyDict* dict = static_cast<PyDict*>(object);
+    if (dict->getSize() == 0) {
+        return Universe::PyFalse;
+    }
+
+    return Universe::PyTrue;
+}
+
+
+
 
 template class DictIteratorKlass<DictIterType::Iter_Keys>;
 template class DictIteratorKlass<DictIterType::Iter_Values>;

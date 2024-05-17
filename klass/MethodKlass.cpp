@@ -20,12 +20,10 @@ void MethodKlass::print(const PyObject* lhs, int flags) const {
 }
 
 void MethodKlass::initialize() {
-
     (new PyTypeObject())->setOwnKlass(this);
-
     setName(StringTable::str_method);
-
-    setSuperKlass(ObjectKlass::getInstance());
+    addSuper(ObjectKlass::getInstance());
+    orderSupers();
 }
 
 void MethodKlass::oops_do(OopClosure* closure, PyObject* object) {

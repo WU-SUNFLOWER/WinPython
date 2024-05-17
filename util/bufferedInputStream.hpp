@@ -1,6 +1,7 @@
 #ifndef Buffered_Input_Stream_Hpp
 #define Buffered_Input_Stream_Hpp
 
+#include <string>
 #include <cstdio>
 #include <cstdint>
 #include <cstdlib>
@@ -36,6 +37,13 @@ public:
     void unreadByte() {
         --index;
     }
+
+
+
+
+
+
+
     int32_t readInt() {
         // 假设pyc文件采用小端序储存整型
         uint32_t b1 = readByte(); // 最低位
@@ -44,6 +52,19 @@ public:
         uint32_t b4 = readByte();  // 最高位
         return b4 << 24 | b3 << 16 | b2 << 8 | b1;
     }
+
+    double readDouble() {
+        int32_t length = readByte();
+        char* str = new char[length + 1];
+        for (int32_t i = 0; i < length; ++i) {
+            str[i] = readByte();
+        }
+        str[length] = '\0';
+        double value = std::stod(str);
+        delete[] str;
+        return value;
+    }
+
     void close() {
         if (fp != nullptr) {
             fclose(fp);

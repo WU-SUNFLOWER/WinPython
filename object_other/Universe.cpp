@@ -9,6 +9,13 @@
 #include "MethodKlass.hpp"
 #include "StringKlass.hpp"
 #include "TypeKlass.hpp"
+#include "PyBool.hpp"
+#include "PyNone.hpp"
+#include "BoolKlass.hpp"
+#include "NoneKlass.hpp"
+#include "FloatKlass.hpp"
+#include "ObjectKlass.hpp"
+
 
 PyObject* Universe::PyTrue = nullptr;
 PyObject* Universe::PyFalse = nullptr;
@@ -37,10 +44,11 @@ void Universe::genesis() {
 
     StringTable::initialize();
 
-    PyTrue = new PyInteger(1);
-    PyFalse = new PyInteger(0);
-    PyNone = PyString::createString("None");
+    PyTrue = PyBool::createBool(true);
+    PyFalse = PyBool::createBool(false);
+    PyNone = PyNone::createNone();
 
+    ObjectKlass::getInstance()->initialize();
     DictKlass::getInstance()->initialize();
     FunctionKlass::getInstance()->initialize();
     IntegerKlass::getInstance()->initialize();
@@ -49,7 +57,9 @@ void Universe::genesis() {
     NativeFunctionKlass::getInstance()->initialize();
     StringKlass::getInstance()->initialize();
     TypeKlass::getInstance()->initialize();
-
+    BoolKlass::getInstance()->initialize();
+    NoneKlass::getInstance()->initialize();
+    FloatKlass::getInstance()->initialize();
 
     
 }

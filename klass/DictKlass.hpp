@@ -35,6 +35,7 @@ public:
         PyObject* subscription) const override;
 
     virtual void oops_do(OopClosure* closure, PyObject* object) override;
+    virtual PyObject* isBoolTrue(PyObject* object) override;
 };
 
 enum DictIterType {Iter_Keys, Iter_Values, Iter_Items};
@@ -58,6 +59,7 @@ public:
     virtual PyObject* next(PyObject* object) const override; 
     
     virtual void oops_do(OopClosure* closure, PyObject* object) override;
+    
 };
 
 #endif

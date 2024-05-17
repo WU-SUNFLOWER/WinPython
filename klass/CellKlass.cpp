@@ -12,3 +12,5 @@ void CellKlass::oops_do(OopClosure* closure, PyObject* object) {
     PyCell* cell = static_cast<PyCell*>(object);
     closure->do_oop(reinterpret_cast<PyObject**>(&cell->_list));
 }
+
+

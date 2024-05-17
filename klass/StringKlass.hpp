@@ -35,6 +35,7 @@ public:
 
     // GC相关接口
     virtual void oops_do(OopClosure* closure, PyObject* object) override;
+    virtual PyObject* isBoolTrue(PyObject* object) override;
 };
 
 #endif

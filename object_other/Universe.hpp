@@ -31,6 +31,8 @@ public:
     static void refreshTempRefRecordStack(int, int, int, int);
 };
 
+#define NotFound -1
+
 #define isTrue(obj) ((obj) == Universe::PyTrue)
 #define isFalse(obj) ((obj) == Universe::PyFalse)
 #define packBoolean(boolean) ((boolean) ? Universe::PyTrue : Universe::PyFalse)
@@ -76,5 +78,14 @@ public:
 #define isPyInteger(x) ((uintptr_t)(x) & 1)
 #define toRawInteger(x) ((int64_t)((int64_t)(x) >> 1))
 #define toPyInteger(x) ((PyObject*)(((uintptr_t)(x) << 1) | 1))
+#define isPyTrue(x) (isPyInteger(x) ? toRawInteger(x) != 0 : x->isBoolTrue() == Universe::PyTrue)
+
+#define isCommonFuncKlass(k) \
+    (k == FunctionKlass::getInstance() || \
+    k == NativeFunctionKlass::getInstance())
+#define isNativeFuncKlass(k) (k == NativeFunctionKlass::getInstance())
+#define isPythonFuncKlass(k) (k == FunctionKlass::getInstance())
+#define isMethod(k) (k == MethodKlass::getInstance())
+#define isTypeObject(k) (k == TypeKlass::getInstance())
 
 #endif

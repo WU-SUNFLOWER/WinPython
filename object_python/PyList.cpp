@@ -14,6 +14,18 @@ PyList* PyList::createList(size_t n, bool isInMeta) {
     return list;
 }
 
+PyList* PyList::copyList(PyList* src, bool isInMeta) {
+    START_COUNT_TEMP_OBJECTS;
+    PUSH_TEMP(src);
+    size_t length = src->getLength();
+    PyList* dst = PyList::createList(length, isInMeta);
+    for (size_t i = 0; i < length; ++i) {
+        dst->set(i, src->get(i));
+    }
+    END_COUNT_TEMP_OBJECTS;
+    return dst;
+}
+
 size_t PyList::index(PyObject* target) {
     for (size_t i = 0; i < getLength(); ++i) {
         if (target->equal(get(i)) == Universe::PyTrue) {

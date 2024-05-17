@@ -14,7 +14,8 @@ size_t FunctionKlass::getSize() {
 void FunctionKlass::initialize() {
     (new PyTypeObject())->setOwnKlass(this);
     setName(StringTable::str_function);
-    setSuperKlass(ObjectKlass::getInstance());
+    addSuper(ObjectKlass::getInstance());
+    orderSupers();
 }
 
 void FunctionKlass::print(const PyObject* lhs, int flags) const {

@@ -15,12 +15,10 @@ size_t IntegerKlass::getSize() {
 }
 
 void IntegerKlass::initialize() {
-
     (new PyTypeObject())->setOwnKlass(this);
-
     setName(StringTable::str_int);
-
-    setSuperKlass(ObjectKlass::getInstance());
+    addSuper(ObjectKlass::getInstance());
+    orderSupers();
 }
 
 void IntegerKlass::print(const PyObject* lhs, int flags) const {
@@ -163,4 +161,13 @@ PyObject* IntegerKlass::allocateInstance(PyObject* callable, PyList* args) {
             exit(-1);
         }
     }
+}
+
+PyObject* IntegerKlass::isBoolTrue(PyObject* object) {
+    if (toRawInteger(object) == 0){
+        return Universe::PyFalse;
+    }
+
+    return Universe::PyTrue;
+
 }

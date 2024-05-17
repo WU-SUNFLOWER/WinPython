@@ -16,6 +16,7 @@ public:
     }
     virtual size_t getSize() override;
     virtual void oops_do(OopClosure* closure, PyObject* object) override;
+
 };
 
 #endif

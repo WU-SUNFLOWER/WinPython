@@ -47,23 +47,53 @@ b --instance--> <class 'B'> --own--> User B-Klass
 PyObject* NativeFunction::isinstance(PyList* args) {
     PyObject* inst = args->get(0);
     PyTypeObject* cls = static_cast<PyTypeObject*>(args->get(1));
+
     if (cls->getKlass() != TypeKlass::getInstance()) {
         printf("isinstance() arg 2 must be a class");
         exit(-1);
     }
+
     // 获取与Python inst对象绑定的C++ Klass
-    // 这个klass反映了这个对象是哪个Python类的实例
     const Klass* klass = inst->getKlass();
     // 获取cls这个Python type对象（class）是哪个C++ Klass的映射
     Klass* targetKlass = cls->getOwnKlass();
+
+    // 遍历klass的继承层次结构
+    PyList* superKlasses = klass->getSuperKlass();
     while (klass != nullptr) {
         if (klass == targetKlass) {
             return Universe::PyTrue;
         }
-        klass = klass->getSuperKlass();
+        // 其他处理逻辑...
+        bool found = false;
+        for (int i = 0; i < superKlasses->getLength(); ++i) {
+            PyTypeObject* superTypeObj = static_cast<PyTypeObject*>(superKlasses->get(i));
+            Klass* superKlass = superTypeObj->getOwnKlass();
+            if (superKlass == targetKlass) {
+                return Universe::PyTrue;
+            }
+            if (superKlass == klass) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            klass = nullptr;
+            for (int i = 0; i < superKlasses->getLength(); ++i) {
+                PyTypeObject* superTypeObj = static_cast<PyTypeObject*>(superKlasses->get(i));
+                Klass* superKlass = superTypeObj->getOwnKlass();
+                PyList* parentSuperKlasses = superKlass->getSuperKlass();
+                if (parentSuperKlasses->getLength() > 0) {
+                    klass = superKlass;
+                    superKlasses = parentSuperKlasses;
+                    break;
+                }
+            }
+        }
     }
     return Universe::PyFalse;
 }
+
 
 PyObject* NativeFunction::type_of(PyList* args) {
     if (args->getLength() != 1) {
@@ -204,4 +234,10 @@ PyObject* NativeFunction::id(PyList* args) {
 PyObject* NativeFunction::sysgc(PyList* args) {
     Universe::PyHeap->gc();
     Py_RETURN_NONE;
+}
+
+PyObject* NativeFunction::type_object_mro(PyList* args) {
+    PyTypeObject* type = static_cast<PyTypeObject*>(args->get(0));
+    PyList* result = PyList::copyList(type->getOwnKlass()->mro());
+    return result;
 }

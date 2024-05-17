@@ -18,6 +18,11 @@ PyString* StringTable::str_dict = nullptr;
 PyString* StringTable::str_object = nullptr;
 PyString* StringTable::str_isinstance = nullptr;
 PyString* StringTable::str_typeof = nullptr;
+PyString* StringTable::str_bool = nullptr;
+PyString* StringTable::str_float = nullptr;
+PyString* StringTable::str_NoneType = nullptr;
+PyString* StringTable::str_mro = nullptr;
+PyString* StringTable::str_class = nullptr;
 
 void StringTable::initialize() {
     str_len = PyString::createString("len", true);
@@ -27,6 +32,7 @@ void StringTable::initialize() {
     str_next = PyString::createString("__next__", true);
     str_mod = PyString::createString("__module__", true);
     str_init = PyString::createString("__init__", true);
+    str_class = PyString::createString("__class__", true);
     str_list = PyString::createString("list", true);
     str_type = PyString::createString("type", true);
     str_typeof = PyString::createString("typeof", true);
@@ -38,4 +44,8 @@ void StringTable::initialize() {
     str_dict = PyString::createString("dict", true);
     str_object = PyString::createString("object", true);
     str_isinstance = PyString::createString("isinstance", true);
+    str_bool = PyString::createString("bool", true);
+    str_float = PyString::createString("float", true);
+    str_NoneType = PyString::createString("NoneType", true);
+    str_mro = PyString::createString("mro", true);
 }

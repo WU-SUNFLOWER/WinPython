@@ -16,12 +16,14 @@ private:
 
     PyString* _name = nullptr;
 
-    Klass* _super = nullptr; // 指向当前klass的父类（基类）
+    PyList* _mro = nullptr;
+    PyList* _supers = nullptr;  // 父类（type object）列表
 
     PyTypeObject* _type_object = nullptr;  // 指向当前klass对应的PyTypeObject对象
 
 protected:
     Klass();
+    PyObject* find_in_parents(PyObject* x, PyObject* y);
 public:
     // 获取Python对象会占用的空间大小
     virtual size_t getSize();
@@ -48,6 +50,7 @@ public:
         _type_object = object;
     }
     PyObject* getTypeObject() {
+        assert(_type_object != nullptr);
         return reinterpret_cast<PyObject*>(_type_object);
     }
 
@@ -58,11 +61,20 @@ public:
         return _name;
     }
 
-    void setSuperKlass(Klass* super) {
-        _super = super;
+    PyList* mro() {
+        return _mro;
     }
-    Klass* getSuperKlass() const {
-        return _super;
+
+    void setSuperList(PyList* supers) {
+        _supers = supers;
+    }
+
+    void addSuper(Klass* x);
+
+    void orderSupers();
+
+    PyList* getSuperKlass() const {
+        return _supers;
     }
 
     // 各种比大小
@@ -79,6 +91,7 @@ public:
     virtual PyObject* mul(const PyObject* lhs, const PyObject* rhs) const { return 0; };
     virtual PyObject* div(const PyObject* lhs, const PyObject* rhs) const { return 0; };
     virtual PyObject* mod(const PyObject* lhs, const PyObject* rhs) const { return 0; };
+    virtual PyObject* floor_div(const PyObject* lhs, const PyObject* rhs) const { return 0; };
     virtual PyObject* inplace_add(PyObject* lhs, PyObject* rhs);
 
     // 其他工具函数
@@ -89,12 +102,18 @@ public:
     virtual void setattr(PyObject* object, PyObject* attr, PyObject* value);
     // 读取下标
     virtual PyObject* subscr(PyObject* object,
-        PyObject* subscrption) const { return 0; }
+        PyObject* subscrption) const {
+        return 0;
+    }
     // 设置下标
-    virtual void store_subscr(PyObject* object, 
-        PyObject* subscription, PyObject* newObject) const { return; }
+    virtual void store_subscr(PyObject* object,
+        PyObject* subscription, PyObject* newObject) const {
+        return;
+    }
     virtual void delete_subscr(PyObject* object,
-        PyObject* subscription) const {return;}
+        PyObject* subscription) const {
+        return;
+    }
     virtual PyObject* has(PyObject* object, PyObject* target) const { return 0; }
 
     // 迭代器相关
@@ -107,6 +126,9 @@ public:
     // GC相关接口
     virtual void oops_do(OopClosure* closure);
     virtual void oops_do(OopClosure* closure, PyObject* object);
+
+    virtual PyObject* isBoolTrue(PyObject* object);
+
 };
 
 #define checkLegalPyObject(obj, klass) assert(obj != nullptr && obj->getKlass() == klass)

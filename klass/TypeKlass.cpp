@@ -10,6 +10,10 @@
 #include "PyDict.hpp"
 #include "StringKlass.hpp"
 #include <stdlib.h>
+#include "nativeFunctions.hpp"
+#include "FunctionKlass.hpp"
+#include "NativeFunctionKlass.hpp"
+#include "PyMethod.hpp"
 
 TypeKlass* TypeKlass::instance = nullptr;
 
@@ -45,10 +49,16 @@ void TypeKlass::print(const PyObject* object, int flag) const {
 }
 
 void TypeKlass::initialize() {
-    auto type = new PyTypeObject();
+    PyTypeObject* type = new PyTypeObject();
     type->setOwnKlass(this);
     setName(StringTable::str_type);
-    setSuperKlass(ObjectKlass::getInstance());
+    addSuper(ObjectKlass::getInstance());
+    orderSupers();
+
+    PyDict* klassDict = PyDict::createDict();
+    klassDict->set(StringTable::str_mro, 
+        PackNativeFunc(NativeFunction::type_object_mro));
+    setKlassDict(klassDict);
 }
 
 PyObject* TypeKlass::getattr(PyObject* object, PyObject* attr) {
@@ -56,20 +66,35 @@ PyObject* TypeKlass::getattr(PyObject* object, PyObject* attr) {
     assert(attr->getKlass() == StringKlass::getInstance());
     
     PyTypeObject* cls = static_cast<PyTypeObject*>(object);
-    Klass* ownKlass = cls->getOwnKlass();
-    PyDict* klassDict = ownKlass->getKlassDict();
-    assert(klassDict != nullptr);
+    PyObject* result = nullptr;
 
-    PyObject* ret = klassDict->get(attr);
-    if (ret != nullptr) {
-        return ret;
+    /* 先顺着type object作为类所持有的mro继承列表查找，看看能不能找到 */
+    Klass* ownKlass = cls->getOwnKlass();
+    PyList* mroList = ownKlass->mro();
+    size_t mroLength = mroList->getLength();
+    for (size_t i = 0; i < mroLength; ++i) {
+        PyTypeObject* tp = static_cast<PyTypeObject*>(mroList->get(0));
+        PyDict* klassDict = tp->getOwnKlass()->getKlassDict();
+        result = klassDict->get(attr);
+        if (result) return result;
     }
-    else {
+
+    /* 若不能，则把type object当作普通的python对象再进行一次查找 */
+    result = find_in_parents(object, attr);
+    if (result) {
+        if (!isPyInteger(result) && isCommonFuncKlass(result->getKlass())) {
+            result = new PyMethod((PyFunction*)result, object);
+        }
+        return result;
+    }
+
+    if (!result) {
         printf("type object '%s' has no attribute '%s'",
             ownKlass->getName()->getValue(),
             static_cast<PyString*>(attr)->getValue());
         exit(-1);
     }
+    return result;
 
 }
 
@@ -81,6 +106,7 @@ void TypeKlass::setattr(PyObject* object, PyObject* attr, PyObject* value) {
     PyDict* klassDict = cls->getOwnKlass()->getKlassDict();
     assert(klassDict != nullptr);
     klassDict->set(attr, value);
+
 }
 
 PyObject* TypeKlass::equal(const PyObject* lhs, const PyObject* rhs) const {

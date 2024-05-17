@@ -49,7 +49,8 @@ void ListKlass::initialize() {
     setName(StringTable::str_list);
 
     // ÉèÖÃ»ùÀà
-    setSuperKlass(ObjectKlass::getInstance());
+    addSuper(ObjectKlass::getInstance());
+    orderSupers();
 }
 
 void ListKlass::print(const PyObject* lhs, int flags) const {
@@ -221,14 +222,14 @@ void ListKlass::oops_do(OopClosure* closure, PyObject* object) {
     closure->do_array_list(&list->_container);
 }
 
-void ListKlass::store_subscr(PyObject* object, 
+void ListKlass::store_subscr(PyObject* object,
     PyObject* subscription, PyObject* newObject
 ) const {
     checkLegalPyObject(object, this);
 
     PyList* list = reinterpret_cast<PyList*>(object);
     size_t pos;
-    
+
     if (isPyInteger(subscription)) {
         pos = toRawInteger(subscription);
     }
@@ -248,7 +249,7 @@ void ListKlass::store_subscr(PyObject* object,
     list->set(pos, newObject);
 }
 
-void ListKlass::delete_subscr(PyObject* object, 
+void ListKlass::delete_subscr(PyObject* object,
     PyObject* subscription
 ) const {
     assert(object->getKlass() == this &&
@@ -297,4 +298,14 @@ void ListIteratorKlass::oops_do(OopClosure* closure, PyObject* object) {
     checkLegalPyObject(object, this);
     ListIterator* iter = static_cast<ListIterator*>(object);
     closure->do_oop(reinterpret_cast<PyObject**>(&iter->_owner));
+}
+
+
+PyObject* ListKlass::isBoolTrue(PyObject* object) {
+    PyList* list_obj = static_cast<PyList*>(object);
+    if (list_obj->getLength() == 0) {
+        return Universe::PyFalse;
+    }
+
+    return Universe::PyTrue;
 }

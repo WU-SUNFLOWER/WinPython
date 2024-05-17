@@ -28,7 +28,8 @@ void StringKlass::initialize() {
 
     setName(StringTable::str_str);
 
-    setSuperKlass(ObjectKlass::getInstance());
+    addSuper(ObjectKlass::getInstance());
+    orderSupers();
 }
 
 void StringKlass::print(const PyObject* lhs, int flags) const {
@@ -181,4 +182,13 @@ void StringKlass::oops_do(OopClosure* closure, PyObject* object) {
     PyString* str = static_cast<PyString*>(object);
     void** ref = reinterpret_cast<void**>(&(str->ptr));
     closure->do_raw_mem(ref, str->getLength() + 1);
+}
+
+PyObject* StringKlass::isBoolTrue(PyObject* object) {
+    PyString* str_obj = static_cast<PyString*>(object);
+    if (str_obj->getLength() == 0) {
+        return Universe::PyFalse;
+    }
+
+    return Universe::PyTrue;
 }

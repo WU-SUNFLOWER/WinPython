@@ -162,6 +162,24 @@
     <ClCompile Include="util\Stack.cpp">
       <Filter>源文件\util</Filter>
     </ClCompile>
+    <ClCompile Include="FloatKlass.cpp">
+      <Filter>源文件\klass</Filter>
+    </ClCompile>
+    <ClCompile Include="PyFloat.cpp">
+      <Filter>源文件\object_python</Filter>
+    </ClCompile>
+    <ClCompile Include="PyBool.cpp">
+      <Filter>源文件\object_python</Filter>
+    </ClCompile>
+    <ClCompile Include="BoolKlass.cpp">
+      <Filter>源文件\klass</Filter>
+    </ClCompile>
+    <ClCompile Include="PyNone.cpp">
+      <Filter>源文件\object_python</Filter>
+    </ClCompile>
+    <ClCompile Include="NoneKlass.cpp">
+      <Filter>源文件\klass</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework/byteCodeFileParser.hpp">
@@ -276,6 +294,24 @@
       <Filter>头文件\util</Filter>
     </ClInclude>
     <ClInclude Include="klass\CodeKlass.hpp">
+      <Filter>头文件\klass</Filter>
+    </ClInclude>
+    <ClInclude Include="FloatKlass.hpp">
+      <Filter>头文件\klass</Filter>
+    </ClInclude>
+    <ClInclude Include="PyFloat.hpp">
+      <Filter>头文件\object_python</Filter>
+    </ClInclude>
+    <ClInclude Include="PyBool.hpp">
+      <Filter>头文件\object_python</Filter>
+    </ClInclude>
+    <ClInclude Include="BoolKlass.hpp">
+      <Filter>头文件\klass</Filter>
+    </ClInclude>
+    <ClInclude Include="PyNone.hpp">
+      <Filter>头文件\object_python</Filter>
+    </ClInclude>
+    <ClInclude Include="NoneKlass.hpp">
       <Filter>头文件\klass</Filter>
     </ClInclude>
   </ItemGroup>
