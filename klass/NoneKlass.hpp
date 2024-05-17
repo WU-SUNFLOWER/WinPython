@@ -14,6 +14,8 @@ public:
 
     virtual void print(const PyObject* obj, int flags = 0) const override;
     virtual void initialize() override;
+
+    virtual PyObject* isBoolTrue(PyObject* object) override;
 };
 
 #endif

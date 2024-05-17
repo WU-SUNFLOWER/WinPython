@@ -3,6 +3,7 @@
 #include "PyTypeObject.hpp"
 #include "StringTable.hpp"
 #include "PyDict.hpp"
+#include "Universe.hpp"
 #include "ObjectKlass.hpp"
 
 
@@ -21,11 +22,13 @@ void NoneKlass::print(const PyObject* obj,int) const {
 
 void NoneKlass::initialize() {
     PyDict* dict = PyDict::createDict();
-
-
     setKlassDict(dict);
-
     (new PyTypeObject())->setOwnKlass(this);
-    setName(StringTable::str_bool);
-    setSuperKlass(ObjectKlass::getInstance());
+    setName(StringTable::str_NoneType);
+    addSuper(ObjectKlass::getInstance());
+    orderSupers();
+}
+
+PyObject* NoneKlass::isBoolTrue(PyObject* object) {
+    return Universe::PyFalse;
 }

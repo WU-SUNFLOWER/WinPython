@@ -141,17 +141,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BoolKlass.cpp" />
-    <ClCompile Include="FloatKlass.cpp" />
+    <ClCompile Include="klass/BoolKlass.cpp" />
+    <ClCompile Include="klass/FloatKlass.cpp" />
     <ClCompile Include="klass\CodeKlass.cpp" />
     <ClCompile Include="memory\Heap.cpp" />
     <ClCompile Include="memory\OopClosure.cpp" />
     <ClCompile Include="memory\ScavengeOopClosure.cpp" />
     <ClCompile Include="memory\Space.cpp" />
-    <ClCompile Include="NoneKlass.cpp" />
-    <ClCompile Include="PyBool.cpp" />
-    <ClCompile Include="PyFloat.cpp" />
-    <ClCompile Include="PyNone.cpp" />
+    <ClCompile Include="klass/NoneKlass.cpp" />
+    <ClCompile Include="object_python/PyBool.cpp" />
+    <ClCompile Include="object_python/PyFloat.cpp" />
+    <ClCompile Include="object_python/PyNone.cpp" />
     <ClCompile Include="util/arrayList.cpp" />
     <ClCompile Include="object_other/Block.cpp" />
     <ClCompile Include="framework/byteCodeFileParser.cpp" />
@@ -189,17 +189,17 @@
     <ClCompile Include="util\Stack.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BoolKlass.hpp" />
-    <ClInclude Include="FloatKlass.hpp" />
+    <ClInclude Include="klass/BoolKlass.hpp" />
+    <ClInclude Include="klass/FloatKlass.hpp" />
     <ClInclude Include="klass\CodeKlass.hpp" />
     <ClInclude Include="memory\Heap.hpp" />
     <ClInclude Include="memory\OopClosure.hpp" />
     <ClInclude Include="memory\ScavengeOopClosure.hpp" />
     <ClInclude Include="memory\Space.hpp" />
     <ClInclude Include="NoneKlass.hpp" />
-    <ClInclude Include="PyBool.hpp" />
-    <ClInclude Include="PyFloat.hpp" />
-    <ClInclude Include="PyNone.hpp" />
+    <ClInclude Include="object_python/PyBool.hpp" />
+    <ClInclude Include="object_python/PyFloat.hpp" />
+    <ClInclude Include="object_python/PyNone.hpp" />
     <ClInclude Include="util/arrayList.hpp" />
     <ClInclude Include="object_other/Block.hpp" />
     <ClInclude Include="util/bufferedInputStream.hpp" />
