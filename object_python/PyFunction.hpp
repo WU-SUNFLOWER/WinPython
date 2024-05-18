@@ -40,6 +40,9 @@ private:
     // 这个指针为C++内建函数预留，普通Python函数默认为空
     NativeFuncPointer _nativeFunc;
 
+    // 模拟Python3中的函数体内__class__特性
+    PyTypeObject* _owner_class = nullptr;
+
 public:
 
     // 枚举定义的本质是创建一个新的类型，并不是创建一个类的成员变量
@@ -69,6 +72,12 @@ public:
     }
     uint32_t getFlags() const {
         return flag;
+    }
+    void setOwnerClass(PyTypeObject* type) {
+        _owner_class = type;
+    }
+    PyTypeObject* getOwnerClass() {
+        return _owner_class;
     }
 
     PyObject* callNativeFunc(PyList* args) const;

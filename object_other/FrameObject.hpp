@@ -13,6 +13,7 @@
 
 class FrameObject {
     friend class Interpreter;
+    friend class SuperKlass;
 private:
     PyList* _stack;  // 运行时栈
     Stack<Block>* _blockStack;  // 这个栈用于处理代码块嵌套的结构

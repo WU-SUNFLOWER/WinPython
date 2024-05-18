@@ -73,10 +73,10 @@ PyObject* TypeKlass::getattr(PyObject* object, PyObject* attr) {
     PyList* mroList = ownKlass->mro();
     size_t mroLength = mroList->getLength();
     for (size_t i = 0; i < mroLength; ++i) {
-        PyTypeObject* tp = static_cast<PyTypeObject*>(mroList->get(0));
+        PyTypeObject* tp = static_cast<PyTypeObject*>(mroList->get(i));
         PyDict* klassDict = tp->getOwnKlass()->getKlassDict();
-        result = klassDict->get(attr);
-        if (result) return result;
+        if (klassDict != nullptr && (result = klassDict->get(attr))) 
+            return result;
     }
 
     /* 若不能，则把type object当作普通的python对象再进行一次查找 */

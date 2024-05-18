@@ -73,19 +73,9 @@ PyString* ByteCodeFileParser::getString() {
 }
 
 PyFloat* ByteCodeFileParser::getFloat() {
-    if (1) {
-        return getFloatValue();
-    }
-    else {
-        exit(-1);
-    }
-}
-
-PyFloat* ByteCodeFileParser::getFloatValue() {
     double value = fileStream->readDouble();
     return PyFloat::createFloat(value);
 }
-
 
 PyList* ByteCodeFileParser::getTuple(bool needToCheck) {
     // tuple以`(`字符（0x28）作为起始标志

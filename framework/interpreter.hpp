@@ -57,6 +57,8 @@ public:
 
     PyObject* callVirtual(PyObject* callable, PyList* args);
 
+    FrameObject* getCurrentFrame();
+
     // GC相关接口
     void oops_do(OopClosure* closure);
 };

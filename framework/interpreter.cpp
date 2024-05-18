@@ -25,6 +25,7 @@
 #include "PyTypeObject.hpp"
 #include "FloatKlass.hpp"
 #include "PyFloat.hpp"
+#include "SuperKlass.hpp"
 
 Interpreter* Interpreter::instance = nullptr;
 
@@ -52,6 +53,7 @@ Interpreter::Interpreter() {
     _builtins->set(StringTable::str_list, ListKlass::getInstance()->getTypeObject());
     _builtins->set(StringTable::str_dict, DictKlass::getInstance()->getTypeObject());
     _builtins->set(StringTable::str_float, FloatKlass::getInstance()->getTypeObject());
+    _builtins->set(StringTable::str_super, SuperKlass::getInstance()->getTypeObject());
 
     _builtins->set(PyString::createString("sysgc"), PackNativeFunc(NativeFunction::sysgc));
 }
@@ -165,85 +167,102 @@ void Interpreter::evalFrame() {
 
             case ByteCode::Binary_Multiply:
                 rhs = POP();  // 右操作数
-                lhs = POP();  // 左操作数
-                if (isPyInteger(lhs) && isPyInteger(rhs)) {
-                    PUSH(toPyInteger(toRawInteger(lhs) * toRawInteger(rhs)));
-                }
-                else if (isPyInteger(lhs) && rhs->getKlass() == FloatKlass::getInstance())
-                {
-                    PUSH(rhs->mul(lhs));
+                lhs = POP();
+                if (isPyInteger(lhs)) {
+                    if (isPyInteger(rhs)) {
+                        PUSH(toPyInteger(toRawInteger(lhs) * toRawInteger(rhs)));
+                    }
+                    else if (rhs->getKlass() == FloatKlass::getInstance()) {
+                        PUSH(rhs->mul(lhs));
+                    }
+                    else {
+                        printf("can't multiply\n");
+                        exit(-1);
+                    }
                 }
                 else {
                     PUSH(lhs->mul(rhs));
                 }
                 break;
 
-            case ByteCode::Binary_Add:
+            case ByteCode::Binary_Add: {
                 rhs = POP();  // 右操作数
-                lhs = POP();  // 左操作数
-                if (isPyInteger(lhs) && isPyInteger(rhs)) {
-                    PUSH(toPyInteger(toRawInteger(lhs) + toRawInteger(rhs)));
+                lhs = POP();
+                if (isPyInteger(lhs)) {
+                    if (isPyInteger(rhs)) {
+                        PUSH(toPyInteger(toRawInteger(lhs) + toRawInteger(rhs)));
+                    }
+                    else if (rhs->getKlass() == FloatKlass::getInstance()) {
+                        PUSH(rhs->add(lhs));
+                    }
+                    else {
+                        printf("can't add\n");
+                        exit(-1);
+                    }
                 }
-                else if (isPyInteger(lhs) && rhs->getKlass() == FloatKlass::getInstance())
-                {
-                    PUSH(rhs->add(lhs));
-                }
-                else{
-
+                else {
                     PUSH(lhs->add(rhs));
                 }
                 break;
+            }
 
             case ByteCode::Binary_Divide:
                 rhs = POP();  // 右操作数
                 lhs = POP();  // 左操作数
-                if (isPyInteger(lhs) && isPyInteger(rhs)) {
-                    int64_t lhs_value = toRawInteger(lhs);
-                    int64_t rhs_value = toRawInteger(rhs);
-                    if (rhs_value == 0) {
-                        printf("division by zero");
+
+                if (isPyInteger(lhs)) {
+                    if (isPyInteger(rhs)) {
+                        if (toRawInteger(rhs) == 0) {
+                            printf("division by zero");
+                            exit(-1);
+                        }
+                        PUSH(new PyFloat(toRawInteger(lhs) / toRawInteger(rhs)));
+                    }
+                    else if (rhs->getKlass() == FloatKlass::getInstance()) {
+                        if (static_cast<PyFloat*>(rhs)->getValue() == 0.0){
+                            printf("division by zero");
+                            exit(-1);
+                        }
+                        PUSH(new PyFloat(toRawInteger(lhs) / static_cast<PyFloat*>(rhs)->getValue()));
+                    }
+                    else {
+                        printf("can't divide\n");
                         exit(-1);
                     }
-                    PUSH(new PyFloat((double)lhs_value / (double)rhs_value));
                 }
-                else if (isPyInteger(lhs) && rhs->getKlass() == FloatKlass::getInstance()) {
-                    if (static_cast<PyFloat*>(rhs)->getValue() == 0.0){
-                        printf("division by zero");
-                        exit(-1);
-                    }
-                    PUSH(new PyFloat(toRawInteger(lhs) / static_cast<PyFloat*>(rhs)->getValue()));
-                }
-               
                 else {
                     PUSH(lhs->div(rhs));
                 }
                 break;
 
             case ByteCode::Binary_FloorDivide:
-                rhs = POP();  
-                lhs = POP();  
-                if (isPyInteger(lhs) && isPyInteger(rhs)) {
-                    int64_t lhs_value = toRawInteger(lhs);
-                    int64_t rhs_value = toRawInteger(rhs);
-                    if (rhs_value == 0) {
-                        fprintf(stderr, "ZeroDivisionError: division by zero\n");
+                rhs = POP();  // 右操作数
+                lhs = POP();  // 左操作数
+
+                if (isPyInteger(lhs)) {
+                    if (isPyInteger(rhs)) {
+                        if (toRawInteger(rhs) == 0) {
+                            printf("division by zero");
+                            exit(-1);
+                        }
+                        PUSH(toPyInteger(toRawInteger(lhs) / toRawInteger(rhs)));
+                    }
+                    else if (rhs->getKlass() == FloatKlass::getInstance()) {
+                        if (static_cast<PyFloat*>(rhs)->getValue() == 0.0) {
+                            printf("division by zero");
+                            exit(-1);
+                        }
+                        PUSH(new PyFloat(floor(toRawInteger(lhs) / static_cast<PyFloat*>(rhs)->getValue())));
+                    }
+                    else {
+                        printf("can't divide\n");
                         exit(-1);
                     }
-                    
-                    PUSH(toPyInteger(lhs_value / rhs_value));
                 }
                 else {
-                    
-                    double lhs_value = isPyInteger(lhs) ? (double)toRawInteger(lhs) : static_cast<PyFloat*>(lhs)->getValue();
-                    double rhs_value = isPyInteger(rhs) ? (double)toRawInteger(rhs) : static_cast<PyFloat*>(rhs)->getValue();
-                    if (rhs_value == 0.0) {
-                        fprintf(stderr, "ZeroDivisionError: division by zero\n");
-                        exit(-1);
-                    }
-                    PUSH(new PyFloat(floor(lhs_value / rhs_value)));
+                    PUSH(lhs->floor_div(rhs));
                 }
                 break;
-
 
             case ByteCode::Binary_Module:
                 rhs = POP();
@@ -269,25 +288,23 @@ void Interpreter::evalFrame() {
 
             case ByteCode::Binary_Subtract:
                 rhs = POP();  // 右操作数
-                lhs = POP();  // 左操作数
-                if (isPyInteger(lhs) && isPyInteger(rhs)) {
-                    PUSH(toPyInteger(toRawInteger(lhs) - toRawInteger(rhs)));
-                }
-                else {
-                    if (isPyInteger(lhs)) {
-                        // 如果 lhs 是整数，就将它转换为浮点数
-                        double lhsValue = static_cast<double>(toRawInteger(lhs));
-                        PyObject* lhsFloat = new PyFloat(lhsValue);
-                        PUSH(lhsFloat->sub(rhs));
+                lhs = POP();
+                if (isPyInteger(lhs)) {
+                    if (isPyInteger(rhs)) {
+                        PUSH(toPyInteger(toRawInteger(lhs) - toRawInteger(rhs)));
+                    }
+                    else if (rhs->getKlass() == FloatKlass::getInstance()) {
+                        PUSH(new PyFloat(toRawInteger(lhs) - static_cast<PyFloat*>(rhs)->getValue()));
                     }
                     else {
-                        PUSH(lhs->sub(rhs));
+                        printf("can't substract\n");
+                        exit(-1);
                     }
                 }
+                else {
+                    PUSH(lhs->sub(rhs));
+                }
                 break;
-
-
-
 
             case ByteCode::Binary_Subscr:
                 rhs = POP();  // 右操作数（在此处为要取的下标）
@@ -326,7 +343,6 @@ void Interpreter::evalFrame() {
                 }
                 break;
 
-            
             // 无条件的绝对地址跳转
             case ByteCode::Jump_Absolute:
                 PC = op_arg;
@@ -959,11 +975,6 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
         FrameObject* calleeFrame = 
             FrameObject::allocate(calleeFunc, _curFrame, false, finalArgs);
 
-        if (owner) {
-            calleeFrame->_globals->set(StringTable::str_class, 
-                owner->getKlass()->getTypeObject());
-        }
-
         /* 
            将与callee绑定的cells（即callee函数运行时
            需要依赖的freevars），装载到新的栈桢上去。
@@ -1059,6 +1070,10 @@ PyObject* Interpreter::callVirtual(PyObject* callable, PyList* args) {
         printf("Unknown function object!");
         exit(-1);
     }
+}
+
+FrameObject* Interpreter::getCurrentFrame() {
+    return _curFrame;
 }
 
 /* GC相关接口 开始 */

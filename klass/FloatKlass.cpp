@@ -24,96 +24,93 @@ void FloatKlass::initialize() {
 }
 
 PyObject* FloatKlass::add(const PyObject* lhs, const PyObject* rhs) const {
-    double lhsValue, rhsValue;
+    double lhsValue = 0;
+    double rhsValue = 0;
 
-    if (isPyInteger(lhs) || isPyInteger(rhs))
-    {
-        if (isPyInteger(lhs)) {
-            lhsValue = static_cast<double>(toRawInteger(lhs));
-            const PyFloat* _rhs = static_cast<const PyFloat*>(rhs);
-            rhsValue = _rhs->getValue();
-        }
-
-        else if (isPyInteger(rhs)) {
-            rhsValue = static_cast<double>(toRawInteger(rhs));
-            const PyFloat* _lhs = static_cast<const PyFloat*>(lhs);
-            lhsValue = _lhs->getValue();
-        }
-
-        return new PyFloat(lhsValue + rhsValue);
+    if (isPyInteger(lhs)) {
+        lhsValue = static_cast<double>(toRawInteger(lhs));
+    }
+    else if (lhs->getKlass() == FloatKlass::getInstance()) {
+        const PyFloat* _lhs = static_cast<const PyFloat*>(lhs);
+        lhsValue = _lhs->getValue();
+    }
+    else {
+        printf("fail to convert to float.\n");
+        exit(-1);
     }
 
-
-    else
-    {
-        const PyFloat* _lhs = static_cast<const PyFloat*>(lhs);
+    if (isPyInteger(rhs)) {
+        rhsValue = static_cast<double>(toRawInteger(rhs));
+    }
+    else if (rhs->getKlass() == FloatKlass::getInstance()) {
         const PyFloat* _rhs = static_cast<const PyFloat*>(rhs);
-        return new PyFloat(_lhs->getValue() + _rhs->getValue());
+        rhsValue = _rhs->getValue();
+    }
+    else {
+        printf("fail to convert to float.\n");
+        exit(-1);
     }
 
     return new PyFloat(lhsValue + rhsValue);
 }
 
 PyObject* FloatKlass::sub(const PyObject* lhs, const PyObject* rhs) const {
-    double lhsValue, rhsValue;
-    START_COUNT_TEMP_OBJECTS;
-    if (isPyInteger(lhs) || isPyInteger(rhs))
-    {
-        if (isPyInteger(lhs)) {
-            lhsValue = static_cast<double>(toRawInteger(lhs));
-            const PyFloat* _rhs = static_cast<const PyFloat*>(rhs);
-            rhsValue = _rhs->getValue();
+    double lhsValue = 0;
+    double rhsValue = 0;
 
-        }
-        
-
-        else if (isPyInteger(rhs)) {
-            rhsValue = static_cast<double>(toRawInteger(rhs));
-            const PyFloat* _lhs = static_cast<const PyFloat*>(lhs);
-            lhsValue = _lhs->getValue();
-        }
-
-        return new PyFloat(lhsValue - rhsValue);
-        END_COUNT_TEMP_OBJECTS;
+    if (isPyInteger(lhs)) {
+        lhsValue = static_cast<double>(toRawInteger(lhs));
+    }
+    else if (lhs->getKlass() == FloatKlass::getInstance()) {
+        const PyFloat* _lhs = static_cast<const PyFloat*>(lhs);
+        lhsValue = _lhs->getValue();
+    }
+    else {
+        printf("fail to convert to float.\n");
+        exit(-1);
     }
 
-
-    else
-    {
-        const PyFloat* _lhs = static_cast<const PyFloat*>(lhs);
+    if (isPyInteger(rhs)) {
+        rhsValue = static_cast<double>(toRawInteger(rhs));
+    }
+    else if (rhs->getKlass() == FloatKlass::getInstance()) {
         const PyFloat* _rhs = static_cast<const PyFloat*>(rhs);
-        return new PyFloat(_lhs->getValue() - _rhs->getValue());
+        rhsValue = _rhs->getValue();
+    }
+    else {
+        printf("fail to convert to float.\n");
+        exit(-1);
     }
 
     return new PyFloat(lhsValue - rhsValue);
 }
 
 PyObject* FloatKlass::mul(const PyObject* lhs, const PyObject* rhs) const {
-    double lhsValue, rhsValue;
+    double lhsValue = 0;
+    double rhsValue = 0;
 
-    if (isPyInteger(lhs) || isPyInteger(rhs))
-    {
-        if (isPyInteger(lhs)) {
-            lhsValue = static_cast<double>(toRawInteger(lhs));
-            const PyFloat* _rhs = static_cast<const PyFloat*>(rhs);
-            rhsValue = _rhs->getValue();
-        }
-
-        else if (isPyInteger(rhs)) {
-            rhsValue = static_cast<double>(toRawInteger(rhs));
-            const PyFloat* _lhs = static_cast<const PyFloat*>(lhs);
-            lhsValue = _lhs->getValue();
-        }
-
-        return new PyFloat(lhsValue * rhsValue);
+    if (isPyInteger(lhs)) {
+        lhsValue = static_cast<double>(toRawInteger(lhs));
+    }
+    else if (lhs->getKlass() == FloatKlass::getInstance()) {
+        const PyFloat* _lhs = static_cast<const PyFloat*>(lhs);
+        lhsValue = _lhs->getValue();
+    }
+    else {
+        printf("fail to convert to float.\n");
+        exit(-1);
     }
 
-
-    else
-    {
-        const PyFloat* _lhs = static_cast<const PyFloat*>(lhs);
+    if (isPyInteger(rhs)) {
+        rhsValue = static_cast<double>(toRawInteger(rhs));
+    }
+    else if (rhs->getKlass() == FloatKlass::getInstance()) {
         const PyFloat* _rhs = static_cast<const PyFloat*>(rhs);
-        return new PyFloat(_lhs->getValue() * _rhs->getValue());
+        rhsValue = _rhs->getValue();
+    }
+    else {
+        printf("fail to convert to float.\n");
+        exit(-1);
     }
 
     return new PyFloat(lhsValue * rhsValue);
@@ -169,9 +166,28 @@ PyObject* FloatKlass::div(const PyObject* lhs, const PyObject* rhs) const {
    
 }
 
-PyObject* FloatKlass::floor_div(const PyObject* lhs, const PyObject* rhs) const
-{
-    return nullptr;
+PyObject* FloatKlass::floor_div(const PyObject* lhs, const PyObject* rhs) const {
+    checkLegalPyObject(lhs, this);
+    const PyFloat* lvalue = static_cast<const PyFloat*>(lhs);
+    if (isPyInteger(rhs)) {
+        if (toRawInteger(rhs) == 0) {
+            printf("division by zero");
+            exit(-1);
+        }
+        return new PyFloat(floor(lvalue->getValue() / toRawInteger(rhs)));
+    }
+    else if (rhs->getKlass() == FloatKlass::getInstance()) {
+        const PyFloat* rvalue = static_cast<const PyFloat*>(rhs);
+        if (rvalue->getValue() == 0.0) {
+            printf("division by zero");
+            exit(-1);
+        }
+        return new PyFloat(floor(lvalue->getValue() / rvalue->getValue()));
+    }
+    else {
+        printf("can't divide");
+        exit(-1);
+    }
 }
 
 

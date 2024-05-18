@@ -162,22 +162,28 @@
     <ClCompile Include="util\Stack.cpp">
       <Filter>源文件\util</Filter>
     </ClCompile>
-    <ClCompile Include="FloatKlass.cpp">
+    <ClCompile Include="klass/BoolKlass.cpp">
       <Filter>源文件\klass</Filter>
     </ClCompile>
-    <ClCompile Include="PyFloat.cpp">
-      <Filter>源文件\object_python</Filter>
-    </ClCompile>
-    <ClCompile Include="PyBool.cpp">
-      <Filter>源文件\object_python</Filter>
-    </ClCompile>
-    <ClCompile Include="BoolKlass.cpp">
+    <ClCompile Include="klass/FloatKlass.cpp">
       <Filter>源文件\klass</Filter>
     </ClCompile>
-    <ClCompile Include="PyNone.cpp">
+    <ClCompile Include="klass/NoneKlass.cpp">
+      <Filter>源文件\klass</Filter>
+    </ClCompile>
+    <ClCompile Include="object_python/PyNone.cpp">
       <Filter>源文件\object_python</Filter>
     </ClCompile>
-    <ClCompile Include="NoneKlass.cpp">
+    <ClCompile Include="object_python/PyFloat.cpp">
+      <Filter>源文件\object_python</Filter>
+    </ClCompile>
+    <ClCompile Include="object_python/PyBool.cpp">
+      <Filter>源文件\object_python</Filter>
+    </ClCompile>
+    <ClCompile Include="PySuper.cpp">
+      <Filter>源文件\object_python</Filter>
+    </ClCompile>
+    <ClCompile Include="SuperKlass.cpp">
       <Filter>源文件\klass</Filter>
     </ClCompile>
   </ItemGroup>
@@ -296,22 +302,28 @@
     <ClInclude Include="klass\CodeKlass.hpp">
       <Filter>头文件\klass</Filter>
     </ClInclude>
-    <ClInclude Include="FloatKlass.hpp">
-      <Filter>头文件\klass</Filter>
-    </ClInclude>
-    <ClInclude Include="PyFloat.hpp">
-      <Filter>头文件\object_python</Filter>
-    </ClInclude>
-    <ClInclude Include="PyBool.hpp">
-      <Filter>头文件\object_python</Filter>
-    </ClInclude>
-    <ClInclude Include="BoolKlass.hpp">
-      <Filter>头文件\klass</Filter>
-    </ClInclude>
-    <ClInclude Include="PyNone.hpp">
-      <Filter>头文件\object_python</Filter>
-    </ClInclude>
     <ClInclude Include="NoneKlass.hpp">
+      <Filter>头文件\klass</Filter>
+    </ClInclude>
+    <ClInclude Include="object_python/PyNone.hpp">
+      <Filter>头文件\object_python</Filter>
+    </ClInclude>
+    <ClInclude Include="object_python/PyFloat.hpp">
+      <Filter>头文件\object_python</Filter>
+    </ClInclude>
+    <ClInclude Include="object_python/PyBool.hpp">
+      <Filter>头文件\object_python</Filter>
+    </ClInclude>
+    <ClInclude Include="klass/BoolKlass.hpp">
+      <Filter>头文件\klass</Filter>
+    </ClInclude>
+    <ClInclude Include="klass/FloatKlass.hpp">
+      <Filter>头文件\klass</Filter>
+    </ClInclude>
+    <ClInclude Include="PySuper.hpp">
+      <Filter>头文件\object_python</Filter>
+    </ClInclude>
+    <ClInclude Include="SuperKlass.hpp">
       <Filter>头文件\klass</Filter>
     </ClInclude>
   </ItemGroup>

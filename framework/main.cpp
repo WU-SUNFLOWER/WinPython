@@ -19,9 +19,9 @@ int main(int argc, char* argv[]) {
     // 传入.py文件
     if (argc == 2) {
         // 加载dll文件
-        HINSTANCE dllHandle = LoadLibrary("python27_d.dll");
+        HINSTANCE dllHandle = LoadLibrary("WinPython.dll");
         if (!dllHandle) {
-            printf("Fail to load python27_d.dll");
+            printf("Fail to load WinPython.dll");
             exit(-1);
         }
         // 加载转换函数

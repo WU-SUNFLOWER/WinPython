@@ -1,14 +1,14 @@
 class A:
-    x = 123
+    x = 111
     
 class B(A):
     pass
     
 b = B()
 print(b.x)
-A.x = 333
+A.x = 222
 print(b.x)
-B.x = 444
+B.x = 333
 print(b.x)
-b.x = 999
+b.x = 444
 print(b.x)

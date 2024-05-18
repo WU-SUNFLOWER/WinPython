@@ -23,6 +23,12 @@ PyString* StringTable::str_float = nullptr;
 PyString* StringTable::str_NoneType = nullptr;
 PyString* StringTable::str_mro = nullptr;
 PyString* StringTable::str_class = nullptr;
+PyString* StringTable::str_super = nullptr;
+PyString* StringTable::str_getattr = nullptr;
+PyString* StringTable::str_setattr = nullptr;
+PyString* StringTable::str_dict_values = nullptr;
+PyString* StringTable::str_dict_keys = nullptr;
+PyString* StringTable::str_dict_items = nullptr;
 
 void StringTable::initialize() {
     str_len = PyString::createString("len", true);
@@ -48,4 +54,10 @@ void StringTable::initialize() {
     str_float = PyString::createString("float", true);
     str_NoneType = PyString::createString("NoneType", true);
     str_mro = PyString::createString("mro", true);
+    str_super = PyString::createString("super", true);
+    str_getattr = PyString::createString("__getattr__", true);
+    str_setattr = PyString::createString("__setattr__", true);
+    str_dict_values = PyString::createString("dict_values", true);
+    str_dict_items = PyString::createString("dict_items", true);
+    str_dict_keys = PyString::createString("dict_key", true);
 }

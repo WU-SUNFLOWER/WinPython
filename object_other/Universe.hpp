@@ -78,7 +78,7 @@ public:
 #define isPyInteger(x) ((uintptr_t)(x) & 1)
 #define toRawInteger(x) ((int64_t)((int64_t)(x) >> 1))
 #define toPyInteger(x) ((PyObject*)(((uintptr_t)(x) << 1) | 1))
-#define isPyTrue(x) (isPyInteger(x) ? toRawInteger(x) != 0 : x->isBoolTrue() == Universe::PyTrue)
+#define isPyTrue(x) (isPyInteger(x) ? (toRawInteger(x) != 0) : ((x)->isBoolTrue() == Universe::PyTrue))
 
 #define isCommonFuncKlass(k) \
     (k == FunctionKlass::getInstance() || \

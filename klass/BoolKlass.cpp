@@ -26,3 +26,7 @@ void BoolKlass::initialize() {
     addSuper(ObjectKlass::getInstance());
     orderSupers();
 }
+
+PyObject* BoolKlass::isBoolTrue(PyObject* object) {
+    return object;
+}

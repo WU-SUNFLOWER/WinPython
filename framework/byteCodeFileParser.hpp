@@ -20,6 +20,5 @@ public:
     PyString* getName();
     PyString* getNoTable();
     PyFloat* getFloat();
-    PyFloat* getFloatValue();
 };
 #endif

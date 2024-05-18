@@ -5,8 +5,10 @@
 #include "PyFunction.hpp"
 #include "PyMethod.hpp"
 #include "PyDict.hpp"
+#include "PyTypeObject.hpp"
 #include <cstdlib>
 #include <cstdio>
+#include "TypeKlass.hpp"
 
 PyString* PyObject::getKlassName() const {
     assert(klass != nullptr);
@@ -163,6 +165,10 @@ PyObject* PyObject::isBoolTrue() {
 
 PyObject* PyObject::next() {
     return getKlass()->next(this);
+}
+
+PyObject* PyObject::isinstance(PyTypeObject* type) const {
+    return this->getKlass()->mro()->has(type);
 }
 
 /* GC相关接口 开始 */

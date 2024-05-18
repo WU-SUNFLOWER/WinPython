@@ -152,6 +152,8 @@
     <ClCompile Include="object_python/PyBool.cpp" />
     <ClCompile Include="object_python/PyFloat.cpp" />
     <ClCompile Include="object_python/PyNone.cpp" />
+    <ClCompile Include="object_python/PySuper.cpp" />
+    <ClCompile Include="klass/SuperKlass.cpp" />
     <ClCompile Include="util/arrayList.cpp" />
     <ClCompile Include="object_other/Block.cpp" />
     <ClCompile Include="framework/byteCodeFileParser.cpp" />
@@ -196,10 +198,12 @@
     <ClInclude Include="memory\OopClosure.hpp" />
     <ClInclude Include="memory\ScavengeOopClosure.hpp" />
     <ClInclude Include="memory\Space.hpp" />
-    <ClInclude Include="NoneKlass.hpp" />
+    <ClInclude Include="klass/NoneKlass.hpp" />
     <ClInclude Include="object_python/PyBool.hpp" />
     <ClInclude Include="object_python/PyFloat.hpp" />
     <ClInclude Include="object_python/PyNone.hpp" />
+    <ClInclude Include="object_python/PySuper.hpp" />
+    <ClInclude Include="klass/SuperKlass.hpp" />
     <ClInclude Include="util/arrayList.hpp" />
     <ClInclude Include="object_other/Block.hpp" />
     <ClInclude Include="util/bufferedInputStream.hpp" />

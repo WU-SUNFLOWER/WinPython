@@ -32,6 +32,12 @@ public:
     static PyString* str_float;
     static PyString* str_mro;
     static PyString* str_class;
+    static PyString* str_super;
+    static PyString* str_getattr;
+    static PyString* str_setattr;
+    static PyString* str_dict_values;
+    static PyString* str_dict_keys;
+    static PyString* str_dict_items;
 };
 
 #endif

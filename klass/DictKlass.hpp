@@ -44,7 +44,7 @@ template<DictIterType type>
 class DictIteratorKlass : public Klass {
 private:
     static DictIteratorKlass* instance;
-    DictIteratorKlass() {};
+    DictIteratorKlass();
 public:
     static DictIteratorKlass* getInstance() {
         if (instance == nullptr) {

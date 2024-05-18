@@ -1,5 +1,6 @@
 #include "FrameObject.hpp"
 #include "interpreter.hpp"
+#include "StringTable.hpp"
 
 FrameObject::FrameObject(CodeObject* codeObject) {
     START_COUNT_TEMP_OBJECTS;
@@ -60,7 +61,11 @@ FrameObject* FrameObject::allocate(PyFunction* callee, FrameObject* callerFrame,
     frame->_callerFrame = callerFrame;
     frame->_fastLocals = args;
     frame->_isEntryFrame = isEntryFrame;
-    END_COUNT_TEMP_OBJECTS(3);
+    if (callee->getOwnerClass()) {
+        frame->_globals->set(StringTable::str_class, 
+            reinterpret_cast<PyObject*>(callee->getOwnerClass()));
+    }
+    END_COUNT_TEMP_OBJECTS;
     return frame;
 }
 

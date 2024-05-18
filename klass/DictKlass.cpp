@@ -39,6 +39,7 @@ void DictKlass::initialize() {
     (new PyTypeObject())->setOwnKlass(this);
     setName(StringTable::str_dict);
     addSuper(ObjectKlass::getInstance());
+    orderSupers();
 }
 
 void DictKlass::print(const PyObject* object, int flags) const {
@@ -109,6 +110,24 @@ void DictKlass::oops_do(OopClosure* closure, PyObject* object) {
     
     closure->do_map(&dict->_map);    
 
+}
+
+template<DictIterType type>
+DictIteratorKlass<type>::DictIteratorKlass() {
+    (new PyTypeObject())->setOwnKlass(this);
+    switch (type) {
+        case DictIterType::Iter_Keys:
+            setName(StringTable::str_dict_keys);
+            break;
+        case DictIterType::Iter_Values:
+            setName(StringTable::str_dict_values);
+            break;
+        case DictIterType::Iter_Items:
+            setName(StringTable::str_dict_items);
+            break;
+    }
+    addSuper(ObjectKlass::getInstance());
+    orderSupers();
 }
 
 template<DictIterType type>

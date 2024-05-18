@@ -45,53 +45,21 @@ b --instance--> <class 'B'> --own--> User B-Klass
 |-----------------klass------------------|
 */
 PyObject* NativeFunction::isinstance(PyList* args) {
+
+    if (args->getLength() != 2) {
+        printf("isinstance expected 2 arguments, got %lld\n", args->getLength());
+        exit(-1);
+    }
+
     PyObject* inst = args->get(0);
     PyTypeObject* cls = static_cast<PyTypeObject*>(args->get(1));
-
     if (cls->getKlass() != TypeKlass::getInstance()) {
         printf("isinstance() arg 2 must be a class");
         exit(-1);
     }
 
-    // 获取与Python inst对象绑定的C++ Klass
-    const Klass* klass = inst->getKlass();
-    // 获取cls这个Python type对象（class）是哪个C++ Klass的映射
-    Klass* targetKlass = cls->getOwnKlass();
+    return inst->isinstance(cls);
 
-    // 遍历klass的继承层次结构
-    PyList* superKlasses = klass->getSuperKlass();
-    while (klass != nullptr) {
-        if (klass == targetKlass) {
-            return Universe::PyTrue;
-        }
-        // 其他处理逻辑...
-        bool found = false;
-        for (int i = 0; i < superKlasses->getLength(); ++i) {
-            PyTypeObject* superTypeObj = static_cast<PyTypeObject*>(superKlasses->get(i));
-            Klass* superKlass = superTypeObj->getOwnKlass();
-            if (superKlass == targetKlass) {
-                return Universe::PyTrue;
-            }
-            if (superKlass == klass) {
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            klass = nullptr;
-            for (int i = 0; i < superKlasses->getLength(); ++i) {
-                PyTypeObject* superTypeObj = static_cast<PyTypeObject*>(superKlasses->get(i));
-                Klass* superKlass = superTypeObj->getOwnKlass();
-                PyList* parentSuperKlasses = superKlass->getSuperKlass();
-                if (parentSuperKlasses->getLength() > 0) {
-                    klass = superKlass;
-                    superKlasses = parentSuperKlasses;
-                    break;
-                }
-            }
-        }
-    }
-    return Universe::PyFalse;
 }
 
 
@@ -144,7 +112,7 @@ PyObject* NativeFunction::list_insert(PyList* args) {
 PyObject* NativeFunction::list_index(PyList* args) {
     PyList* list = reinterpret_cast<PyList*>(args->get(0));
     size_t ans = list->index(args->get(1));
-    return new PyInteger(ans);
+    return toPyInteger(ans);
 }
 
 PyObject* NativeFunction::list_pop(PyList* args) {

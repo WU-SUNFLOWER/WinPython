@@ -4,7 +4,11 @@ def outer(n):
     return inner
     
 i = 0
+func_list = []
 while i < 10:
     f = outer(i)
-    f()
+    func_list.append(f)
     i += 1
+    
+for f in func_list:
+    f()

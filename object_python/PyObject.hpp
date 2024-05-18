@@ -81,6 +81,8 @@ public:
     PyObject* getIter();
     PyObject* next();
 
+    PyObject* isinstance(PyTypeObject* type) const;
+
     /*公用方法 End*/
     
     virtual PyObject* rsub(const PyObject* minuend) const {

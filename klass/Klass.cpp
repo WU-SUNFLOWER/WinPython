@@ -29,6 +29,8 @@ size_t Klass::getSize() {
 }
 
 PyObject* Klass::createKlass(PyObject* dict, PyObject* supers, PyObject* name) {
+    START_COUNT_TEMP_OBJECTS;
+    
     checkLegalPyObject(dict, DictKlass::getInstance());
     checkLegalPyObject(supers, ListKlass::getInstance());
     checkLegalPyObject(name, StringKlass::getInstance());
@@ -36,10 +38,9 @@ PyObject* Klass::createKlass(PyObject* dict, PyObject* supers, PyObject* name) {
     PyDict* _dict = static_cast<PyDict*>(dict);
     PyList* _supers = static_cast<PyList*>(supers);
     PyString* _name = static_cast<PyString*>(name);
+    PUSH_TEMP(_dict);
 
     Klass* newKlass = new Klass();
-    // 将type object的属性和方法挂到klass上
-    newKlass->setKlassDict(_dict);
     // 将type object的名称挂到klass上
     newKlass->setName(_name);
     // 初始化supers列表
@@ -49,12 +50,24 @@ PyObject* Klass::createKlass(PyObject* dict, PyObject* supers, PyObject* name) {
         newKlass->addSuper(ObjectKlass::getInstance());
         newKlass->_supers = _supers;
     }
+
     // 创建Python世界对应的type对象，并实现type对象和C++ Klass的双向绑定
     PyTypeObject* cls = new PyTypeObject();
     cls->setOwnKlass(newKlass);
     // 排序生成mro列表
     newKlass->orderSupers();
 
+    // 为类方法绑定type object
+    for (size_t i = 0; i < _dict->getSize(); ++i) {
+        PyObject* obj = _dict->getValueByIndex(i);
+        if (!isPyInteger(obj) && obj->getKlass() == FunctionKlass::getInstance()) {
+            static_cast<PyFunction*>(obj)->setOwnerClass(cls);
+        }
+    }
+    // 将type object的属性和方法挂到klass上
+    newKlass->setKlassDict(_dict);
+
+    END_COUNT_TEMP_OBJECTS;
     return cls;
 }
 
@@ -109,16 +122,6 @@ PyObject* Klass::find_in_parents(PyObject* object, PyObject* attr) {
 PyObject* Klass::getattr(PyObject* object, PyObject* attr) {
     assert(attr->getKlass() == StringKlass::getInstance());
 
-    /*
-    PyObject* getattr_func = object->getKlass()->getKlassDict()->get(attr);
-    if (getattr_func && (getattr_func->getKlass() == FunctionKlass::getInstance())) {
-        getattr_func = new PyMethod((PyFunction*)getattr_func, object);
-        PyList* args = PyList::createList();
-        args->append(attr);
-        return Interpreter::getInstance()->callVirtual(getattr_func, args);
-    }    
-    */
-
     PyObject* result = nullptr;
 
     // 首先在对象的自有属性中查找，找到就返回
@@ -132,15 +135,31 @@ PyObject* Klass::getattr(PyObject* object, PyObject* attr) {
 
     // 如果没找到，就顺着mro列表的顺序遍历查找
     result = find_in_parents(object, attr);
+    if (result) {
+        if (!isPyInteger(result) && isCommonFuncKlass(result->getKlass())) {
+            result = new PyMethod((PyFunction*)result, object);
+        }
+        return result;
+    }
+
+    // 如果在mro列表中也没找到，就触发__getattr__
+    PyObject* getattr_func = object->getKlass()->getKlassDict()->get(StringTable::str_getattr);
+    if (getattr_func && (getattr_func->getKlass() == FunctionKlass::getInstance())) {
+        START_COUNT_TEMP_OBJECTS;
+        getattr_func = new PyMethod((PyFunction*)getattr_func, object);
+        PUSH_TEMP(attr);
+        PUSH_TEMP(getattr_func);
+        PyList* args = PyList::createList();
+        args->append(attr);
+        END_COUNT_TEMP_OBJECTS;
+        return Interpreter::getInstance()->callVirtual(getattr_func, args);
+    }
+
     if (result == nullptr) {
         printf("'%s' object has no attribute '%s'\n", 
             object->getKlassNameAsString(),
             static_cast<PyString*>(attr)->getValue());
         exit(-1);
-    }
-
-    if (!isPyInteger(result) && isCommonFuncKlass(result->getKlass())) {
-        result = new PyMethod((PyFunction*)result, object);
     }
 
     return result;
@@ -149,16 +168,15 @@ PyObject* Klass::getattr(PyObject* object, PyObject* attr) {
 void Klass::setattr(PyObject* object, PyObject* attr, PyObject* value) {
     assert(attr->getKlass() == StringKlass::getInstance());
 
-    /*
-    PyObject* func = object->getKlass()->getKlassDict()->get(attr);
+    PyObject* func = object->getKlass()->getKlassDict()->get(StringTable::str_setattr);
     if (func && (func->getKlass() == FunctionKlass::getInstance())) {
         func = new PyMethod((PyFunction*)func, object);
         PyList* args = PyList::createList();
         args->append(attr);
         args->append(value);
-        return Interpreter::getInstance()->callVirtual(func, args);
-    }    
-    */
+        Interpreter::getInstance()->callVirtual(func, args);
+        return;
+    }
 
     PyDict* selfDict = object->getSelfDict();
     if (selfDict == nullptr) {
