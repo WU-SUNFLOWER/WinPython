@@ -26,6 +26,7 @@
 #include "FloatKlass.hpp"
 #include "PyFloat.hpp"
 #include "SuperKlass.hpp"
+#include "RangeKlass.hpp"
 
 Interpreter* Interpreter::instance = nullptr;
 
@@ -54,6 +55,7 @@ Interpreter::Interpreter() {
     _builtins->set(StringTable::str_dict, DictKlass::getInstance()->getTypeObject());
     _builtins->set(StringTable::str_float, FloatKlass::getInstance()->getTypeObject());
     _builtins->set(StringTable::str_super, SuperKlass::getInstance()->getTypeObject());
+    _builtins->set(StringTable::str_range, RangeKlass::getInstance()->getTypeObject());
 
     _builtins->set(PyString::createString("sysgc"), PackNativeFunc(NativeFunction::sysgc));
 }

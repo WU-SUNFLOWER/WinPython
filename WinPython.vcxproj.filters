@@ -180,10 +180,16 @@
     <ClCompile Include="object_python/PyBool.cpp">
       <Filter>源文件\object_python</Filter>
     </ClCompile>
-    <ClCompile Include="PySuper.cpp">
+    <ClCompile Include="object_python/PyRange.cpp">
       <Filter>源文件\object_python</Filter>
     </ClCompile>
-    <ClCompile Include="SuperKlass.cpp">
+    <ClCompile Include="klass/RangeKlass.cpp">
+      <Filter>源文件\klass</Filter>
+    </ClCompile>
+    <ClCompile Include="object_python/PySuper.cpp">
+      <Filter>源文件\object_python</Filter>
+    </ClCompile>
+    <ClCompile Include="klass/SuperKlass.cpp">
       <Filter>源文件\klass</Filter>
     </ClCompile>
   </ItemGroup>
@@ -302,9 +308,6 @@
     <ClInclude Include="klass\CodeKlass.hpp">
       <Filter>头文件\klass</Filter>
     </ClInclude>
-    <ClInclude Include="NoneKlass.hpp">
-      <Filter>头文件\klass</Filter>
-    </ClInclude>
     <ClInclude Include="object_python/PyNone.hpp">
       <Filter>头文件\object_python</Filter>
     </ClInclude>
@@ -320,11 +323,20 @@
     <ClInclude Include="klass/FloatKlass.hpp">
       <Filter>头文件\klass</Filter>
     </ClInclude>
-    <ClInclude Include="PySuper.hpp">
+    <ClInclude Include="klass/NoneKlass.hpp">
+      <Filter>头文件\klass</Filter>
+    </ClInclude>
+    <ClInclude Include="klass/RangeKlass.hpp">
+      <Filter>头文件\klass</Filter>
+    </ClInclude>
+    <ClInclude Include="klass/SuperKlass.hpp">
+      <Filter>头文件\klass</Filter>
+    </ClInclude>
+    <ClInclude Include="object_python/PySuper.hpp">
       <Filter>头文件\object_python</Filter>
     </ClInclude>
-    <ClInclude Include="SuperKlass.hpp">
-      <Filter>头文件\klass</Filter>
+    <ClInclude Include="object_python/PyRange.hpp">
+      <Filter>头文件\object_python</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

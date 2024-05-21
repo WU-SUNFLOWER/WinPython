@@ -16,6 +16,7 @@
 #include "FloatKlass.hpp"
 #include "ObjectKlass.hpp"
 #include "SuperKlass.hpp"
+#include "RangeKlass.hpp"
 
 PyObject* Universe::PyTrue = nullptr;
 PyObject* Universe::PyFalse = nullptr;
@@ -61,6 +62,7 @@ void Universe::genesis() {
     NoneKlass::getInstance()->initialize();
     FloatKlass::getInstance()->initialize();
     SuperKlass::getInstance()->initialize();
+    RangeKlass::getInstance()->initialize();
     
 }
 

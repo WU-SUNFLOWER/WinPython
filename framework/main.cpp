@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
         puts("WinPython -c <python bytecode filename>");
         exit(-1);
     }
-    setlocale(LC_CTYPE, ".UTF-8");  // 启用UTF8编码，这样中文显示才不会乱码
+    //setlocale(LC_CTYPE, ".UTF-8");  // 启用UTF8编码，这样中文显示才不会乱码
     Universe::genesis();
     BufferedInputStream stream(byteCodeFile.c_str());
     ByteCodeFileParser parser(&stream);

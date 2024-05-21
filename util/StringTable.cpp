@@ -29,6 +29,7 @@ PyString* StringTable::str_setattr = nullptr;
 PyString* StringTable::str_dict_values = nullptr;
 PyString* StringTable::str_dict_keys = nullptr;
 PyString* StringTable::str_dict_items = nullptr;
+PyString* StringTable::str_range = nullptr;
 
 void StringTable::initialize() {
     str_len = PyString::createString("len", true);
@@ -60,4 +61,5 @@ void StringTable::initialize() {
     str_dict_values = PyString::createString("dict_values", true);
     str_dict_items = PyString::createString("dict_items", true);
     str_dict_keys = PyString::createString("dict_key", true);
+    str_range = PyString::createString("range", true);
 }

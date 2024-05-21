@@ -147,6 +147,11 @@ PyObject* NativeFunction::list_iterator_next(PyList* args) {
     return iter->next();
 }
 
+PyObject* NativeFunction::range_iterator_next(PyRange* args) {
+    RangeIterator* iter = static_cast<RangeIterator*>(args->get(0));
+    return iter->next();
+}
+
 // dict.setdefault(key, value)
 // 先看看字典中是否有key字段，如有则啥也不干
 // 如果没有，则向字典添加键值对(key, value)

@@ -38,6 +38,7 @@ public:
     static PyString* str_dict_values;
     static PyString* str_dict_keys;
     static PyString* str_dict_items;
+    static PyString* str_range;
 };
 
 #endif

@@ -4,6 +4,7 @@
 #include "PyObject.hpp"
 #include "PyList.hpp"
 #include "PyFunction.hpp"
+#include "PyRange.hpp"
 
 class NativeFunction {
 public:
@@ -25,6 +26,7 @@ public:
     static PyObject* list_remove(PyList* args);
     static PyObject* list_reverse(PyList* args);
     static PyObject* list_iterator_next(PyList* args);
+    static PyObject* range_iterator_next(PyRange* args);
 
     static PyObject* dict_set_default(PyList* args);
     static PyObject* dict_pop(PyList* args);
