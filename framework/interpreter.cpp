@@ -547,6 +547,14 @@ void Interpreter::evalFrame() {
             // 获取cell variable并解引用，再加载到栈顶
             case ByteCode::Load_Deref: {
                 PyObject* object = _curFrame->_cells->get(op_arg);
+                if (!object) {
+                    PyObject* cellName =
+                        _curFrame->_codeObject->_cellVars->get(op_arg);
+                    size_t i = _curFrame->_varNames->index(cellName);
+                    object = _curFrame->_fastLocals->get(i);
+                    // 找到了之后别忘了把cellObject挂载到栈桢的_cells上去
+                    _curFrame->_cells->set(op_arg, object);
+                }
                 if (!isPyInteger(object) && object->getKlass() == CellKlass::getInstance()) {
                     PyCell* cell = static_cast<PyCell*>(object);
                     PyObject* temp = cell->getObject();
@@ -578,7 +586,6 @@ void Interpreter::evalFrame() {
                 if (isPyInteger(cellObject) || cellObject->getKlass() != CellKlass::getInstance()) {
                     cellObject = new PyCell(_curFrame->_cells, op_arg);
                 }
-                PyObject* temp = static_cast<PyCell*>(cellObject)->getObject();
                 PUSH(cellObject);
                 break;
             }
@@ -715,7 +722,7 @@ void Interpreter::compareTwoPythonObjects(PyObject* lhs, PyObject* rhs, uint16_t
                 PUSH(rhs->has(lhs));
                 break;
             case CompareCondition::Not_In:
-                PUSH(packBoolean(rhs->has(lhs) == Universe::PyTrue));
+                PUSH(packBoolean(rhs->has(lhs) == Universe::PyFalse));
                 break;
             default:
                 printf("Unknown Compare Condition Code 0x%x\n", op);
@@ -989,7 +996,6 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
             size_t cells_len = calleeFunc->funcCode->_cellVars->getLength();
             for (size_t i = 0; i < freevar_len; ++i) {
                 PyCell* temp = static_cast<PyCell*>(freevarsList->get(i));
-                PyObject* temp1 = temp->getObject();
                 calleeFrame->_cells->set(cells_len + i, temp);
             }
         }

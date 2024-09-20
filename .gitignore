@@ -45,3 +45,5 @@ x64/
 *.db
 *.pdb
 *.pdb
+
+.pyc
