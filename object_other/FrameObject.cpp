@@ -1,47 +1,44 @@
 #include "FrameObject.hpp"
 #include "interpreter.hpp"
 #include "StringTable.hpp"
+#include "Handle.hpp"
+#include "nativeFunctions.hpp"
 
-FrameObject::FrameObject(CodeObject* codeObject) {
-    START_COUNT_TEMP_OBJECTS;
-    pc = 0;
-   
-    _codeObject = codeObject;
-    _consts = codeObject->_consts;
-    _names = codeObject->_names;
-    _varNames = codeObject->_varNames;
-    _byteCodes = codeObject->_byteCodes;
+FrameObject::FrameObject(Handle<CodeObject*> codeObject) {
 
-    // 初始化一张空的映射表用于储存本地变量
-    _locals = PyDict::createDict();
-    PUSH_TEMP(_locals);
-    
-    // 对于入口函数<module>来说，它外面不可能再有全局变量
-    // 因此该函数中的变量查询，到它的本地变量为止
-    _globals = _locals;
-    _fastLocals = nullptr;
+    this->pc = 0;
+    this->_codeObject = codeObject;
+    this->_consts = codeObject->_consts;
+    this->_names = codeObject->_names;
+    this->_varNames = codeObject->_varNames;
+    this->_byteCodes = codeObject->_byteCodes;
 
-    size_t cellsLength = 
+    Handle<PyDict*> locals = PyDict::createDict();
+
+    size_t cellsLength =
         _codeObject->_cellVars->getLength() + _codeObject->_freeVars->getLength();
-    _cells = cellsLength > 0 ? PyList::createList(cellsLength) : nullptr;
-    PUSH_TEMP(_cells);
-
-    if (_cells) {
+    Handle<PyList*> cells = 
+        cellsLength > 0 ? PyList::createList(cellsLength) : nullptr;
+    if (cells) {
         for (size_t i = 0; i < cellsLength; ++i) {
-            _cells->set(i, nullptr);
+            cells->set(i, nullptr);
         }
     }
+    
+    Handle<PyList*> stack = PyList::createList(_codeObject->_stackSize);
 
-    _stack = PyList::createList(_codeObject->_stackSize);
-    PUSH_TEMP(_stack);
+    // 初始化一张空的映射表用于储存本地变量
+    this->_locals = locals;
+    this->_cells = cells;
+    // 对于入口函数<module>来说，它外面不可能再有全局变量
+    // 因此该函数中的变量查询，到它的本地变量为止
+    this->_globals = locals;
+    this->_stack = stack;
 
-    _blockStack = new Stack<Block>(10);
-
-    _callerFrame = nullptr;
-
-    _isEntryFrame = false;
-
-    END_COUNT_TEMP_OBJECTS;
+    this->_fastLocals = nullptr;
+    this->_blockStack = new Stack<Block>(10);
+    this->_callerFrame = nullptr;
+    this->_isEntryFrame = false;
 
 }
 
@@ -49,14 +46,16 @@ FrameObject::~FrameObject() {
     delete _blockStack;
 }
 
-FrameObject* FrameObject::allocate(PyFunction* callee, FrameObject* callerFrame,
-    bool isEntryFrame, PyList* args
+FrameObject* FrameObject::allocate(
+    Handle<PyFunction*> callee, Handle<FrameObject*> callerFrame,
+    bool isEntryFrame, Handle<PyList*> args
 ) {
-    START_COUNT_TEMP_OBJECTS;
-    PUSH_TEMP(callee);
-    PUSH_TEMP(callerFrame);
-    PUSH_TEMP(args);
-    FrameObject* frame = new FrameObject(callee->funcCode);
+    //START_COUNT_TEMP_OBJECTS;
+    //PUSH_TEMP(callee);
+    //PUSH_TEMP(callerFrame);
+    //PUSH_TEMP(args);
+    Handle<FrameObject*> frame = new FrameObject(callee->funcCode);
+    //NativeFunction::sysgc(nullptr);
     frame->_globals = callee->_globals;
     frame->_callerFrame = callerFrame;
     frame->_fastLocals = args;
@@ -65,7 +64,7 @@ FrameObject* FrameObject::allocate(PyFunction* callee, FrameObject* callerFrame,
         frame->_globals->set(StringTable::str_class, 
             reinterpret_cast<PyObject*>(callee->getOwnerClass()));
     }
-    END_COUNT_TEMP_OBJECTS;
+    //END_COUNT_TEMP_OBJECTS;
     return frame;
 }
 

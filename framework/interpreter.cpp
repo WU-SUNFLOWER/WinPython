@@ -767,12 +767,13 @@ rawArgNumber_pos —— 即用户调用Call_Function时的op_args的低8位，
 rawArgNumber_kw —— 即用户调用Call_Function时的op_args的高8位，
     代表扩展键值参数的总个数
 */
-void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs, 
+void Interpreter::entryIntoNewFrame(
+    Handle<PyObject*> callableObject, Handle<PyList*> rawArgs, 
     uint8_t rawArgNumber_pos, uint8_t rawArgNumber_kw
 ) {
-    START_COUNT_TEMP_OBJECTS;
-    PUSH_TEMP(callableObject);
-    PUSH_TEMP(rawArgs);
+    //START_COUNT_TEMP_OBJECTS;
+    //PUSH_TEMP(callableObject);
+    //PUSH_TEMP(rawArgs);
     /*
         在Python2中，对于普通的位置参数、位置扩展参数（*args），
         在执行Call_Function指令时都会被记道op_args里传给argNumber。
@@ -791,24 +792,24 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
     }
 
     // 判断callable object的真实类型，提取出真正的callee function
-    PyFunction* calleeFunc = nullptr;
-    PyObject* owner = nullptr;
-    PUSH_TEMP(calleeFunc);
-    PUSH_TEMP(owner);
+    Handle<PyFunction*> calleeFunc = nullptr;
+    Handle<PyObject*> owner = nullptr;
+    //PUSH_TEMP(calleeFunc);
+    //PUSH_TEMP(owner);
     if (isMethod(klass)) {
-        PyMethod* method = static_cast<PyMethod*>(callableObject);
+        PyMethod* method = static_cast<PyMethod*>((PyObject*)callableObject);
         calleeFunc = method->getFunc();
         owner = method->getOwner();
     }
     else if (isCommonFuncKlass(klass)) {
-        calleeFunc = static_cast<PyFunction*>(callableObject);
+        calleeFunc = static_cast<PyFunction*>((PyObject*)callableObject);
     }
     else if (isTypeObject(klass)) {
-        PyObject* inst = static_cast<PyTypeObject*>(callableObject)
+        PyObject* inst = static_cast<PyTypeObject*>((PyObject*)callableObject)
             ->getOwnKlass()
             ->allocateInstance(callableObject, rawArgs);
         PUSH(inst);
-        END_COUNT_TEMP_OBJECTS;
+        //END_COUNT_TEMP_OBJECTS;
         return;
     }
 
@@ -824,17 +825,17 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
     }
 
     klass = calleeFunc->getKlass();
-    PyList* finalArgs = PyList::createList(rawArgNumber_pos);
-    PUSH_TEMP(finalArgs);
+    Handle<PyList*> finalArgs = PyList::createList(rawArgNumber_pos);
+    //PUSH_TEMP(finalArgs);
 
     // 对于一般的python函数，还需要进行一系列的参数处理
-    PyList* posExArgs = nullptr;
-    PyDict* keywordExArgs = nullptr;
-    CodeObject* code = nullptr;
+    Handle<PyList*> posExArgs = nullptr;
+    Handle<PyDict*> keywordExArgs = nullptr;
+    Handle<CodeObject*> code = nullptr;
     if (isPythonFuncKlass(klass)) {
 
         code = calleeFunc->funcCode;
-        PUSH_TEMP(code);
+        //PUSH_TEMP(code);
         size_t formalArgNumber_total = code->_argCount;
         size_t formalArgNumber_default = 0;
 
@@ -842,11 +843,11 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
         int flags = code->_flag;
         if (flags & PyFunction::CO_VARARGS) {
             posExArgs = PyList::createList(rawArgNumber_pos - formalArgNumber_total);
-            PUSH_TEMP(posExArgs);
+            //PUSH_TEMP(posExArgs);
         }
         if (flags & PyFunction::CO_VARKEYWORDS) {
             keywordExArgs = PyDict::createDict();
-            PUSH_TEMP(keywordExArgs);
+            //PUSH_TEMP(keywordExArgs);
         }
 
         // 处理函数形参列表中的默认参数值
@@ -1006,7 +1007,7 @@ void Interpreter::entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs,
         printf("Unknown function object!");
         exit(-1);
     }
-    END_COUNT_TEMP_OBJECTS;
+    //END_COUNT_TEMP_OBJECTS;
 } 
 
 // 退出并销毁当前栈桢，再把解释器执行上下文切换为caller的栈桢

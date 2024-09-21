@@ -1,0 +1,67 @@
+#include "Handle.hpp"
+#include "FrameObject.hpp"
+#include "PyList.hpp"
+#include "PyFunction.hpp"
+
+template<class T>
+inline Handle<T>::Handle(T value) : LinkedList(), _value(value) {
+	HandleMark::getInstance()->add_handle(this);
+}
+
+template<class T>
+inline Handle<T>::Handle(const Handle<T>& other)
+	: LinkedList(), _value(other._value) 
+{
+	HandleMark::getInstance()->add_handle(this);
+}
+
+template<class T>
+Handle<T>::~Handle() {
+	_value = nullptr;
+	HandleMark::getInstance()->del_handle(this);
+}
+
+template<class T>
+void Handle<T>::oops_do(OopClosure* closure) {
+	closure->do_oop(reinterpret_cast<PyObject**>(& _value));
+}
+
+template<>
+void Handle<FrameObject*>::oops_do(OopClosure* closure) {
+	_value->oops_do(closure);
+}
+
+template class Handle<PyFunction*>;
+template class Handle<PyList*>;
+template class Handle<PyDict*>;
+template class Handle<PyObject*>;
+template class Handle<CodeObject*>;
+template class Handle<FrameObject*>;
+
+HandleMark* HandleMark::instance = nullptr;
+
+HandleMark::HandleMark() {
+
+}
+
+HandleMark* HandleMark::getInstance() {
+	if (instance == nullptr) {
+		instance = new HandleMark();
+	}
+	return instance;
+}
+
+void HandleMark::oops_do(OopClosure* closure) {
+	LinkedList* cur = &_handle_list;
+	while ((cur = cur->next()) != &_handle_list) {
+		cur->oops_do(closure);
+	}
+}
+
+void HandleMark::add_handle(LinkedList* handle_node) {
+	handle_node->add_before(&_handle_list);
+}
+
+void HandleMark::del_handle(LinkedList* handle_node) {
+	handle_node->del();
+}

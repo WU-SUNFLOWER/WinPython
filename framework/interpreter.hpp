@@ -10,6 +10,7 @@
 #include "Map.hpp"
 #include "PyDict.hpp"
 #include "OopClosure.hpp"
+#include "Handle.hpp"
 
 class Interpreter {
     enum Status {
@@ -49,7 +50,9 @@ public:
 
     void makeFunction(int16_t defaultArgCount, bool isClosureFunc);
 
-    void entryIntoNewFrame(PyObject* callableObject, PyList* rawArgs, 
+    void entryIntoNewFrame(
+        Handle<PyObject*> callableObject, 
+        Handle<PyList*> rawArgs, 
         uint8_t argNumber_pos, uint8_t argNumber_kw);
 
     void destroyCurFrame();

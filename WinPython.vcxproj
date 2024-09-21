@@ -144,6 +144,7 @@
     <ClCompile Include="klass/BoolKlass.cpp" />
     <ClCompile Include="klass/FloatKlass.cpp" />
     <ClCompile Include="klass\CodeKlass.cpp" />
+    <ClCompile Include="memory\Handle.cpp" />
     <ClCompile Include="memory\Heap.cpp" />
     <ClCompile Include="memory\OopClosure.cpp" />
     <ClCompile Include="memory\ScavengeOopClosure.cpp" />
@@ -190,12 +191,14 @@
     <ClCompile Include="util/StringTable.cpp" />
     <ClCompile Include="klass/TypeKlass.cpp" />
     <ClCompile Include="object_other/Universe.cpp" />
+    <ClCompile Include="util\LinkedList.cpp" />
     <ClCompile Include="util\Stack.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="klass/BoolKlass.hpp" />
     <ClInclude Include="klass/FloatKlass.hpp" />
     <ClInclude Include="klass\CodeKlass.hpp" />
+    <ClInclude Include="memory\Handle.hpp" />
     <ClInclude Include="memory\Heap.hpp" />
     <ClInclude Include="memory\OopClosure.hpp" />
     <ClInclude Include="memory\ScavengeOopClosure.hpp" />
@@ -240,6 +243,7 @@
     <ClInclude Include="util/StringTable.hpp" />
     <ClInclude Include="klass/TypeKlass.hpp" />
     <ClInclude Include="object_other/Universe.hpp" />
+    <ClInclude Include="util\LinkedList.hpp" />
     <ClInclude Include="util\Stack.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

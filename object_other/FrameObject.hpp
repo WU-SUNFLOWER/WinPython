@@ -10,6 +10,7 @@
 #include "PyList.hpp"
 #include "PyDict.hpp"
 #include "Stack.hpp"
+#include "Handle.hpp"
 
 class FrameObject {
     friend class Interpreter;
@@ -43,12 +44,17 @@ private:
 
 public:
     // 该构造函数仅适用于为<module>创建栈桢
-    FrameObject(CodeObject* code);
+    FrameObject(Handle<CodeObject*> code);
 
     ~FrameObject();
 
     // 该工厂函数用于一般的通过PyFunction创建栈桢
-    static FrameObject* allocate(PyFunction* callee, FrameObject* callerFrame, bool isEntryFrame, PyList* args);
+    
+    static FrameObject* allocate(
+        Handle<PyFunction*> callee, 
+        Handle<FrameObject*> callerFrame, 
+        bool isEntryFrame, 
+        Handle<PyList*> args);
 
     uint8_t getOpCode();
     uint16_t getOpArgument();

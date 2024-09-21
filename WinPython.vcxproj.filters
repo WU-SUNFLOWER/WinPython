@@ -192,6 +192,12 @@
     <ClCompile Include="klass/SuperKlass.cpp">
       <Filter>源文件\klass</Filter>
     </ClCompile>
+    <ClCompile Include="util\LinkedList.cpp">
+      <Filter>源文件\util</Filter>
+    </ClCompile>
+    <ClCompile Include="memory\Handle.cpp">
+      <Filter>源文件\memory</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework/byteCodeFileParser.hpp">
@@ -337,6 +343,12 @@
     </ClInclude>
     <ClInclude Include="object_python/PyRange.hpp">
       <Filter>头文件\object_python</Filter>
+    </ClInclude>
+    <ClInclude Include="util\LinkedList.hpp">
+      <Filter>头文件\util</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\Handle.hpp">
+      <Filter>头文件\memory</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

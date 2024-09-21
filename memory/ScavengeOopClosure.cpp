@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include "Block.hpp"
+#include "Handle.hpp"
 
 ScavengeOopClosure::ScavengeOopClosure(Space* from, Space* to, Space* meta) :
     _from(from), _to(to), _meta(meta)
@@ -32,6 +33,7 @@ void ScavengeOopClosure::scavenge() {
 void ScavengeOopClosure::process_roots() {
     Universe::oops_do(this);
     Interpreter::getInstance()->oops_do(this);
+    HandleMark::getInstance()->oops_do(this);
 }
 
 PyObject* ScavengeOopClosure::copy_and_push(PyObject* object) {
