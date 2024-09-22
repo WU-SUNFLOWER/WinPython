@@ -39,6 +39,11 @@ void Handle<Klass*>::oops_do(OopClosure* closure) {
 	_value->oops_do(closure);
 }
 
+template<>
+void Handle<Map<PyObject*, PyObject*>*>::oops_do(OopClosure* closure) {
+	closure->do_map(&_value);
+}
+
 template class Handle<PyFunction*>;
 template class Handle<PyMethod*>;
 template class Handle<PyList*>;
@@ -50,6 +55,7 @@ template class Handle<PyTypeObject*>;
 template class Handle<CodeObject*>;
 template class Handle<FrameObject*>;
 template class Handle<Klass*>;
+template class Handle<Map<PyObject*, PyObject*>*>;
 
 HandleMark* HandleMark::instance = nullptr;
 

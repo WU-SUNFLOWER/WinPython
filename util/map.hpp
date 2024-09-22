@@ -12,7 +12,7 @@ public:
     KEY key;
     VAL value;
 
-    void* operator new[](size_t size);
+    //void* operator new[](size_t size);
     
     // 无参构造函数
     MapItem() : key(0), value(0) {};
@@ -25,8 +25,8 @@ public:
 
 template<typename KEY, typename VAL>
 class Map {
-//private:
-public:
+private:
+    uintptr_t _mark_word = 0;
     VAL _default;
     size_t capacity = 0;
     size_t length = 0;
@@ -38,7 +38,7 @@ public:
 public:
     static Map* createMap(VAL defaultElem);
     
-    void* operator new(size_t size);
+    //void* operator new(size_t size);
 
     // 哈希表的增删改查基础操作
     void set(KEY key, VAL value);
@@ -64,7 +64,11 @@ public:
         return capacity;
     }
 
+    // GC相关接口
     void oops_do(OopClosure* closure);
+    void* getNewAddr();
+    void setNewAddr(void*);
+    size_t getSize();
 
 };
 #endif

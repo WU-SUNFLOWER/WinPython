@@ -190,7 +190,7 @@ void* PyObject::getNewAddr() {
 }
 
 void PyObject::setNewAddr(void* addr) {
-    if (!addr) return;
+    assert(addr != nullptr);
     _mark_word = reinterpret_cast<uintptr_t>(addr) | 0x2;
 }
 

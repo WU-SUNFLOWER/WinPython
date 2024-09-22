@@ -1,7 +1,7 @@
 def foo(n):
     d = {}
     d['x'] = n
-    if n < 100:
+    if n < 10:
         d['y'] = foo(n + 1)
         d['z'] = foo(n + 2)
     return d
