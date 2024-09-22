@@ -38,7 +38,7 @@ private:
 public:
     static Map* createMap(VAL defaultElem);
     
-    //void* operator new(size_t size);
+    void* operator new(size_t size);
 
     // 哈希表的增删改查基础操作
     void set(KEY key, VAL value);

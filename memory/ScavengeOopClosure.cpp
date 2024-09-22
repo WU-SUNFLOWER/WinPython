@@ -71,56 +71,59 @@ void ScavengeOopClosure::do_array_list(ArrayList<PyObject*>** ref) {
     do_array_list_nv<PyObject*>(ref);
 }
 
-/*
-void ScavengeOopClosure::do_array_list(ArrayList<PyString*>** ref) {
-    do_array_list_nv<PyString*>(ref);
-}
-*/
-
 template<typename T>
 void ScavengeOopClosure::do_array_list_nv(ArrayList<T>** ref) {
     if (ref == nullptr || *ref == nullptr) return;
-    assert(_from->hasObject(*ref));
 
-    size_t size = sizeof(ArrayList<T>);
+    /*
+    assert(_from->hasObject(*ref));
+    ArrayList<T>* object = *ref;
+    void* target = object->getNewAddr();
+    if (target) {
+        *ref = reinterpret_cast<ArrayList<T>*>(target);
+        return;
+    }
+
+    size_t size = object->getSize();
     if (!_to->canAlloc(size)) {
         fputs("Can't allocate more space.", stderr);
         exit(-1);
     }
+    target = _to->allocate(size);
+    memcpy(target, object, size);
 
-    void* target = _to->allocate(size);
-    memcpy(target, *ref, size);
+    object->setNewAddr(target);
 
-    *ref = reinterpret_cast<ArrayList<T>*>(target);
+    *ref = reinterpret_cast<ArrayList<T>*>(target);    
+    */
+
+
     (*ref)->oops_do(this);
 }
-
-//void ScavengeOopClosure::do_map(Map<PyObject*, PyObject*>** ref) {
-//    if (ref == nullptr || *ref == nullptr) return;
-//    assert(_from->hasObject(*ref));
-//
-//    size_t size = sizeof(Map<PyObject*, PyObject*>);
-//    if (!_to->canAlloc(size)) {
-//        fputs("Can't allocate more space.", stderr);
-//        exit(-1);
-//    }
-//    void* target = _to->allocate(size);
-//    memcpy(target, *ref, size);
-//
-//    auto old_target = *ref;
-//
-//    *ref = reinterpret_cast<Map<PyObject*, PyObject*>*>(target);
-//    (*ref)->oops_do(this);
-//
-//    if ((*ref)->length > 3) {
-//        auto x = (*ref)->ptr[3].value->getKlass()->getSize();
-//    }
-//
-//}
 
 void ScavengeOopClosure::do_map(Map<PyObject*, PyObject*>** ref) {
     if (ref == nullptr || *ref == nullptr) return;
 
+    assert(_from->hasObject(*ref));
+
+    Map<PyObject*, PyObject*>* object = *ref;
+    void* target = object->getNewAddr();
+    if (target) {
+        *ref = reinterpret_cast<Map<PyObject*, PyObject*>*>(target);
+        return;
+    }
+
+    size_t size = object->getSize();
+    if (!_to->canAlloc(size)) {
+        fputs("Can't allocate more space.", stderr);
+        exit(-1);
+    }
+    target = _to->allocate(size);
+    memcpy(target, object, size);
+
+    object->setNewAddr(target);
+
+    *ref = reinterpret_cast<Map<PyObject*, PyObject*>*>(target);
     (*ref)->oops_do(this);
 }
 

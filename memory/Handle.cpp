@@ -44,6 +44,16 @@ void Handle<Map<PyObject*, PyObject*>*>::oops_do(OopClosure* closure) {
 	closure->do_map(&_value);
 }
 
+template<>
+void Handle<ArrayList<PyObject*>*>::oops_do(OopClosure* closure) {
+	closure->do_array_list(&_value);
+}
+
+template<>
+void Handle<ArrayList<Klass*>*>::oops_do(OopClosure* closure) {
+	closure->do_array_list(&_value);
+}
+
 template class Handle<PyFunction*>;
 template class Handle<PyMethod*>;
 template class Handle<PyList*>;
@@ -56,6 +66,8 @@ template class Handle<CodeObject*>;
 template class Handle<FrameObject*>;
 template class Handle<Klass*>;
 template class Handle<Map<PyObject*, PyObject*>*>;
+template class Handle<ArrayList<PyObject*>*>;
+template class Handle<ArrayList<Klass*>*>;
 
 HandleMark* HandleMark::instance = nullptr;
 

@@ -9,6 +9,11 @@ Map<KEY, VAL>* Map<KEY, VAL>::createMap(VAL defaultElem) {
 }
 
 template<typename KEY, typename VAL>
+void* Map<KEY, VAL>::operator new(size_t size) {
+    return Universe::PyHeap->allocate(size);
+}
+
+template<typename KEY, typename VAL>
 void Map<KEY, VAL>::expand() {
     return;
 }

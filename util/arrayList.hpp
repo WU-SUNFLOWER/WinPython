@@ -11,12 +11,13 @@ class ArrayList {
     friend class PyList;
     friend class ListKlass;
 private:
+    uintptr_t _mark_word = 0;
     size_t length = 0;  // 数组内有效元素的个数
     size_t capacity = 0;  // 数组开辟内存的总长度
     T* ptr = nullptr;
     T _defaultElem;
 
-    ArrayList* expand(size_t targetLength = 0);
+    void expand(size_t targetLength = 0);
 public:
     static ArrayList* createArrayList(T defaultElem, int64_t n = 8ll, bool isInMeta = false);
     
@@ -45,8 +46,11 @@ public:
         return capacity;
     }
     // GC相关接口
-    void* operator new(size_t size, bool isInMeta = false);
+    //void* operator new(size_t size);
     void oops_do(OopClosure* closure);
+    void* getNewAddr();
+    void setNewAddr(void*);
+    size_t getSize();
 };
 
 #endif
