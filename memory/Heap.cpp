@@ -39,7 +39,7 @@ void* Heap::allocate(size_t size) {
     if (!eden->canAlloc(size)) {
         gc();
         if (!eden->canAlloc(size)) {
-            puts("eden space hasn't enough space to allocate.");
+            fputs("eden space hasn't enough space to allocate.", stderr);
             exit(-1);
         }
     }

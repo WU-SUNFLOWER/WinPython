@@ -771,9 +771,6 @@ void Interpreter::entryIntoNewFrame(
     Handle<PyObject*> callableObject, Handle<PyList*> rawArgs, 
     uint8_t rawArgNumber_pos, uint8_t rawArgNumber_kw
 ) {
-    //START_COUNT_TEMP_OBJECTS;
-    //PUSH_TEMP(callableObject);
-    //PUSH_TEMP(rawArgs);
     /*
         在Python2中，对于普通的位置参数、位置扩展参数（*args），
         在执行Call_Function指令时都会被记道op_args里传给argNumber。
@@ -785,7 +782,7 @@ void Interpreter::entryIntoNewFrame(
     */
     
     // 取出callableObject的klass，判断函数调用是否合法
-    const Klass* klass = callableObject->getKlass();
+    Handle<Klass*> klass = callableObject->getKlass();
     if (!isMethod(klass) && !isTypeObject(klass) && !isCommonFuncKlass(klass)) {
         printf("Unknown callable object!");
         exit(-1);
@@ -794,10 +791,8 @@ void Interpreter::entryIntoNewFrame(
     // 判断callable object的真实类型，提取出真正的callee function
     Handle<PyFunction*> calleeFunc = nullptr;
     Handle<PyObject*> owner = nullptr;
-    //PUSH_TEMP(calleeFunc);
-    //PUSH_TEMP(owner);
     if (isMethod(klass)) {
-        PyMethod* method = static_cast<PyMethod*>((PyObject*)callableObject);
+        Handle<PyMethod*> method = static_cast<PyMethod*>((PyObject*)callableObject);
         calleeFunc = method->getFunc();
         owner = method->getOwner();
     }
@@ -805,7 +800,7 @@ void Interpreter::entryIntoNewFrame(
         calleeFunc = static_cast<PyFunction*>((PyObject*)callableObject);
     }
     else if (isTypeObject(klass)) {
-        PyObject* inst = static_cast<PyTypeObject*>((PyObject*)callableObject)
+        Handle<PyObject*> inst = static_cast<PyTypeObject*>((PyObject*)callableObject)
             ->getOwnKlass()
             ->allocateInstance(callableObject, rawArgs);
         PUSH(inst);
@@ -826,7 +821,6 @@ void Interpreter::entryIntoNewFrame(
 
     klass = calleeFunc->getKlass();
     Handle<PyList*> finalArgs = PyList::createList(rawArgNumber_pos);
-    //PUSH_TEMP(finalArgs);
 
     // 对于一般的python函数，还需要进行一系列的参数处理
     Handle<PyList*> posExArgs = nullptr;
@@ -843,16 +837,14 @@ void Interpreter::entryIntoNewFrame(
         int flags = code->_flag;
         if (flags & PyFunction::CO_VARARGS) {
             posExArgs = PyList::createList(rawArgNumber_pos - formalArgNumber_total);
-            //PUSH_TEMP(posExArgs);
         }
         if (flags & PyFunction::CO_VARKEYWORDS) {
             keywordExArgs = PyDict::createDict();
-            //PUSH_TEMP(keywordExArgs);
         }
 
         // 处理函数形参列表中的默认参数值
         // 这里用最笨的办法，即先把所有的默认参数值写到finalArgs上，再用实参覆盖
-        PyList* defaultArgs = calleeFunc->_defaultArgs;
+        Handle<PyList*> defaultArgs = calleeFunc->_defaultArgs;
         if (defaultArgs) {
             formalArgNumber_default = defaultArgs->getLength();
             /* 
@@ -903,16 +895,14 @@ void Interpreter::entryIntoNewFrame(
 
         // 接下来处理扩展键值参数（**kwargs）
         for (size_t i = 0; i < rawArgNumber_kw; ++i) {
-            PyObject* key = rawArgs->get(rawArgNumber_pos + 2 * i);
-            PyObject* value = rawArgs->get(rawArgNumber_pos + 2 * i + 1);
+            Handle<PyObject*> key = rawArgs->get(rawArgNumber_pos + 2 * i);
+            Handle<PyObject*> value = rawArgs->get(rawArgNumber_pos + 2 * i + 1);
             
             if (key->getKlass() != StringKlass::getInstance()) {
                 printf("%.200s() keywords must be strings\n", funcName);
                 exit(-1);
             }
             
-            const uint8_t* key_str = static_cast<PyString*>(key)->getValue();
-
             // 先在被调函数的varnames中找一下，看看能不能找到keyword
             // 如果能找到，说明用户是在尝试为函数的形参赋值
             // 不能找到，该键值对记入扩展键值参数
@@ -932,7 +922,9 @@ void Interpreter::entryIntoNewFrame(
                     finalArgs->get(foundIndex) != nullptr
                 ) {
                     printf("%.200s() got multiple values for keyword "
-                        "argument '%.400s'\n", funcName, key_str);
+                           "argument '%.400s'\n", 
+                           funcName, 
+                           key()->as<PyString>()->getValue());
                     exit(-1);
                 }
                 finalArgs->set(foundIndex, value);
@@ -942,7 +934,9 @@ void Interpreter::entryIntoNewFrame(
             }
             else {
                 printf("%.200s() got an unexpected keyword "
-                    "argument '%.400s'\n", funcName, key_str);
+                       "argument '%.400s'\n", 
+                       funcName, 
+                       key()->as<PyString>()->getValue());
                 exit(-1);
             }
         }
@@ -982,7 +976,7 @@ void Interpreter::entryIntoNewFrame(
     }
     else if (isPythonFuncKlass(klass)) {
         // 创建新栈桢
-        FrameObject* calleeFrame = 
+        Handle<FrameObject*> calleeFrame = 
             FrameObject::allocate(calleeFunc, _curFrame, false, finalArgs);
 
         /* 
@@ -991,12 +985,12 @@ void Interpreter::entryIntoNewFrame(
            这样当callee运行时，就可以通过Load_Closure指令
            访问这些freevars了。
         */
-        PyList* freevarsList = calleeFunc->_freevars;
+        Handle<PyList*> freevarsList = calleeFunc->_freevars;
         if (freevarsList) {
             size_t freevar_len = freevarsList->getLength();
             size_t cells_len = calleeFunc->funcCode->_cellVars->getLength();
             for (size_t i = 0; i < freevar_len; ++i) {
-                PyCell* temp = static_cast<PyCell*>(freevarsList->get(i));
+                Handle<PyCell*> temp = freevarsList->get(i)->as<PyCell>();
                 calleeFrame->_cells->set(cells_len + i, temp);
             }
         }
@@ -1026,32 +1020,24 @@ void Interpreter::exitFromCurFrame() {
     PUSH(_retValue);
 }
 
-PyObject* Interpreter::callVirtual(PyObject* callable, PyList* args) {
-    Klass* klass = callable->getKlass();
+PyObject* Interpreter::callVirtual(Handle<PyObject*> callable, Handle<PyList*> args) {
+    Handle<Klass*> klass = callable->getKlass();
     if (klass == NativeFunctionKlass::getInstance()) {
-        return static_cast<PyFunction*>(callable)->callNativeFunc(args);
+        return callable()->as<PyFunction>()->callNativeFunc(args);
     }
     else if (klass == MethodKlass::getInstance()) {
-        PyMethod* method = static_cast<PyMethod*>(callable);
-        PyFunction* func = method->getFunc();
+        Handle<PyMethod*> method = callable()->as<PyMethod>();
+        Handle<PyFunction*> func = method->getFunc();
         if (args == nullptr) {
-            START_COUNT_TEMP_OBJECTS;
-            PUSH_TEMP(callable);
-            PUSH_TEMP(method);
-            PUSH_TEMP(func);
             args = PyList::createList(1);
-            END_COUNT_TEMP_OBJECTS;
         }
         args->insert(0, method->getOwner());
-        return callVirtual(func, args);
+        return callVirtual(func(), args);
     }
     else if (klass == FunctionKlass::getInstance()) {
-        START_COUNT_TEMP_OBJECTS;
-        PUSH_TEMP(callable);
-        PUSH_TEMP(args);
         // 创建Python栈桢
-        FrameObject* frame = FrameObject::allocate(
-            static_cast<PyFunction*>(callable),
+        Handle<FrameObject*> frame = FrameObject::allocate(
+            callable()->as<PyFunction>(),
             /* 
                 从Python世界的视角来看，即便是被C++代码调用的某个Python函数，
                 在逻辑上也是被某一条Python代码触发的。
@@ -1067,7 +1053,6 @@ PyObject* Interpreter::callVirtual(PyObject* callable, PyList* args) {
             true,
             args
         );
-        END_COUNT_TEMP_OBJECTS;
         // 手工执行新栈桢
         _curFrame = frame;
         evalFrame();

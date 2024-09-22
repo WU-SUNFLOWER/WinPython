@@ -2,6 +2,7 @@
 #include "Universe.hpp"
 #include "FunctionKlass.hpp"
 #include "NativeFunctionKlass.hpp"
+#include "StringKlass.hpp"
 #include "PyFunction.hpp"
 #include "PyMethod.hpp"
 #include "PyDict.hpp"
@@ -9,6 +10,11 @@
 #include <cstdlib>
 #include <cstdio>
 #include "TypeKlass.hpp"
+#include "CellKlass.hpp"
+#include "PyCell.hpp"
+#include "PyList.hpp"
+#include "ListKlass.hpp"
+#include "DictKlass.hpp"
 
 PyString* PyObject::getKlassName() const {
     assert(klass != nullptr);
@@ -20,12 +26,16 @@ const uint8_t* PyObject::getKlassNameAsString() const {
     return getKlassName()->getValue();
 }
 
+PyDict* PyObject::initSelfDict() {
+    return getKlass()->init_self_dict(this);
+}
+
 PyDict* PyObject::getSelfDict() {
     return _self_dict;
 }
 
-PyDict* PyObject::initSelfDict() {
-    return (_self_dict = PyDict::createDict());
+void PyObject::setSelfDict(Handle<PyDict*> dict) {
+    _self_dict = dict;
 }
 
 void* PyObject::operator new(size_t size, bool isInMeta) {
@@ -193,3 +203,45 @@ void PyObject::oops_do(OopClosure* closure) {
     getKlass()->oops_do(closure, this);
 }
 /* GC相关接口 结束 */
+
+template<class T>
+T* PyObject::as()
+{
+    return static_cast<T>(this);
+}
+
+template<>
+PyString* PyObject::as<PyString>() {
+    checkLegalPyObject(this, StringKlass::getInstance());
+    return static_cast<PyString*>(this);
+}
+
+template<>
+PyList* PyObject::as<PyList>() {
+    checkLegalPyObject(this, ListKlass::getInstance());
+    return static_cast<PyList*>(this);
+}
+
+template<>
+PyDict* PyObject::as<PyDict>() {
+    checkLegalPyObject(this, DictKlass::getInstance());
+    return static_cast<PyDict*>(this);
+}
+
+template<>
+PyCell* PyObject::as<PyCell>() {
+    checkLegalPyObject(this, CellKlass::getInstance());
+    return static_cast<PyCell*>(this);
+}
+
+template<>
+PyFunction* PyObject::as<PyFunction>() {
+    checkLegalPyObject(this, FunctionKlass::getInstance());
+    return static_cast<PyFunction*>(this);
+}
+
+template<>
+PyMethod* PyObject::as<PyMethod>() {
+    checkLegalPyObject(this, MethodKlass::getInstance());
+    return static_cast<PyMethod*>(this);
+}

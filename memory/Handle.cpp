@@ -2,6 +2,9 @@
 #include "FrameObject.hpp"
 #include "PyList.hpp"
 #include "PyFunction.hpp"
+#include "PyMethod.hpp"
+#include "PyCell.hpp"
+#include "map.hpp"
 
 template<class T>
 inline Handle<T>::Handle(T value) : LinkedList(), _value(value) {
@@ -31,12 +34,22 @@ void Handle<FrameObject*>::oops_do(OopClosure* closure) {
 	_value->oops_do(closure);
 }
 
+template<>
+void Handle<Klass*>::oops_do(OopClosure* closure) {
+	_value->oops_do(closure);
+}
+
 template class Handle<PyFunction*>;
+template class Handle<PyMethod*>;
 template class Handle<PyList*>;
 template class Handle<PyDict*>;
 template class Handle<PyObject*>;
+template class Handle<PyCell*>;
+template class Handle<PyString*>;
+template class Handle<PyTypeObject*>;
 template class Handle<CodeObject*>;
 template class Handle<FrameObject*>;
+template class Handle<Klass*>;
 
 HandleMark* HandleMark::instance = nullptr;
 

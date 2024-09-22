@@ -39,7 +39,7 @@ PyObject* RangeKlass::getIter(PyObject* object) const {
     return new RangeIterator(static_cast<PyRange*>(object));
 }
 
-PyObject* RangeKlass::allocateInstance(PyObject* callable, PyList* args) {
+PyObject* RangeKlass::allocateInstance(Handle<PyObject*> callable, Handle<PyList*> args) {
     START_COUNT_TEMP_OBJECTS;
     assert(callable == getTypeObject());
 

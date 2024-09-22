@@ -1,16 +1,17 @@
 #include "PyList.hpp"
 #include "ListKlass.hpp"
 #include "Universe.hpp"
+#include "Handle.hpp"
 
 PyList* PyList::createList(size_t n, bool isInMeta) {
-    START_COUNT_TEMP_OBJECTS;
-    PyList* list = new(isInMeta) PyList();
+    //START_COUNT_TEMP_OBJECTS;
+    Handle<PyList*> list = new(isInMeta)PyList();
     list->isInMeta = isInMeta;
     list->setKlass(ListKlass::getInstance());
-    PUSH_TEMP(list);
+    //PUSH_TEMP(list);
     auto container = ArrayList<PyObject*>::createArrayList(nullptr, n, isInMeta);
     list->_container = container;
-    END_COUNT_TEMP_OBJECTS;
+    //END_COUNT_TEMP_OBJECTS;
     return list;
 }
 

@@ -5,6 +5,7 @@
 #include "map.hpp"
 #include "Klass.hpp"
 #include <cassert>
+#include <cstdio>
 #include "OopClosure.hpp"
 
 class PyDict;
@@ -35,6 +36,7 @@ public:
     const uint8_t* getKlassNameAsString() const;
 
     PyDict* getSelfDict();
+    void setSelfDict(Handle<PyDict*> dict);
     PyDict* initSelfDict();
 
     void* operator new(size_t size, bool isInMeta = false);
@@ -84,10 +86,8 @@ public:
     PyObject* isinstance(PyTypeObject* type) const;
 
     /*公用方法 End*/
-    
-    virtual PyObject* rsub(const PyObject* minuend) const {
-        return nullptr;
-    }
+    template<class T>
+    inline T* as();
 
     // GC相关接口
     void* getNewAddr();

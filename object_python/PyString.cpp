@@ -8,13 +8,13 @@
 PyString* PyString::createString(
     const uint8_t* source, size_t len_src, bool isMeta
 ) {
-    START_COUNT_TEMP_OBJECTS;
+    //START_COUNT_TEMP_OBJECTS;
 
-    PyString* str = new (isMeta)PyString();
+    Handle<PyString*> str = new (isMeta)PyString();
     str->length = len_src;
     str->setKlass(StringKlass::getInstance());
     str->isInMeta = isMeta;
-    PUSH_TEMP(str);
+    //PUSH_TEMP(str);
     
     uint8_t* ptr = nullptr;
     if (isMeta) {
@@ -27,7 +27,7 @@ PyString* PyString::createString(
     ptr[len_src] = 0;
     str->ptr = ptr;
 
-    END_COUNT_TEMP_OBJECTS;
+    //END_COUNT_TEMP_OBJECTS;
     return str;
 }
 

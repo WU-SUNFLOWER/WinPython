@@ -7,6 +7,7 @@
 
 class PyObject;
 class Klass;
+class PyString;
 
 class OopClosure {
 public:
@@ -14,6 +15,7 @@ public:
 
     virtual void do_array_list(ArrayList<Klass*>** list) = 0;
     virtual void do_array_list(ArrayList<PyObject*>** list) = 0;
+    //virtual void do_array_list(ArrayList<PyString*>** list) = 0;
     
     virtual void do_map(Map<PyObject*, PyObject*>** map) = 0;
     virtual void do_raw_mem(void** mem, size_t size) = 0;

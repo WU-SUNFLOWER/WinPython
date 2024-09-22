@@ -19,6 +19,9 @@ void Map<KEY, VAL>::expand() {
     }
     self->ptr = newPtr;
 
+    if (self->length > 3) {
+        auto x = self->ptr[3].value->getKlass()->getSize();
+    }
 
     END_COUNT_TEMP_OBJECTS;
 }
@@ -27,15 +30,15 @@ template<>
 Map<PyObject*, PyObject*>* Map<PyObject*, PyObject*>::createMap(
     PyObject* defaultElem
 ) {
+    Handle<PyObject*> _defaultElem = defaultElem;
+
     START_COUNT_TEMP_OBJECTS;
-    if (defaultElem) PUSH_TEMP(defaultElem);
-    
     Map* map = new Map();
     PUSH_TEMP_PYOBJECT_MAP(map);
     
     map->capacity = 8;
     map->length = 0;
-    map->_default = defaultElem;
+    map->_default = _defaultElem;
 
     auto addr = new MapItem<PyObject*, PyObject*>[map->capacity];
     map->ptr = addr;
@@ -55,7 +58,6 @@ void* Map<KEY, VAL>::operator new(size_t size) {
     return Universe::PyHeap->allocate(size);
 }
 
-
 template<typename KEY, typename VAL>
 void Map<KEY, VAL>::set(KEY key, VAL value) {
 }
@@ -64,43 +66,51 @@ template<>
 void Map<PyObject*, PyObject*>::set(PyObject* key, PyObject* value) {
     
     auto self = this;
+    Handle<PyObject*> _key = key;
+    Handle<PyObject*> _value = value;
     // 如果key值在哈希表中已出现过，则直接覆盖对应的value值
-    size_t searchIdx = self->getIndex(key);
+    size_t searchIdx = self->getIndex(_key);
     if (searchIdx != -1) {
-        self->ptr[searchIdx].value = value;
+        self->ptr[searchIdx].value = _value;
         return;
     }
 
     START_COUNT_TEMP_OBJECTS;
-    PUSH_TEMP(key);
-    PUSH_TEMP(value);
     PUSH_TEMP_PYOBJECT_MAP(self);
-
 
     // 空间不够要扩容
     if (self->length >= self->capacity) {
         self->expand();
     }
     // 放置新元素
-    auto elem = MapItem<PyObject*, PyObject*>(key, value);
+    auto elem = MapItem<PyObject*, PyObject*>(_key, _value);
     self->ptr[self->length++] = elem;
 
+    if (self->length > 3) {
+        auto x = self->ptr[3].value->getKlass()->getSize();
+    }
 
     END_COUNT_TEMP_OBJECTS;
 }
 
 template<typename KEY, typename VAL>
 VAL Map<KEY, VAL>::remove(KEY key) {
+
+}
+
+template<>
+PyObject* Map<PyObject*, PyObject*>::remove(PyObject* key) {
     size_t searchIdx = getIndex(key);
+    PyObject* ret = _default;
     if (searchIdx != -1) {
-        VAL ret = ptr[searchIdx].value;
+        PyObject* ret = ptr[searchIdx].value;
         // 哈希表的元素排列顺序是无所谓的，这里不用位移
         ptr[searchIdx] = ptr[--length];
-        return ret;
     }
-    else {
-        return _default;
+    if (length > 3) {
+        auto x = this->ptr[3].value->getKlass()->getSize();
     }
+    return ret;
 }
 
 template<typename KEY, typename VAL>
@@ -153,21 +163,29 @@ size_t Map<KEY, VAL>::getIndex(KEY key) {
 
 template<typename KEY, typename VAL>
 void Map<KEY, VAL>::oops_do(OopClosure* closure) {
-    closure->do_raw_mem(reinterpret_cast<void**>(&ptr), 
-        capacity * sizeof(MapItem<KEY, VAL>));
+    fputs("Can't directly call Map<KEY, VAL>::oops_do(OopClosure* closure)", stderr);
+    exit(-1);
 }
 
 template<>
 void Map<PyObject*, PyObject*>::oops_do(OopClosure* closure) {
-    if (ptr != nullptr) {
 
-        closure->do_raw_mem(reinterpret_cast<void**>(&ptr), 
-            capacity * sizeof(MapItem<PyObject*, PyObject*>));
+    if (ptr == nullptr) return;
 
-        for (size_t i = 0; i < length; ++i) {
-            closure->do_oop(&(ptr[i].key));
-            closure->do_oop(&(ptr[i].value));
-        }
+    closure->do_raw_mem(reinterpret_cast<void**>(&ptr), 
+        capacity * sizeof(MapItem<PyObject*, PyObject*>));
+
+    if (length > 3) {
+        auto x = ptr[3].value->getKlass()->getSize();
+    }
+
+    for (size_t i = 0; i < length; ++i) {
+        closure->do_oop(&(ptr[i].key));
+        closure->do_oop(&(ptr[i].value));
+    }
+
+    if (length > 3) {
+        auto x = ptr[3].value->getKlass()->getSize();
     }
 }
 

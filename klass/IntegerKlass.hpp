@@ -38,7 +38,7 @@ public:
     virtual PyObject* inplace_add(PyObject* lhs, PyObject* rhs) override;
 
     // 类的实例化
-    virtual PyObject* allocateInstance(PyObject* callable, PyList* args) override;
+    virtual PyObject* allocateInstance(Handle<PyObject*> callable, Handle<PyList*> args) override;
 
     virtual void oops_do(OopClosure*, PyObject*) override {};
     virtual PyObject* isBoolTrue(PyObject* object) override;

@@ -58,7 +58,7 @@ public:
     void destroyCurFrame();
     void exitFromCurFrame();
 
-    PyObject* callVirtual(PyObject* callable, PyList* args);
+    PyObject* callVirtual(Handle<PyObject*> callable, Handle<PyList*> args);
 
     FrameObject* getCurrentFrame();
 

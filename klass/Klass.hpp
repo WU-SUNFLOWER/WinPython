@@ -3,6 +3,7 @@
 
 #include "OopClosure.hpp"
 #include "map.hpp"
+#include "Handle.hpp"
 
 class PyObject;
 class PyString;
@@ -28,7 +29,7 @@ public:
     // 获取Python对象会占用的空间大小
     virtual size_t getSize();
 
-    static PyObject* createKlass(PyObject* dict, PyObject* supers, PyObject* name);
+    static PyObject* createKlass(Handle<PyObject*> dict, Handle<PyObject*> supers, Handle<PyObject*> name);
 
     virtual void initialize() { return; };
 
@@ -95,11 +96,12 @@ public:
     virtual PyObject* inplace_add(PyObject* lhs, PyObject* rhs);
 
     // 其他工具函数
+    virtual PyDict* init_self_dict(Handle<PyObject*> object);
     virtual PyObject* len(const PyObject* object) const { return 0; };
     // 读取属性
     virtual PyObject* getattr(PyObject* object, PyObject* attr);
     // 设置属性
-    virtual void setattr(PyObject* object, PyObject* attr, PyObject* value);
+    virtual void setattr(Handle<PyObject*> object, Handle<PyObject*> attr, Handle<PyObject*> value);
     // 读取下标
     virtual PyObject* subscr(PyObject* object,
         PyObject* subscrption) const {
@@ -121,7 +123,7 @@ public:
     virtual PyObject* next(PyObject* object) const { return 0; }
 
     // 类的实例化
-    virtual PyObject* allocateInstance(PyObject* callable, PyList* args);
+    virtual PyObject* allocateInstance(Handle<PyObject*> callable, Handle<PyList*> args);
 
     // GC相关接口
     virtual void oops_do(OopClosure* closure);

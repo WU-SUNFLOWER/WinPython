@@ -18,7 +18,7 @@ public:
     virtual void initialize() override;
     virtual void print(const PyObject* object, int flags) const override;
     virtual PyObject* getIter(PyObject* object) const override;
-    virtual PyObject* allocateInstance(PyObject* callable, PyList* args) override;
+    virtual PyObject* allocateInstance(Handle<PyObject*> callable, Handle<PyList*> args) override;
     
 };
 

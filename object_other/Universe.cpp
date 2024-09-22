@@ -74,6 +74,7 @@ void Universe::oops_do(OopClosure* closure) {
     closure->do_oop(reinterpret_cast<PyObject**>(&PyTrue));
     closure->do_oop(reinterpret_cast<PyObject**>(&PyFalse));
     closure->do_oop(reinterpret_cast<PyObject**>(&PyNone));
+    closure->do_oop(reinterpret_cast<PyObject**>(&MainCode));
     closure->do_array_list(&PyKlasses);
 
     for (size_t i = 0; i < _temp_stack->getLength(); ++i) {

@@ -144,7 +144,7 @@ PyObject* IntegerKlass::inplace_add(PyObject* lhs, PyObject* rhs) {
     return new PyInteger(a->value + b->value);
 }
 
-PyObject* IntegerKlass::allocateInstance(PyObject* callable, PyList* args) {
+PyObject* IntegerKlass::allocateInstance(Handle<PyObject*> callable, Handle<PyList*> args) {
     if (args == nullptr || args->getLength() <= 0) {
         return new PyInteger(0);
     }

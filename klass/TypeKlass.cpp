@@ -98,12 +98,14 @@ PyObject* TypeKlass::getattr(PyObject* object, PyObject* attr) {
 
 }
 
-void TypeKlass::setattr(PyObject* object, PyObject* attr, PyObject* value) {
+void TypeKlass::setattr(
+    Handle<PyObject*> object, Handle<PyObject*> attr, Handle<PyObject*> value
+) {
     checkLegalPyObject(object, this);
     assert(attr->getKlass() == StringKlass::getInstance());
 
-    PyTypeObject* cls = static_cast<PyTypeObject*>(object);
-    PyDict* klassDict = cls->getOwnKlass()->getKlassDict();
+    Handle<PyTypeObject*> cls = static_cast<PyTypeObject*>(object());
+    Handle<PyDict*> klassDict = cls->getOwnKlass()->getKlassDict();
     assert(klassDict != nullptr);
     klassDict->set(attr, value);
 

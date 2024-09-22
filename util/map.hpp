@@ -25,12 +25,16 @@ public:
 
 template<typename KEY, typename VAL>
 class Map {
-private:
+//private:
+public:
     VAL _default;
     size_t capacity = 0;
     size_t length = 0;
     MapItem<KEY, VAL>* ptr = nullptr;
     void expand();
+
+    Map() {}
+
 public:
     static Map* createMap(VAL defaultElem);
     

@@ -18,8 +18,6 @@
 #include "PyMethod.hpp"
 #include "NativeFunctionKlass.hpp"
 
-
-
 Klass::Klass() {
     Universe::PyKlasses->push(this);
 }
@@ -28,46 +26,40 @@ size_t Klass::getSize() {
     return sizeof(PyObject);
 }
 
-PyObject* Klass::createKlass(PyObject* dict, PyObject* supers, PyObject* name) {
-    START_COUNT_TEMP_OBJECTS;
-    
+PyObject* Klass::createKlass(
+    Handle<PyObject*> dict, Handle<PyObject*> supers, Handle<PyObject*> name
+) {
     checkLegalPyObject(dict, DictKlass::getInstance());
     checkLegalPyObject(supers, ListKlass::getInstance());
     checkLegalPyObject(name, StringKlass::getInstance());
 
-    PyDict* _dict = static_cast<PyDict*>(dict);
-    PyList* _supers = static_cast<PyList*>(supers);
-    PyString* _name = static_cast<PyString*>(name);
-    PUSH_TEMP(_dict);
+    Handle<Klass*> newKlass = new Klass();
 
-    Klass* newKlass = new Klass();
     // 将type object的名称挂到klass上
-    newKlass->setName(_name);
+    newKlass->setName(name->as<PyString>());
     // 初始化supers列表
-    newKlass->setSuperList(_supers);
+    newKlass->setSuperList(supers->as<PyList>());
     // 如果用户显式指定的super列表为空，则将<class 'object'>作为默认父类
-    if (_supers->getLength() <= 0) {
+    if (supers->as<PyList>()->getLength() <= 0) {
         newKlass->addSuper(ObjectKlass::getInstance());
-        newKlass->_supers = _supers;
     }
 
     // 创建Python世界对应的type对象，并实现type对象和C++ Klass的双向绑定
-    PyTypeObject* cls = new PyTypeObject();
+    Handle<PyTypeObject*> cls = new PyTypeObject();
     cls->setOwnKlass(newKlass);
     // 排序生成mro列表
     newKlass->orderSupers();
 
     // 为类方法绑定type object
-    for (size_t i = 0; i < _dict->getSize(); ++i) {
-        PyObject* obj = _dict->getValueByIndex(i);
-        if (!isPyInteger(obj) && obj->getKlass() == FunctionKlass::getInstance()) {
-            static_cast<PyFunction*>(obj)->setOwnerClass(cls);
+    for (size_t i = 0; i < dict->as<PyDict>()->getSize(); ++i) {
+        Handle<PyObject*> obj = dict->as<PyDict>()->getValueByIndex(i);
+        if (!isPyInteger(obj()) && obj->getKlass() == FunctionKlass::getInstance()) {
+            obj->as<PyFunction>()->setOwnerClass(cls);
         }
     }
     // 将type object的属性和方法挂到klass上
-    newKlass->setKlassDict(_dict);
+    newKlass->setKlassDict(dict->as<PyDict>());
 
-    END_COUNT_TEMP_OBJECTS;
     return cls;
 }
 
@@ -97,6 +89,13 @@ PyObject* Klass::inplace_add(PyObject* lhs, PyObject* rhs) {
         lhs->getKlassNameAsString(),
         rhs->getKlassNameAsString());
     exit(-1);
+}
+
+PyDict* Klass::init_self_dict(Handle<PyObject*> object) {
+    assert(object->getSelfDict() == nullptr);
+    Handle<PyDict*> dict = PyDict::createDict();
+    object->setSelfDict(dict);
+    return dict;
 }
 
 PyObject* Klass::find_in_parents(PyObject* object, PyObject* attr) {
@@ -165,49 +164,50 @@ PyObject* Klass::getattr(PyObject* object, PyObject* attr) {
     return result;
 }
 
-void Klass::setattr(PyObject* object, PyObject* attr, PyObject* value) {
+void Klass::setattr(
+    Handle<PyObject*> object, Handle<PyObject*> attr, Handle<PyObject*> value
+) {
     assert(attr->getKlass() == StringKlass::getInstance());
 
-    PyObject* func = object->getKlass()->getKlassDict()->get(StringTable::str_setattr);
+    Handle<PyObject*> func = 
+        object->getKlass()->getKlassDict()->get(StringTable::str_setattr);
+
     if (func && (func->getKlass() == FunctionKlass::getInstance())) {
-        func = new PyMethod((PyFunction*)func, object);
-        PyList* args = PyList::createList();
+        func = new PyMethod((PyFunction*)func(), object);
+        Handle<PyList*> args = PyList::createList();
         args->append(attr);
         args->append(value);
         Interpreter::getInstance()->callVirtual(func, args);
         return;
     }
 
-    PyDict* selfDict = object->getSelfDict();
+    Handle<PyDict*> selfDict = object->getSelfDict();
     if (selfDict == nullptr) {
         selfDict = object->initSelfDict();
     }
     selfDict->set(attr, value);
 }
 
-PyObject* Klass::allocateInstance(PyObject* callable, PyList* args) {
-    START_COUNT_TEMP_OBJECTS;
+PyObject* Klass::allocateInstance(
+    Handle<PyObject*> callable, Handle<PyList*> args
+) {
     checkLegalPyObject(callable, TypeKlass::getInstance());
-    PUSH_TEMP(callable);
-    PUSH_TEMP(args);
 
     // 为实例化的Python对象分配内存
-    PyObject* inst = new PyObject();
-    PUSH_TEMP(inst);
+    Handle<PyObject*> inst = new PyObject();
 
     // 为Python对象绑定klass
-    PyTypeObject* cls = static_cast<PyTypeObject*>(callable);
-    Klass* ownKlass = cls->getOwnKlass();
+    Handle<PyTypeObject*> cls = static_cast<PyTypeObject*>(callable());
+    Handle<Klass*> ownKlass = cls->getOwnKlass();
     inst->setKlass(ownKlass);
 
     // 调用Python类的__init__函数初始化对象
-    PyObject* constructor = ownKlass->getKlassDict()->get(StringTable::str_init);
+    Handle<PyObject*> constructor = ownKlass->getKlassDict()->get(StringTable::str_init);
     if (constructor != nullptr) {
         args->insert(0, inst);
         Interpreter::getInstance()->callVirtual(constructor, args);
     }
 
-    END_COUNT_TEMP_OBJECTS;
     return inst;
 }
 
@@ -220,11 +220,10 @@ void Klass::oops_do(OopClosure* closure) {
 }
 
 void Klass::oops_do(OopClosure* closure, PyObject* object) {
-    // Do nothing
+    // do nothing...
 }
 
 PyObject* Klass::isBoolTrue(PyObject* object) {
-
     return Universe::PyTrue;
 }
 

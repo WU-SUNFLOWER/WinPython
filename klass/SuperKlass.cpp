@@ -57,7 +57,7 @@ PyObject* SuperKlass::getattr(PyObject* superObject, PyObject* attr) {
     return nullptr;
 }
 
-PyObject* SuperKlass::allocateInstance(PyObject* callable, PyList* args) {
+PyObject* SuperKlass::allocateInstance(Handle<PyObject*> callable, Handle<PyList*> args) {
     START_COUNT_TEMP_OBJECTS;
     assert(callable == getTypeObject());
 

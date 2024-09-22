@@ -16,7 +16,7 @@ FrameObject::FrameObject(Handle<CodeObject*> codeObject) {
     Handle<PyDict*> locals = PyDict::createDict();
 
     size_t cellsLength =
-        _codeObject->_cellVars->getLength() + _codeObject->_freeVars->getLength();
+        codeObject->_cellVars->getLength() + codeObject->_freeVars->getLength();
     Handle<PyList*> cells = 
         cellsLength > 0 ? PyList::createList(cellsLength) : nullptr;
     if (cells) {
@@ -25,7 +25,7 @@ FrameObject::FrameObject(Handle<CodeObject*> codeObject) {
         }
     }
     
-    Handle<PyList*> stack = PyList::createList(_codeObject->_stackSize);
+    Handle<PyList*> stack = PyList::createList(codeObject->_stackSize);
 
     // 初始化一张空的映射表用于储存本地变量
     this->_locals = locals;

@@ -13,7 +13,7 @@ Space::Space(size_t size) {
     _top = (char*)(reinterpret_cast<uint64_t>(_base + 15) & ~15);
     _capacity = _end - _top;
     if (_top == nullptr) {
-        puts("Don't have enough memory space.");
+        fputs("Don't have enough memory space.", stderr);
         exit(-1);
     }
 }

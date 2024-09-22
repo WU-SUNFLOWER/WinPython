@@ -43,10 +43,6 @@ public:
     inline LinkedList* prev() {
         return _prev;
     }
-    template<class T>
-    inline T as() {
-        return static_cast<T>(this);
-    }
     virtual void oops_do(OopClosure*) {};
 };
 
