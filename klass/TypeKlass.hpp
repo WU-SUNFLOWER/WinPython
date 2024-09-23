@@ -13,7 +13,7 @@ public:
     virtual void print(const PyObject* object, int flag) const override;
     void initialize() override;
 
-    virtual PyObject* getattr(PyObject* object, PyObject* attr) override;
+    virtual PyObject* getattr(Handle<PyObject*> object, Handle<PyObject*> attr) override;
     virtual void setattr(Handle<PyObject*> object, 
                          Handle<PyObject*> attr, 
                          Handle<PyObject*> value) override;

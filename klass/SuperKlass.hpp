@@ -15,7 +15,7 @@ public:
     }
     virtual void initialize() override;
     virtual size_t getSize() override;
-    virtual PyObject* getattr(PyObject* obj, PyObject* attr) override;
+    virtual PyObject* getattr(Handle<PyObject*> obj, Handle<PyObject*> attr) override;
     virtual PyObject* allocateInstance(Handle<PyObject*> callable, Handle<PyList*> args) override;
 };
 

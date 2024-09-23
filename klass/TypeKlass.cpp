@@ -61,37 +61,39 @@ void TypeKlass::initialize() {
     setKlassDict(klassDict);
 }
 
-PyObject* TypeKlass::getattr(PyObject* object, PyObject* attr) {
+PyObject* TypeKlass::getattr(Handle<PyObject*> object, Handle<PyObject*> attr) {
     checkLegalPyObject(object, this);
     assert(attr->getKlass() == StringKlass::getInstance());
     
-    PyTypeObject* cls = static_cast<PyTypeObject*>(object);
-    PyObject* result = nullptr;
+    Handle<PyTypeObject*> cls = object->as<PyTypeObject>();
+    Handle<PyObject*> result = nullptr;
 
     /* 先顺着type object作为类所持有的mro继承列表查找，看看能不能找到 */
-    Klass* ownKlass = cls->getOwnKlass();
-    PyList* mroList = ownKlass->mro();
+    Handle<Klass*> ownKlass = cls->getOwnKlass();
+    Handle<PyList*> mroList = ownKlass->mro();
     size_t mroLength = mroList->getLength();
     for (size_t i = 0; i < mroLength; ++i) {
-        PyTypeObject* tp = static_cast<PyTypeObject*>(mroList->get(i));
-        PyDict* klassDict = tp->getOwnKlass()->getKlassDict();
-        if (klassDict != nullptr && (result = klassDict->get(attr))) 
-            return result;
+        Handle<PyTypeObject*> tp = static_cast<PyTypeObject*>(mroList->get(i));
+        Handle<PyDict*> klassDict = tp->getOwnKlass()->getKlassDict();
+        if (klassDict != nullptr) {
+            result = klassDict->get(attr);
+            if (result != nullptr) return result;
+        }
     }
 
     /* 若不能，则把type object当作普通的python对象再进行一次查找 */
     result = find_in_parents(object, attr);
     if (result) {
-        if (!isPyInteger(result) && isCommonFuncKlass(result->getKlass())) {
-            result = new PyMethod((PyFunction*)result, object);
+        if (!isPyInteger(result()) && isCommonFuncKlass(result->getKlass())) {
+            result = new PyMethod(result->as<PyFunction>(), object);
         }
         return result;
     }
 
     if (!result) {
         printf("type object '%s' has no attribute '%s'",
-            ownKlass->getName()->getValue(),
-            static_cast<PyString*>(attr)->getValue());
+               ownKlass->getName()->getValue(),
+               attr->as<PyString>()->getValue());
         exit(-1);
     }
     return result;

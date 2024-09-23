@@ -7,6 +7,7 @@
 #include "PyMethod.hpp"
 #include "PyDict.hpp"
 #include "PyTypeObject.hpp"
+#include "TypeKlass.hpp"
 #include <cstdlib>
 #include <cstdio>
 #include "TypeKlass.hpp"
@@ -15,6 +16,8 @@
 #include "PyList.hpp"
 #include "ListKlass.hpp"
 #include "DictKlass.hpp"
+#include "PySuper.hpp"
+#include "SuperKlass.hpp"
 
 PyString* PyObject::getKlassName() const {
     assert(klass != nullptr);
@@ -236,7 +239,8 @@ PyCell* PyObject::as<PyCell>() {
 
 template<>
 PyFunction* PyObject::as<PyFunction>() {
-    checkLegalPyObject(this, FunctionKlass::getInstance());
+    assert(this->getKlass() == FunctionKlass::getInstance()
+           || this->getKlass() == NativeFunctionKlass::getInstance());
     return static_cast<PyFunction*>(this);
 }
 
@@ -244,4 +248,16 @@ template<>
 PyMethod* PyObject::as<PyMethod>() {
     checkLegalPyObject(this, MethodKlass::getInstance());
     return static_cast<PyMethod*>(this);
+}
+
+template<>
+PyTypeObject* PyObject::as<PyTypeObject>() {
+    checkLegalPyObject(this, TypeKlass::getInstance());
+    return static_cast<PyTypeObject*>(this);
+}
+
+template<>
+PySuper* PyObject::as<PySuper>() {
+    checkLegalPyObject(this, SuperKlass::getInstance());
+    return static_cast<PySuper*>(this);
 }

@@ -50,12 +50,7 @@ FrameObject* FrameObject::allocate(
     Handle<PyFunction*> callee, Handle<FrameObject*> callerFrame,
     bool isEntryFrame, Handle<PyList*> args
 ) {
-    //START_COUNT_TEMP_OBJECTS;
-    //PUSH_TEMP(callee);
-    //PUSH_TEMP(callerFrame);
-    //PUSH_TEMP(args);
     Handle<FrameObject*> frame = new FrameObject(callee->funcCode);
-    //NativeFunction::sysgc(nullptr);
     frame->_globals = callee->_globals;
     frame->_callerFrame = callerFrame;
     frame->_fastLocals = args;
@@ -64,7 +59,6 @@ FrameObject* FrameObject::allocate(
         frame->_globals->set(StringTable::str_class, 
             reinterpret_cast<PyObject*>(callee->getOwnerClass()));
     }
-    //END_COUNT_TEMP_OBJECTS;
     return frame;
 }
 

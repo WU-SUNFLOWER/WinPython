@@ -804,7 +804,6 @@ void Interpreter::entryIntoNewFrame(
             ->getOwnKlass()
             ->allocateInstance(callableObject, rawArgs);
         PUSH(inst);
-        //END_COUNT_TEMP_OBJECTS;
         return;
     }
 
@@ -829,7 +828,6 @@ void Interpreter::entryIntoNewFrame(
     if (isPythonFuncKlass(klass)) {
 
         code = calleeFunc->funcCode;
-        //PUSH_TEMP(code);
         size_t formalArgNumber_total = code->_argCount;
         size_t formalArgNumber_default = 0;
 
@@ -1001,7 +999,6 @@ void Interpreter::entryIntoNewFrame(
         printf("Unknown function object!");
         exit(-1);
     }
-    //END_COUNT_TEMP_OBJECTS;
 } 
 
 // 退出并销毁当前栈桢，再把解释器执行上下文切换为caller的栈桢

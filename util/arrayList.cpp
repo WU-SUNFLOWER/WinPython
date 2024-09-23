@@ -15,7 +15,7 @@ ArrayList<T>* ArrayList<T>::createArrayList(
     T defaultElem, int64_t n, bool isInMeta
 ) {
     Handle<T> _defaultElem = defaultElem;
-    ArrayList<T>* object = new ArrayList<T>();
+    Handle<ArrayList<T>*> object = new ArrayList<T>();
 
     object->length = 0;
     object->_defaultElem = _defaultElem;

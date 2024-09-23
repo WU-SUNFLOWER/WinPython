@@ -118,13 +118,13 @@ PyObject* Klass::find_in_parents(PyObject* object, PyObject* attr) {
     return result;
 }
 
-PyObject* Klass::getattr(PyObject* object, PyObject* attr) {
+PyObject* Klass::getattr(Handle<PyObject*> object, Handle<PyObject*> attr) {
     assert(attr->getKlass() == StringKlass::getInstance());
 
-    PyObject* result = nullptr;
+    Handle<PyObject*> result = nullptr;
 
     // 首先在对象的自有属性中查找，找到就返回
-    PyDict* selfDict = object->getSelfDict();
+    Handle<PyDict*> selfDict = object->getSelfDict();
     if (selfDict != nullptr) {
         result = selfDict->get(attr);
         if (result != nullptr) {
@@ -135,29 +135,26 @@ PyObject* Klass::getattr(PyObject* object, PyObject* attr) {
     // 如果没找到，就顺着mro列表的顺序遍历查找
     result = find_in_parents(object, attr);
     if (result) {
-        if (!isPyInteger(result) && isCommonFuncKlass(result->getKlass())) {
-            result = new PyMethod((PyFunction*)result, object);
+        if (!isPyInteger(result()) && isCommonFuncKlass(result->getKlass())) {
+            result = new PyMethod(result->as<PyFunction>(), object);
         }
         return result;
     }
 
     // 如果在mro列表中也没找到，就触发__getattr__
-    PyObject* getattr_func = object->getKlass()->getKlassDict()->get(StringTable::str_getattr);
+    Handle<PyObject*> getattr_func = 
+        object->getKlass()->getKlassDict()->get(StringTable::str_getattr);
     if (getattr_func && (getattr_func->getKlass() == FunctionKlass::getInstance())) {
-        START_COUNT_TEMP_OBJECTS;
-        getattr_func = new PyMethod((PyFunction*)getattr_func, object);
-        PUSH_TEMP(attr);
-        PUSH_TEMP(getattr_func);
-        PyList* args = PyList::createList();
+        getattr_func = new PyMethod(getattr_func->as<PyFunction>(), object);
+        Handle<PyList*> args = PyList::createList();
         args->append(attr);
-        END_COUNT_TEMP_OBJECTS;
         return Interpreter::getInstance()->callVirtual(getattr_func, args);
     }
 
     if (result == nullptr) {
         printf("'%s' object has no attribute '%s'\n", 
             object->getKlassNameAsString(),
-            static_cast<PyString*>(attr)->getValue());
+            attr->as<PyString>()->getValue());
         exit(-1);
     }
 

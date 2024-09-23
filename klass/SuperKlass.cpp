@@ -24,33 +24,40 @@ size_t SuperKlass::getSize() {
     return sizeof(PySuper);
 }
 
-PyObject* SuperKlass::getattr(PyObject* superObject, PyObject* attr) {
+PyObject* SuperKlass::getattr(
+    Handle<PyObject*> superObject, Handle<PyObject*> attr
+) {
     checkLegalPyObject(superObject, this);
 
-    PyObject* obj = static_cast<PySuper*>(superObject)->object;
-    PyTypeObject* type = static_cast<PySuper*>(superObject)->type;
+    Handle<PyObject*> obj = superObject->as<PySuper>()->object;
+    Handle<PyTypeObject*> type = superObject->as<PySuper>()->type;
 
-    PyList* mroList = obj->getKlass()->mro();
+    Handle<PyList*> mroList = obj->getKlass()->mro();
     size_t mroLength = mroList->getLength();
     size_t index = mroList->index(type) + 1;
     
-    PyObject* result = nullptr;
+    Handle<PyObject*> result = nullptr;
     while (index < mroLength) {
-        PyTypeObject* tp = static_cast<PyTypeObject*>(mroList->get(index));
-        PyDict* klassDict = tp->getOwnKlass()->getKlassDict();
-        if (klassDict != nullptr && (result = klassDict->get(attr))) break;
+        Handle<PyTypeObject*> tp = static_cast<PyTypeObject*>(mroList->get(index));
+        Handle<PyDict*> klassDict = tp->getOwnKlass()->getKlassDict();
+        if (klassDict != nullptr) {
+            result = klassDict->get(attr);
+            if (result != nullptr) {
+                break;
+            }
+        }
         ++index;
     }
 
-    if (result) {
-        if (!isPyInteger(result) && isCommonFuncKlass(result->getKlass())) {
-            result = new PyMethod((PyFunction*)result, obj);
+    if (result != nullptr) {
+        if (!isPyInteger(result()) && isCommonFuncKlass(result->getKlass())) {
+            result = new PyMethod(result->as<PyFunction>(), obj);
         }
         return result;
     }
     else {
-        printf("'super' object has no attribute '%s'", 
-            static_cast<PyString*>(attr)->getValue());
+        printf("'super' object has no attribute '%s'",
+               attr->as<PyString>()->getValue());
         exit(-1);
     }
 
@@ -58,14 +65,14 @@ PyObject* SuperKlass::getattr(PyObject* superObject, PyObject* attr) {
 }
 
 PyObject* SuperKlass::allocateInstance(Handle<PyObject*> callable, Handle<PyList*> args) {
-    START_COUNT_TEMP_OBJECTS;
+
     assert(callable == getTypeObject());
 
-    PyTypeObject* type = nullptr;
-    PyObject* obj = nullptr;
+    Handle<PyTypeObject*> type = nullptr;
+    Handle<PyObject*> obj = nullptr;
     switch (args->getLength()) {
         case 0: {
-            FrameObject* frame = Interpreter::getInstance()->getCurrentFrame();
+            Handle<FrameObject*> frame = Interpreter::getInstance()->getCurrentFrame();
             type = static_cast<PyTypeObject*>(frame->_globals->get(StringTable::str_class));
             if (!type) {
                 printf("name '__class__' is not defined\n");
@@ -96,16 +103,11 @@ PyObject* SuperKlass::allocateInstance(Handle<PyObject*> callable, Handle<PyList
         }
     }
 
-    PUSH_TEMP(type);
-    PUSH_TEMP(obj);
-
     // 为实例化的Python对象分配内存
-    PyObject* inst = new PySuper(type, obj);
-    PUSH_TEMP(inst);
+    Handle<PyObject*> inst = new PySuper(type, obj);
 
     // 为Python对象绑定klass
     inst->setKlass(this);
 
-    END_COUNT_TEMP_OBJECTS;
     return inst;
 }

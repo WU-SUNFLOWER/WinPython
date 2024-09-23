@@ -40,7 +40,7 @@ PyObject* RangeKlass::getIter(PyObject* object) const {
 }
 
 PyObject* RangeKlass::allocateInstance(Handle<PyObject*> callable, Handle<PyList*> args) {
-    START_COUNT_TEMP_OBJECTS;
+
     assert(callable == getTypeObject());
 
     if (args->getLength() != 1 && args->getLength() != 2 && args->getLength() != 3) {
@@ -48,7 +48,7 @@ PyObject* RangeKlass::allocateInstance(Handle<PyObject*> callable, Handle<PyList
         exit(-1);
     }
 
-    long start = 0, end = 0, step = 1;
+    int64_t start = 0, end = 0, step = 1;
     switch (args->getLength()) {
     case 1:
         if (!isPyInteger(args->get(0))) {
@@ -82,20 +82,14 @@ PyObject* RangeKlass::allocateInstance(Handle<PyObject*> callable, Handle<PyList
     }
 
     // 创建新的范围对象并设置其属性
-    PyRange* range = new PyRange(start, end, step);
-    PUSH_TEMP(range);
+    Handle<PyRange*> range = new PyRange(start, end, step);
 
     // 绑定klass到新对象
     range->setKlass(this);
 
     // 返回新分配的实例
-    END_COUNT_TEMP_OBJECTS;
     return range;
 }
-
-
-
-
 
 RangeIteratorKlass::RangeIteratorKlass() {
     PyDict* dict = PyDict::createDict();

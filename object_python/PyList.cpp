@@ -4,26 +4,21 @@
 #include "Handle.hpp"
 
 PyList* PyList::createList(size_t n, bool isInMeta) {
-    //START_COUNT_TEMP_OBJECTS;
     Handle<PyList*> list = new(isInMeta)PyList();
     list->isInMeta = isInMeta;
     list->setKlass(ListKlass::getInstance());
-    //PUSH_TEMP(list);
-    auto container = ArrayList<PyObject*>::createArrayList(nullptr, n, isInMeta);
+    Handle<ArrayList<PyObject*>*> container = 
+        ArrayList<PyObject*>::createArrayList(nullptr, n, isInMeta);
     list->_container = container;
-    //END_COUNT_TEMP_OBJECTS;
     return list;
 }
 
-PyList* PyList::copyList(PyList* src, bool isInMeta) {
-    START_COUNT_TEMP_OBJECTS;
-    PUSH_TEMP(src);
+PyList* PyList::copyList(Handle<PyList*> src, bool isInMeta) {
     size_t length = src->getLength();
-    PyList* dst = PyList::createList(length, isInMeta);
+    Handle<PyList*> dst = PyList::createList(length, isInMeta);
     for (size_t i = 0; i < length; ++i) {
         dst->set(i, src->get(i));
     }
-    END_COUNT_TEMP_OBJECTS;
     return dst;
 }
 

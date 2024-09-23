@@ -99,7 +99,7 @@ public:
     virtual PyDict* init_self_dict(Handle<PyObject*> object);
     virtual PyObject* len(const PyObject* object) const { return 0; };
     // 读取属性
-    virtual PyObject* getattr(PyObject* object, PyObject* attr);
+    virtual PyObject* getattr(Handle<PyObject*> object, Handle<PyObject*> attr);
     // 设置属性
     virtual void setattr(Handle<PyObject*> object, Handle<PyObject*> attr, Handle<PyObject*> value);
     // 读取下标

@@ -5,6 +5,8 @@
 #include "PyMethod.hpp"
 #include "PyCell.hpp"
 #include "map.hpp"
+#include "PyRange.hpp"
+#include "PySuper.hpp"
 
 template<class T>
 inline Handle<T>::Handle(T value) : LinkedList(), _value(value) {
@@ -62,6 +64,8 @@ template class Handle<PyObject*>;
 template class Handle<PyCell*>;
 template class Handle<PyString*>;
 template class Handle<PyTypeObject*>;
+template class Handle<PyRange*>;
+template class Handle<PySuper*>;
 template class Handle<CodeObject*>;
 template class Handle<FrameObject*>;
 template class Handle<Klass*>;

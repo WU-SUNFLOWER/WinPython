@@ -76,19 +76,6 @@ void Universe::oops_do(OopClosure* closure) {
     closure->do_oop(reinterpret_cast<PyObject**>(&PyNone));
     closure->do_oop(reinterpret_cast<PyObject**>(&MainCode));
     closure->do_array_list(&PyKlasses);
-
-    for (size_t i = 0; i < _temp_stack->getLength(); ++i) {
-        closure->do_oop(_temp_stack->get(i));
-    }
-    for (size_t i = 0; i < _temp_pyobject_array_stack->getLength(); ++i) {
-        closure->do_array_list(_temp_pyobject_array_stack->get(i));
-    }
-    for (size_t i = 0; i < _temp_klass_array_stack->getLength(); ++i) {
-        closure->do_array_list(_temp_klass_array_stack->get(i));
-    }
-    for (size_t i = 0; i < _temp_pyobject_map_stack->getLength(); ++i) {
-        closure->do_map(_temp_pyobject_map_stack->get(i));
-    }
 }
 
 void Universe::refreshTempRefRecordStack(
