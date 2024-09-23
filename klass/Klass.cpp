@@ -205,6 +205,8 @@ PyObject* Klass::allocateInstance(
         Interpreter::getInstance()->callVirtual(constructor, args);
     }
 
+    //printf("create new object 0x%llx\n", (uintptr_t)inst());
+
     return inst;
 }
 

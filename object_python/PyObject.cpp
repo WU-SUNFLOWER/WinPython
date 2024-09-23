@@ -21,6 +21,12 @@
 #include "PyFloat.hpp"
 #include "FloatKlass.hpp"
 
+PyObject::PyObject()
+    : klass(nullptr), _self_dict(nullptr), _mark_word(0) 
+{
+
+}
+
 PyString* PyObject::getKlassName() const {
     assert(klass != nullptr);
     return getKlass()->getName();

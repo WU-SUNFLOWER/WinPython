@@ -33,14 +33,6 @@ Stack<Map<PyObject*, PyObject*>**>* Universe::_temp_pyobject_map_stack = nullptr
 void Universe::genesis() {
     PyHeap = Heap::getInstance();
 
-    _temp_pyobject_array_stack = 
-        new Stack<ArrayList<PyObject*>**>(1024 * 1024);
-    _temp_klass_array_stack =
-        new Stack<ArrayList<Klass*>**>(1024 * 1024);
-    _temp_pyobject_map_stack = 
-        new Stack<Map<PyObject*, PyObject*>**>(1024 * 1024);
-    _temp_stack = 
-        new Stack<PyObject**>(2 * 1024 * 1024);
     PyKlasses = ArrayList<Klass*>::createArrayList(nullptr);
 
     StringTable::initialize();
@@ -76,16 +68,4 @@ void Universe::oops_do(OopClosure* closure) {
     closure->do_oop(reinterpret_cast<PyObject**>(&PyNone));
     closure->do_oop(reinterpret_cast<PyObject**>(&MainCode));
     closure->do_array_list(&PyKlasses);
-}
-
-void Universe::refreshTempRefRecordStack(
-    int _count_temp_objects, 
-    int _count_temp_pyobject_arrays,
-    int _count_temp_klass_arrays,
-    int _count_temp_pyobject_map
-) { 
-    _temp_stack->_length -= _count_temp_objects;
-    _temp_pyobject_array_stack->_length -= _count_temp_pyobject_arrays;
-    _temp_klass_array_stack->_length -= _count_temp_klass_arrays;
-    _temp_pyobject_map_stack->_length -= _count_temp_pyobject_map;
 }

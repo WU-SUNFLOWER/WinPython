@@ -23,6 +23,8 @@ Heap::Heap(size_t size) {
 
     eden = mem_1;
     survivor = mem_2;
+
+    is_during_gc = false;
 }
 
 Heap::~Heap() {
@@ -33,9 +35,11 @@ Heap::~Heap() {
     mem_2 = nullptr;
     eden = nullptr;
     survivor = nullptr;
+    is_during_gc = false;
 }
 
 void* Heap::allocate(size_t size) {
+    assert(!is_during_gc);
     if (!eden->canAlloc(size)) {
         gc();
         if (!eden->canAlloc(size)) {
@@ -60,10 +64,7 @@ void Heap::copyLiveObjects() {
 }
 
 void Heap::gc() {
-
-    static int count = 0;
-    count++;
-
+    is_during_gc = true;
     puts("gc starting...");
     puts("  before gc:");
     printf("  eden's capacity is %llu\n", eden->_capacity);
@@ -81,4 +82,5 @@ void Heap::gc() {
     puts("  after gc:");
     printf("  eden's capacity is %llu\n", eden->_capacity);
     puts("gc end");
+    is_during_gc = false;
 }

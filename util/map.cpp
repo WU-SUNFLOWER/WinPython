@@ -90,8 +90,7 @@ Map<PyObject*, PyObject*>* Map<PyObject*, PyObject*>::createMap(
     PyObject* defaultElem
 ) {
     Handle<PyObject*> _defaultElem = defaultElem;
-
-    Map* map = new Map();
+    Handle<Map*> map = new Map();
     map->capacity = 8;
     map->length = 0;
     map->_default = _defaultElem;
@@ -102,9 +101,9 @@ Map<PyObject*, PyObject*>* Map<PyObject*, PyObject*>::createMap(
 
 template<>
 void Map<PyObject*, PyObject*>::expand() {
-    Map* self = this;
+    Handle<Map*> self = this;
     MapItem<PyObject*, PyObject*>* newPtr = 
-        new MapItem<PyObject*, PyObject*>[capacity <<= 1];
+        new MapItem<PyObject*, PyObject*>[self->capacity <<= 1];
     for (size_t i = 0; i < self->length; ++i) {
         newPtr[i] = self->ptr[i];
     }
@@ -113,7 +112,7 @@ void Map<PyObject*, PyObject*>::expand() {
 
 template<>
 void Map<PyObject*, PyObject*>::set(PyObject* key, PyObject* value) {
-    Map* self = this;
+    Handle<Map*> self = this;
     Handle<PyObject*> _key = key;
     Handle<PyObject*> _value = value;
     // 如果key值在哈希表中已出现过，则直接覆盖对应的value值
@@ -164,13 +163,18 @@ void Map<PyObject*, PyObject*>::oops_do(OopClosure* closure) {
 
     if (ptr == nullptr) return;
 
-    //closure->do_raw_mem(reinterpret_cast<void**>(&ptr), 
-    //    capacity * sizeof(MapItem<PyObject*, PyObject*>));
+    closure->do_raw_mem(reinterpret_cast<void**>(&ptr), 
+        capacity * sizeof(MapItem<PyObject*, PyObject*>));
 
     for (size_t i = 0; i < length; ++i) {
         closure->do_oop(&(ptr[i].key));
         closure->do_oop(&(ptr[i].value));
     }
+}
+
+template <typename K, typename V>
+void* MapItem<K, V>::operator new[](size_t size) {
+    return Universe::PyHeap->allocate(size);
 }
 
 template class Map<PyObject*, PyObject*>;

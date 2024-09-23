@@ -63,6 +63,7 @@ Interpreter::Interpreter() {
 void Interpreter::run(CodeObject* codeObject) {
     _curFrame = new FrameObject(codeObject);
     _curFrame->_locals->set(PyString::createString("__name__"), PyString::createString("__main__"));
+
     evalFrame();
     destroyCurFrame();
 }

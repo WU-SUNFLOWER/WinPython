@@ -34,5 +34,5 @@ void FunctionKlass::oops_do(OopClosure* closure, PyObject* object) {
     closure->do_oop(reinterpret_cast<PyObject**>(&func->_globals));
     closure->do_oop(reinterpret_cast<PyObject**>(&func->_defaultArgs));
     closure->do_oop(reinterpret_cast<PyObject**>(&func->_freevars));
-
+    closure->do_oop(reinterpret_cast<PyObject**>(&func->_owner_class));
 }

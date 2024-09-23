@@ -14,6 +14,8 @@ public:
 
     Space* metaspace;
 
+    bool is_during_gc;
+
     Heap(size_t size);
 
 public:

@@ -9,7 +9,7 @@ RESET = '\033[0m'   # 重置颜色
 
 root_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 test_cases_dir = os.path.join(root_dir, "./test_cases")
-executable_path = os.path.join(root_dir, "./x64/Debug/WinPython.exe")
+executable_path = os.path.join(root_dir, "./x64/Release/WinPython.exe")
 
 def run_test_case(test_case_path):
     command = [executable_path, test_case_path]

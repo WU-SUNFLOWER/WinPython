@@ -20,7 +20,9 @@ ArrayList<T>* ArrayList<T>::createArrayList(
     object->length = 0;
     object->_defaultElem = _defaultElem;
     object->capacity = static_cast<size_t>(std::max(1ll, n));
-    object->ptr = new T[object->capacity];
+
+    void* addr = Universe::PyHeap->allocate(sizeof(T) * object->capacity);
+    object->ptr = new(addr)T[object->capacity];
 
     for (size_t i = 0; i < object->capacity; ++i) {
         object->ptr[i] = _defaultElem;
@@ -40,7 +42,8 @@ void ArrayList<T>::expand(size_t targetLength) {
     self->capacity = std::max(self->capacity << 1, std::max(self->length + 1, targetLength));
 
     assert(self->length <= self->capacity);
-    T* newPtr = new T[self->capacity];
+    void* addr = Universe::PyHeap->allocate(sizeof(T) * self->capacity);
+    T* newPtr = new(addr)T[self->capacity];
 
     // 拷贝老缓冲区的数组元素
     for (size_t i = 0; i < self->length; ++i) {
@@ -138,9 +141,10 @@ size_t ArrayList<T>::getSize() {
 
 template<>
 void ArrayList<Klass*>::oops_do(OopClosure* closure) {
-    //closure->do_raw_mem(reinterpret_cast<void**>(&ptr), 
-    //    capacity * sizeof(Klass*));
+    assert(Universe::PyHeap->survivor->hasObject(this));
     if (ptr == nullptr) return;
+    closure->do_raw_mem(reinterpret_cast<void**>(&ptr), 
+        capacity * sizeof(Klass*));
     for (size_t i = 0; i < length; ++i) {
         closure->do_klass(&(ptr[i]));
     }
@@ -148,9 +152,10 @@ void ArrayList<Klass*>::oops_do(OopClosure* closure) {
 
 template<>
 void ArrayList<PyObject*>::oops_do(OopClosure* closure) {
-    //closure->do_raw_mem(reinterpret_cast<void**>(&ptr),
-    //    capacity * sizeof(PyObject*));
+    assert(Universe::PyHeap->survivor->hasObject(this));
     if (ptr == nullptr) return;
+    closure->do_raw_mem(reinterpret_cast<void**>(&ptr),
+        capacity * sizeof(PyObject*));
     for (size_t i = 0; i < length; ++i) {
         closure->do_oop((&ptr[i]));
     }

@@ -12,7 +12,7 @@ public:
     KEY key;
     VAL value;
 
-    //void* operator new[](size_t size);
+    void* operator new[](size_t size);
     
     // 无参构造函数
     MapItem() : key(0), value(0) {};

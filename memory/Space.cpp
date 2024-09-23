@@ -39,7 +39,7 @@ void* Space::allocate(size_t size) {
 }
 
 void Space::clear() {
-    //memset(_base, 0x00, _size);
+    memset(_base, 0x00, _size);
     // ½«_topºÍ_capacity¸´Î»
     _top = (char*)(reinterpret_cast<uint64_t>(_base + 15) & ~15);
     _capacity = _end - _top;

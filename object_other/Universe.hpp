@@ -28,7 +28,6 @@ public:
 
     // GC相关接口
     static void oops_do(OopClosure* closure);
-    static void refreshTempRefRecordStack(int, int, int, int);
 };
 
 #define NotFound -1
@@ -37,43 +36,6 @@ public:
 #define isFalse(obj) ((obj) == Universe::PyFalse)
 #define packBoolean(boolean) ((boolean) ? Universe::PyTrue : Universe::PyFalse)
 #define takeNot(obj) ((obj) == Universe::PyTrue ? Universe::PyFalse : Universe::PyTrue)
-
-#define START_COUNT_TEMP_OBJECTS \
-    int _count_temp_objects = 0; \
-    int _count_temp_pyobject_arrays = 0; \
-    int _count_temp_klass_arrays = 0; \
-    int _count_temp_pyobject_map = 0;
-
-#define PUSH_TEMP(x) \
-    { \
-        Universe::_temp_stack->push(reinterpret_cast<PyObject**>(&x)); \
-        ++_count_temp_objects; \
-    }
-
-#define PUSH_TEMP_PYOBJECT_ARRAY(x) \
-    { \
-        Universe::_temp_pyobject_array_stack->push(&x); \
-        ++_count_temp_pyobject_arrays; \
-    }
-
-#define PUSH_TEMP_KLASS_ARRAY(x) \
-    { \
-        Universe::_temp_klass_array_stack->push(&x); \
-        ++_count_temp_klass_arrays; \
-    }
-
-#define PUSH_TEMP_PYOBJECT_MAP(x) \
-    { \
-        Universe::_temp_pyobject_map_stack->push(&x); \
-        ++_count_temp_pyobject_map; \
-    }
-
-#define END_COUNT_TEMP_OBJECTS \
-    { \
-        Universe::refreshTempRefRecordStack( \
-            _count_temp_objects, _count_temp_pyobject_arrays, \
-            _count_temp_klass_arrays, _count_temp_pyobject_map); \
-    }
 
 #define isPyInteger(x) ((uintptr_t)(x) & 1)
 #define toRawInteger(x) ((int64_t)((int64_t)(x) >> 1))

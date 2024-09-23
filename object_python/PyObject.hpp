@@ -20,8 +20,7 @@ private:
     PyDict* _self_dict;
 public:
 
-    PyObject() : 
-        klass(nullptr), _self_dict(nullptr), _mark_word(0) {};
+    PyObject();
 
     void setKlass(Klass* k) {
         klass = k;
