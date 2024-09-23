@@ -21,9 +21,6 @@ public:
     PyObject* sub(PyObject* other);
     PyObject* mul(PyObject* other);
     PyObject* div(PyObject* other);
-
-    void* operator new(size_t size);
-    void operator delete(void* p);
 };
 
 #endif

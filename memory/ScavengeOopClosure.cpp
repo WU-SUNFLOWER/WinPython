@@ -29,6 +29,7 @@ void ScavengeOopClosure::scavenge() {
 }
 
 void ScavengeOopClosure::process_roots() {
+    StringTable::oops_do(this);
     Universe::oops_do(this);
     Interpreter::getInstance()->oops_do(this);
     HandleMark::getInstance()->oops_do(this);
@@ -75,7 +76,6 @@ template<typename T>
 void ScavengeOopClosure::do_array_list_nv(ArrayList<T>** ref) {
     if (ref == nullptr || *ref == nullptr) return;
 
-    /*
     assert(_from->hasObject(*ref));
     ArrayList<T>* object = *ref;
     void* target = object->getNewAddr();
@@ -94,9 +94,7 @@ void ScavengeOopClosure::do_array_list_nv(ArrayList<T>** ref) {
 
     object->setNewAddr(target);
 
-    *ref = reinterpret_cast<ArrayList<T>*>(target);    
-    */
-
+    *ref = reinterpret_cast<ArrayList<T>*>(target);
 
     (*ref)->oops_do(this);
 }

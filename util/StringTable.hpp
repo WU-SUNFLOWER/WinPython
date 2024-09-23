@@ -9,6 +9,9 @@ class StringTable {
 private:
     static void initialize();
 public:
+
+    static void oops_do(OopClosure* closure);
+
     static PyString* str_len;
     static PyString* str_false;
     static PyString* str_true;

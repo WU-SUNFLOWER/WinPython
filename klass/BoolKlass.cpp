@@ -27,6 +27,10 @@ void BoolKlass::initialize() {
     orderSupers();
 }
 
+size_t BoolKlass::getSize() {
+    return sizeof(PyBool);
+}
+
 PyObject* BoolKlass::isBoolTrue(PyObject* object) {
     return object;
 }

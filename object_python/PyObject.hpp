@@ -18,12 +18,10 @@ private:
 
     // 用来保存定义在PyObject实例之上的属性
     PyDict* _self_dict;
-protected:
-    bool isInMeta;
 public:
 
     PyObject() : 
-        klass(nullptr), _self_dict(nullptr), _mark_word(0), isInMeta(false) {};
+        klass(nullptr), _self_dict(nullptr), _mark_word(0) {};
 
     void setKlass(Klass* k) {
         klass = k;
@@ -39,8 +37,8 @@ public:
     void setSelfDict(Handle<PyDict*> dict);
     PyDict* initSelfDict();
 
-    void* operator new(size_t size, bool isInMeta = false);
-    void operator delete(void*, bool);
+    void* operator new(size_t size);
+    void operator delete(void*);
 
     /*公用方法 Start*/
 
@@ -94,9 +92,6 @@ public:
     void setNewAddr(void*);
     size_t getSize();
     void oops_do(OopClosure* closure);
-    bool isInMetaSpace() const {
-        return isInMeta;
-    }
 };
 
 typedef Map<PyObject*, PyObject*> PyObjectMap;

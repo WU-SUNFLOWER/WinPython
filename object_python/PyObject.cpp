@@ -18,6 +18,8 @@
 #include "DictKlass.hpp"
 #include "PySuper.hpp"
 #include "SuperKlass.hpp"
+#include "PyFloat.hpp"
+#include "FloatKlass.hpp"
 
 PyString* PyObject::getKlassName() const {
     assert(klass != nullptr);
@@ -41,13 +43,11 @@ void PyObject::setSelfDict(Handle<PyDict*> dict) {
     _self_dict = dict;
 }
 
-void* PyObject::operator new(size_t size, bool isInMeta) {
-    return isInMeta ? 
-        Universe::PyHeap->allocateMeta(size) :
-        Universe::PyHeap->allocate(size);
+void* PyObject::operator new(size_t size) {
+    return Universe::PyHeap->allocate(size);
 }
 
-void PyObject::operator delete(void*, bool) {
+void PyObject::operator delete(void*) {
     puts("You can't delete a python object directly.");
     exit(-1);
 }
@@ -214,6 +214,11 @@ T* PyObject::as()
 }
 
 template<>
+PyObject* PyObject::as<PyObject>() {
+    return static_cast<PyObject*>(this);
+}
+
+template<>
 PyString* PyObject::as<PyString>() {
     checkLegalPyObject(this, StringKlass::getInstance());
     return static_cast<PyString*>(this);
@@ -260,4 +265,10 @@ template<>
 PySuper* PyObject::as<PySuper>() {
     checkLegalPyObject(this, SuperKlass::getInstance());
     return static_cast<PySuper*>(this);
+}
+
+template<>
+PyFloat* PyObject::as<PyFloat>() {
+    checkLegalPyObject(this, FloatKlass::getInstance());
+    return static_cast<PyFloat*>(this);
 }

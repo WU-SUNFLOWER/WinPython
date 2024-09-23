@@ -60,7 +60,7 @@ public:
     uint16_t getOpArgument();
     bool hasMoreCode();
     
-    void pushToStack(PyObject* object);
+    void pushToStack(Handle<PyObject*> object);
     PyObject* popFromStack();
 
     PyObject* getTopInStack();

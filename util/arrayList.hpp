@@ -19,7 +19,7 @@ private:
 
     void expand(size_t targetLength = 0);
 public:
-    static ArrayList* createArrayList(T defaultElem, int64_t n = 8ll, bool isInMeta = false);
+    static ArrayList* createArrayList(T defaultElem, int64_t n = 8ll);
     
     // 向数组中的最后一个位置添加元素
     void push(T elem);
@@ -46,7 +46,7 @@ public:
         return capacity;
     }
     // GC相关接口
-    //void* operator new(size_t size);
+    void* operator new(size_t size);
     void oops_do(OopClosure* closure);
     void* getNewAddr();
     void setNewAddr(void*);

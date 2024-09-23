@@ -51,12 +51,8 @@ public:
         _lineno(lineno),
         _notable(notable) 
     {
-        PyObject::isInMeta = true;
         setKlass(CodeKlass::getInstance());
     };
-
-    void* operator new(size_t size);
-    void operator delete(void*);
 
 };
 #endif

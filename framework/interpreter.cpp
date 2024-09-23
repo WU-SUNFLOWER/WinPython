@@ -85,6 +85,9 @@ void Interpreter::evalFrame() {
     bool hasArugment;
     uint16_t op_arg;
 
+    Handle<PyObject*> rhs = nullptr;
+    Handle<PyObject*> lhs = nullptr;
+
     while (_curFrame->hasMoreCode()) {
 
         if (_status != IS_OK) {
@@ -99,8 +102,6 @@ void Interpreter::evalFrame() {
         if (hasArugment) {
             op_arg = _curFrame->getOpArgument();
         }
-        
-        PyObject* rhs, * lhs;
 
         switch (op_code) {
             case ByteCode::Pop_Top:
@@ -111,24 +112,24 @@ void Interpreter::evalFrame() {
                 PUSH(TOP());
                 break;
 
-            case ByteCode::Build_List:{
-                PyList* list = PyList::createList();
+            case ByteCode::Build_List: {
+                Handle<PyList*> list = PyList::createList();
                 while (op_arg-- > 0) {
-                    PyObject* temp = POP();
+                    Handle<PyObject*> temp = POP();
                     list->set(op_arg, temp);
                 }
-                PUSH(list);
+                PUSH(list->as<PyObject>());
                 break;
             }
             
             // 暂时先用list代替一下tuple
             case ByteCode::Build_Tuple: {
-                PyList* list = PyList::createList();
+                Handle<PyList*> list = PyList::createList();
                 while (op_arg-- > 0) {
-                    PyObject* temp = POP();
+                    Handle<PyObject*> temp = POP();
                     list->set(op_arg, temp);
                 }
-                PUSH(list);
+                PUSH(list->as<PyObject>());
                 break;
             }
 
@@ -138,25 +139,25 @@ void Interpreter::evalFrame() {
             }
 
             case ByteCode::Store_Map: {
-                PyObject* key = POP();
-                PyObject* value = POP();
+                Handle<PyObject*> key = POP();
+                Handle<PyObject*> value = POP();
                 // 因为可能有多个多个元素要存入字典，
                 // 所以字典对象暂时不能从栈上弹出
-                PyDict* dict = static_cast<PyDict*>(TOP());
+                Handle<PyDict*> dict = static_cast<PyDict*>(TOP());
                 dict->set(key, value);
                 break;
             }
 
             case ByteCode::Load_Const: {
-                PyObject* temp = Consts->get(op_arg);
+                Handle<PyObject*> temp = (_curFrame->_consts)->get(op_arg);
                 PUSH(temp);
                 break;
             }
 
             case ByteCode::Print_Item:
                 lhs = POP();
-                if (isPyInteger(lhs)) {
-                    printf("%lld", toRawInteger(lhs));
+                if (isPyInteger(lhs())) {
+                    printf("%lld", toRawInteger(lhs()));
                 }
                 else {
                     lhs->print(FLAG_PyString_PRINT_RAW);
@@ -170,9 +171,9 @@ void Interpreter::evalFrame() {
             case ByteCode::Binary_Multiply:
                 rhs = POP();  // 右操作数
                 lhs = POP();
-                if (isPyInteger(lhs)) {
-                    if (isPyInteger(rhs)) {
-                        PUSH(toPyInteger(toRawInteger(lhs) * toRawInteger(rhs)));
+                if (isPyInteger(lhs())) {
+                    if (isPyInteger(rhs())) {
+                        PUSH(toPyInteger(toRawInteger(lhs()) * toRawInteger(rhs())));
                     }
                     else if (rhs->getKlass() == FloatKlass::getInstance()) {
                         PUSH(rhs->mul(lhs));
@@ -190,9 +191,9 @@ void Interpreter::evalFrame() {
             case ByteCode::Binary_Add: {
                 rhs = POP();  // 右操作数
                 lhs = POP();
-                if (isPyInteger(lhs)) {
-                    if (isPyInteger(rhs)) {
-                        PUSH(toPyInteger(toRawInteger(lhs) + toRawInteger(rhs)));
+                if (isPyInteger(lhs())) {
+                    if (isPyInteger(rhs())) {
+                        PUSH(toPyInteger(toRawInteger(lhs()) + toRawInteger(rhs())));
                     }
                     else if (rhs->getKlass() == FloatKlass::getInstance()) {
                         PUSH(rhs->add(lhs));
@@ -212,20 +213,20 @@ void Interpreter::evalFrame() {
                 rhs = POP();  // 右操作数
                 lhs = POP();  // 左操作数
 
-                if (isPyInteger(lhs)) {
-                    if (isPyInteger(rhs)) {
-                        if (toRawInteger(rhs) == 0) {
+                if (isPyInteger(lhs())) {
+                    if (isPyInteger(rhs())) {
+                        if (toRawInteger(rhs()) == 0) {
                             printf("division by zero");
                             exit(-1);
                         }
-                        PUSH(new PyFloat(toRawInteger(lhs) / toRawInteger(rhs)));
+                        PUSH(new PyFloat(toRawInteger(lhs()) / toRawInteger(rhs())));
                     }
                     else if (rhs->getKlass() == FloatKlass::getInstance()) {
-                        if (static_cast<PyFloat*>(rhs)->getValue() == 0.0){
+                        if (rhs->as<PyFloat>()->getValue() == 0.0) {
                             printf("division by zero");
                             exit(-1);
                         }
-                        PUSH(new PyFloat(toRawInteger(lhs) / static_cast<PyFloat*>(rhs)->getValue()));
+                        PUSH(new PyFloat(toRawInteger(lhs()) / rhs->as<PyFloat>()->getValue()));
                     }
                     else {
                         printf("can't divide\n");
@@ -241,20 +242,20 @@ void Interpreter::evalFrame() {
                 rhs = POP();  // 右操作数
                 lhs = POP();  // 左操作数
 
-                if (isPyInteger(lhs)) {
-                    if (isPyInteger(rhs)) {
-                        if (toRawInteger(rhs) == 0) {
+                if (isPyInteger(lhs())) {
+                    if (isPyInteger(rhs())) {
+                        if (toRawInteger(rhs()) == 0) {
                             printf("division by zero");
                             exit(-1);
                         }
-                        PUSH(toPyInteger(toRawInteger(lhs) / toRawInteger(rhs)));
+                        PUSH(toPyInteger(toRawInteger(lhs()) / toRawInteger(rhs())));
                     }
                     else if (rhs->getKlass() == FloatKlass::getInstance()) {
-                        if (static_cast<PyFloat*>(rhs)->getValue() == 0.0) {
+                        if (rhs->as<PyFloat>()->getValue() == 0.0) {
                             printf("division by zero");
                             exit(-1);
                         }
-                        PUSH(new PyFloat(floor(toRawInteger(lhs) / static_cast<PyFloat*>(rhs)->getValue())));
+                        PUSH(new PyFloat(floor(toRawInteger(lhs()) / rhs->as<PyFloat>()->getValue())));
                     }
                     else {
                         printf("can't divide\n");
@@ -269,8 +270,8 @@ void Interpreter::evalFrame() {
             case ByteCode::Binary_Module:
                 rhs = POP();
                 lhs = POP();
-                if (isPyInteger(lhs) && isPyInteger(rhs)) {
-                    PUSH(toPyInteger(toRawInteger(lhs) % toRawInteger(rhs)));
+                if (isPyInteger(lhs()) && isPyInteger(rhs())) {
+                    PUSH(toPyInteger(toRawInteger(lhs()) % toRawInteger(rhs())));
                 }
                 else {
                     PUSH(lhs->mod(rhs));
@@ -280,8 +281,8 @@ void Interpreter::evalFrame() {
             case ByteCode::Inplace_Add:
                 rhs = POP();
                 lhs = POP();
-                if (isPyInteger(lhs) && isPyInteger(rhs)) {
-                    PUSH(toPyInteger(toRawInteger(lhs) + toRawInteger(rhs)));
+                if (isPyInteger(lhs()) && isPyInteger(rhs())) {
+                    PUSH(toPyInteger(toRawInteger(lhs()) + toRawInteger(rhs())));
                 }
                 else {
                     PUSH(lhs->inplace_add(rhs));
@@ -291,12 +292,12 @@ void Interpreter::evalFrame() {
             case ByteCode::Binary_Subtract:
                 rhs = POP();  // 右操作数
                 lhs = POP();
-                if (isPyInteger(lhs)) {
-                    if (isPyInteger(rhs)) {
-                        PUSH(toPyInteger(toRawInteger(lhs) - toRawInteger(rhs)));
+                if (isPyInteger(lhs())) {
+                    if (isPyInteger(rhs())) {
+                        PUSH(toPyInteger(toRawInteger(lhs()) - toRawInteger(rhs())));
                     }
                     else if (rhs->getKlass() == FloatKlass::getInstance()) {
-                        PUSH(new PyFloat(toRawInteger(lhs) - static_cast<PyFloat*>(rhs)->getValue()));
+                        PUSH(new PyFloat(toRawInteger(lhs()) - rhs->as<PyFloat>()->getValue()));
                     }
                     else {
                         printf("can't substract\n");
@@ -317,7 +318,7 @@ void Interpreter::evalFrame() {
             case ByteCode::Store_Subscr: {
                 rhs = POP();  // 右操作数（在此处为要取的下标）
                 lhs = POP();  // 左操作数（在此处为被取下标的元素）
-                PyObject* newObject = POP();
+                Handle<PyObject*> newObject = POP();
                 lhs->store_subscr(rhs, newObject);
                 break;
             }
@@ -340,7 +341,7 @@ void Interpreter::evalFrame() {
             // 该指令执行的是绝对地址跳转
             case ByteCode::Pop_Jump_If_False:
                 lhs = POP();
-                if (!isPyTrue(lhs)) { 
+                if (!isPyTrue(lhs())) { 
                     PC = op_arg;
                 }
                 break;
@@ -394,12 +395,12 @@ void Interpreter::evalFrame() {
                 // 因为调用函数传递键值扩展参数时，key和value都会压栈，所以这里要*2
                 uint8_t argNumber_total = argNumber_pos + 2 * argNumber_kw;
                 // 先把所有参数从栈上弹出来，存到临时列表中去
-                PyList* rawArgs = PyList::createList(argNumber_total);
+                Handle<PyList*> rawArgs = PyList::createList(argNumber_total);
                 while (argNumber_total-- > 0) {
                     rawArgs->set(argNumber_total, POP());
                 }
                 // 发起函数调用，对函数参数的进一步处理在之后发生
-                PyObject* callableObject = POP();
+                Handle<PyObject*> callableObject = POP();
                 entryIntoNewFrame(callableObject, rawArgs, 
                     argNumber_pos, argNumber_kw);
                 break;
@@ -416,9 +417,9 @@ void Interpreter::evalFrame() {
             // 将栈顶元素储存到全局变量
             case ByteCode::Store_Global: {
                 // 栈顶存放着要写入的PyObject，所以我们要先把它弹出来
-                PyObject* sourceObject = POP();
+                Handle<PyObject*> sourceObject = POP();
                 // 先根据指令参数查出要访问变量的名称
-                PyObject* variableName = _curFrame->_names->get(op_arg);
+                Handle<PyObject*> variableName = _curFrame->_names->get(op_arg);
                 // 再根据名称索引到全局变量的对象
                 _curFrame->_globals->set(variableName, sourceObject);
                 break;
@@ -427,9 +428,9 @@ void Interpreter::evalFrame() {
             // 将指定的全局变量压入栈顶
             case ByteCode::Load_Global: {
                 // 先根据指令参数找出要访问变量的变量名
-                PyObject* variableName = _curFrame->_names->get(op_arg);
+                Handle<PyObject*> variableName = _curFrame->_names->get(op_arg);
                 // 再根据变量名索引到Python对象
-                PyObject* variableObject = _curFrame->_globals->get(variableName);
+                Handle<PyObject*> variableObject = _curFrame->_globals->get(variableName);
                 if (variableObject != nullptr) {
                     PUSH(variableObject);
                     break;
@@ -441,17 +442,16 @@ void Interpreter::evalFrame() {
                 }
                 else {
                     printf("name '%s' is not defined\n", 
-                        static_cast<PyString*>(variableName)->getValue());
+                           variableName->as<PyString>()->getValue());
                     exit(-1);
                 }
-                
                 break;
             }
 
             // 将栈顶元素储存到指定名称的本地变量
             case ByteCode::Store_Name: {
-                PyObject* sourceObject = POP();
-                PyObject* variableName = _curFrame->_names->get(op_arg);
+                Handle<PyObject*> sourceObject = POP();
+                Handle<PyObject*> variableName = _curFrame->_names->get(op_arg);
                 // 由于Python中在函数体内尝试对变量赋值时，
                 // 会完全屏蔽全局变量
                 // 所以这里直接设置_locals表即可，无需去检查_globals表
@@ -461,9 +461,11 @@ void Interpreter::evalFrame() {
             
             // 加载指定名称的变量到栈顶
             case ByteCode::Load_Name: {
-                PyObject* variableName = _curFrame->_names->get(op_arg);
+                Handle<PyObject*> variableName = 
+                    _curFrame->_names->get(op_arg);
                 // 先去本地变量表看看有没有想要找的变量
-                PyObject* variableObject = _curFrame->_locals->get(variableName);
+                Handle<PyObject*> variableObject = 
+                    _curFrame->_locals->get(variableName);
                 if (variableObject != nullptr) {
                     PUSH(variableObject);
                     break;
@@ -480,7 +482,7 @@ void Interpreter::evalFrame() {
                     PUSH(variableObject);
                 } else {
                     printf("name '%s' is not defined\n",
-                        static_cast<PyString*>(variableName)->getValue());
+                        variableName->as<PyString>()->getValue());
                     exit(-1);
                 }
                 break;
@@ -492,7 +494,7 @@ void Interpreter::evalFrame() {
                 // 查找要获取的属性名的name
                 rhs = _curFrame->_names->get(op_arg);
                 // 将查得的属性对象压栈
-                PyObject* attr = lhs->getattr(rhs);
+                Handle<PyObject*> attr = lhs->getattr(rhs);
                 PUSH(attr);
                 break;
             }
@@ -504,7 +506,7 @@ void Interpreter::evalFrame() {
                 # STORE_ATTR  2 (x)
             */
             case ByteCode::Store_Attr: {
-                PyObject* attr = _curFrame->_names->get(op_arg);
+                Handle<PyObject*> attr = _curFrame->_names->get(op_arg);
                 lhs = POP();
                 rhs = POP();
                 lhs->setattr(attr, rhs);
@@ -512,11 +514,11 @@ void Interpreter::evalFrame() {
             }
 
             case ByteCode::Load_Fast: {
-                PyObject* elem = _curFrame->_fastLocals->get(op_arg);
+                Handle<PyObject*> elem = _curFrame->_fastLocals->get(op_arg);
                 if (elem != nullptr) {
                     PUSH(elem);
                 } else {
-                    PyString* varname = 
+                    Handle<PyString*> varname = 
                         static_cast<PyString*>(_curFrame->_varNames->get(op_arg));
                     printf("local variable '%s' referenced before assignment\n",
                         varname->getValue());
@@ -546,18 +548,21 @@ void Interpreter::evalFrame() {
             
             // 获取cell variable并解引用，再加载到栈顶
             case ByteCode::Load_Deref: {
-                PyObject* object = _curFrame->_cells->get(op_arg);
+                Handle<PyObject*> object = _curFrame->_cells->get(op_arg);
                 if (!object) {
-                    PyObject* cellName =
+                    Handle<PyObject*> cellName =
                         _curFrame->_codeObject->_cellVars->get(op_arg);
                     size_t i = _curFrame->_varNames->index(cellName);
                     object = _curFrame->_fastLocals->get(i);
                     // 找到了之后别忘了把cellObject挂载到栈桢的_cells上去
                     _curFrame->_cells->set(op_arg, object);
                 }
-                if (!isPyInteger(object) && object->getKlass() == CellKlass::getInstance()) {
-                    PyCell* cell = static_cast<PyCell*>(object);
-                    PyObject* temp = cell->getObject();
+                if (
+                    !isPyInteger(object()) 
+                    && object->getKlass() == CellKlass::getInstance()
+                ) {
+                    Handle<PyCell*> cell = object->as<PyCell>();
+                    Handle<PyObject*> temp = cell->getObject();
                     PUSH(temp);
                 }
                 else {
@@ -570,20 +575,23 @@ void Interpreter::evalFrame() {
             // 将cells表中的元素转换为PyCell并压栈
             // 该指令与Make_Closure指令配合使用，用于构建闭包函数
             case ByteCode::Load_Closure: {
-                PyObject* cellObject = _curFrame->_cells->get(op_arg);
+                Handle<PyObject*> cellObject = _curFrame->_cells->get(op_arg);
                 /* 
                     如果在cells列表里没找到，也有可能是inner function恰好引用
                     outer function的argument。所以还要再去尝试找找。
                 */
                 if (!cellObject) {
-                    PyObject* cellName = 
+                    Handle<PyObject*> cellName = 
                         _curFrame->_codeObject->_cellVars->get(op_arg);
                     size_t i = _curFrame->_varNames->index(cellName);
                     cellObject = _curFrame->_fastLocals->get(i);
                     // 找到了之后别忘了把cellObject挂载到栈桢的_cells上去
                     _curFrame->_cells->set(op_arg, cellObject);
                 }
-                if (isPyInteger(cellObject) || cellObject->getKlass() != CellKlass::getInstance()) {
+                if (
+                    isPyInteger(cellObject()) 
+                    || cellObject->getKlass() != CellKlass::getInstance()
+                ) {
                     cellObject = new PyCell(_curFrame->_cells, op_arg);
                 }
                 PUSH(cellObject);
@@ -599,9 +607,9 @@ void Interpreter::evalFrame() {
             
             case ByteCode::For_Iter: {
                 // 获取迭代器对象（由于迭代器要重复使用，所以不能从栈上弹出）
-                PyObject* iter = TOP();
+                Handle<PyObject*> iter = TOP();
                 // 调用迭代器对象的next方法
-                PyObject* ret = iter->next();
+                Handle<PyObject*> ret = iter->next();
                 // 如果返回值是None，则说明迭代结束，执行跳转
                 // 注意这里必须用TOP不能用POP，
                 // 因为迭代结束前留在栈上的返回值可能会被后续指令使用
@@ -615,7 +623,7 @@ void Interpreter::evalFrame() {
             }
 
             case ByteCode::Unpack_Sequence: {
-                PyList* list = static_cast<PyList*>(POP());
+                Handle<PyList*> list = static_cast<PyList*>(POP());
                 // Python中解包值接收变量数必须和待解包列表的长度一致
                 size_t length = list->getLength();
                 if (op_arg < length) {
@@ -635,9 +643,9 @@ void Interpreter::evalFrame() {
             }
 
             case ByteCode::Build_Class: {
-                PyObject* dict = POP();
-                PyObject* supers = POP();
-                PyObject* name = POP();
+                Handle<PyObject*> dict = POP();
+                Handle<PyObject*> supers = POP();
+                Handle<PyObject*> name = POP();
                 PUSH(Klass::createKlass(dict, supers, name));
                 break;
             }
@@ -659,64 +667,67 @@ void Interpreter::evalFrame() {
     }
 }
 
-void Interpreter::compareTwoPythonObjects(PyObject* lhs, PyObject* rhs, uint16_t op) {
+void Interpreter::compareTwoPythonObjects(
+    Handle<PyObject*> lhs, Handle<PyObject*> rhs, uint16_t op
+) {
 
-    if (isPyInteger(lhs) && isPyInteger(rhs)) {
+    if (isPyInteger(lhs()) && isPyInteger(rhs())) {
         switch (op) {
             case CompareCondition::Less:
-                PUSH(packBoolean((int64_t)lhs < (int64_t)rhs));
+                PUSH(packBoolean((int64_t)lhs() < (int64_t)rhs()));
                 break;
             case CompareCondition::Less_Equal:
-                PUSH(packBoolean((int64_t)lhs <= (int64_t)rhs));
+                PUSH(packBoolean((int64_t)lhs() <= (int64_t)rhs()));
                 break;
             case CompareCondition::Equal:
-                PUSH(packBoolean((int64_t)lhs == (int64_t)rhs));
+                PUSH(packBoolean((int64_t)lhs() == (int64_t)rhs()));
                 break;
             case CompareCondition::Greater_Equal:
-                PUSH(packBoolean((int64_t)lhs >= (int64_t)rhs));
+                PUSH(packBoolean((int64_t)lhs() >= (int64_t)rhs()));
                 break;
             case CompareCondition::Greater:
-                PUSH(packBoolean((int64_t)lhs > (int64_t)rhs));
+                PUSH(packBoolean((int64_t)lhs() > (int64_t)rhs()));
                 break;
             case CompareCondition::Not_Equal:
-                PUSH(packBoolean((int64_t)lhs != (int64_t)rhs));
+                PUSH(packBoolean((int64_t)lhs() != (int64_t)rhs()));
                 break;
             default:
                 printf("Illegal compare operator between integers.\n");
                 exit(-1);
         }
-    } else {
+    } 
+    else {
         switch (op) {
             case CompareCondition::Less:
-                if (isPyInteger(lhs)) lhs = new PyInteger(toRawInteger(lhs));
+                if (isPyInteger(lhs())) lhs = new PyInteger(toRawInteger(lhs()));
                 PUSH(lhs->less(rhs));
                 break;
             case CompareCondition::Less_Equal:
-                if (isPyInteger(lhs)) lhs = new PyInteger(toRawInteger(lhs));
+                if (isPyInteger(lhs())) lhs = new PyInteger(toRawInteger(lhs()));
                 PUSH(lhs->less_equal(rhs));
                 break;
             case CompareCondition::Equal:
-                if (isPyInteger(lhs)) lhs = new PyInteger(toRawInteger(lhs));
+                if (isPyInteger(lhs())) lhs = new PyInteger(toRawInteger(lhs()));
                 PUSH(lhs->equal(rhs));
                 break;
             case CompareCondition::Greater_Equal:
-                if (isPyInteger(lhs)) lhs = new PyInteger(toRawInteger(lhs));
+                if (isPyInteger(lhs())) lhs = new PyInteger(toRawInteger(lhs()));
                 PUSH(lhs->greater_equal(rhs));
                 break;
             case CompareCondition::Greater:
-                if (isPyInteger(lhs)) lhs = new PyInteger(toRawInteger(lhs));
+                if (isPyInteger(lhs())) lhs = new PyInteger(toRawInteger(lhs()));
                 PUSH(lhs->greater(rhs));
                 break;
             case CompareCondition::Not_Equal:
-                if (isPyInteger(lhs)) lhs = new PyInteger(toRawInteger(lhs));
+                if (isPyInteger(lhs())) lhs = new PyInteger(toRawInteger(lhs()));
                 PUSH(lhs->not_equal(rhs));
                 break;
             // is和is not关键字用于比较两个python对象的地址是否一致
             case CompareCondition::Is:
-                PUSH(packBoolean(lhs == rhs));
+                PUSH(packBoolean(lhs() == rhs()));
                 break;
             case CompareCondition::Is_Not:
-                PUSH(packBoolean(lhs != rhs));
+                PUSH(packBoolean(lhs() != rhs()));
                 break;
             case CompareCondition::In:
                 PUSH(rhs->has(lhs));
@@ -732,17 +743,17 @@ void Interpreter::compareTwoPythonObjects(PyObject* lhs, PyObject* rhs, uint16_t
 }
 
 void Interpreter::makeFunction(int16_t defaultArgCount, bool isClosure) {
-    PyFunction* funcObject = new PyFunction(static_cast<CodeObject*>(POP()));
+    Handle<PyFunction*> funcObject = new PyFunction(static_cast<CodeObject*>(POP()));
 
     // 如果需要创建的函数对象为闭包函数，需要绑定cells列表
     if (isClosure) {
-        PyObject* temp = POP();
-        funcObject->setFreevars(static_cast<PyList*>(temp));
+        Handle<PyObject*> temp = POP();
+        funcObject->setFreevars(temp->as<PyList>());
     }
 
     // 处理需要绑定默认参数的函数
     if (defaultArgCount > 0) {
-        PyList* DefaultArgs = PyList::createList(defaultArgCount);
+        Handle<PyList*> DefaultArgs = PyList::createList(defaultArgCount);
         while (defaultArgCount-- > 0) {
             DefaultArgs->set(defaultArgCount, POP());
         }
@@ -751,7 +762,7 @@ void Interpreter::makeFunction(int16_t defaultArgCount, bool isClosure) {
 
     // 同步栈桢全局变量表和函数对象的全局变量表
     funcObject->setGlobalMap(_curFrame->_globals);
-    PUSH(funcObject);
+    PUSH(funcObject->as<PyObject>());
 }
 
 /*
@@ -792,23 +803,27 @@ void Interpreter::entryIntoNewFrame(
     Handle<PyFunction*> calleeFunc = nullptr;
     Handle<PyObject*> owner = nullptr;
     if (isMethod(klass)) {
-        Handle<PyMethod*> method = static_cast<PyMethod*>((PyObject*)callableObject);
+        //Handle<PyMethod*> method = static_cast<PyMethod*>((PyObject*)callableObject);
+        Handle<PyMethod*> method = callableObject->as<PyMethod>();
         calleeFunc = method->getFunc();
         owner = method->getOwner();
     }
     else if (isCommonFuncKlass(klass)) {
-        calleeFunc = static_cast<PyFunction*>((PyObject*)callableObject);
+        //calleeFunc = static_cast<PyFunction*>((PyObject*)callableObject);
+        calleeFunc = callableObject->as<PyFunction>();
     }
     else if (isTypeObject(klass)) {
-        Handle<PyObject*> inst = static_cast<PyTypeObject*>((PyObject*)callableObject)
+        //Handle<PyObject*> inst = static_cast<PyTypeObject*>((PyObject*)callableObject)
+        Handle<PyObject*> inst = callableObject
+            ->as<PyTypeObject>()
             ->getOwnKlass()
             ->allocateInstance(callableObject, rawArgs);
         PUSH(inst);
         return;
     }
 
-    if (!calleeFunc) {
-        printf("Try to call a function with null pointer");
+    if (calleeFunc == nullptr) {
+        fputs("Try to call a function with null pointer", stderr);
         exit(-1);
     }
 
@@ -921,8 +936,8 @@ void Interpreter::entryIntoNewFrame(
                 ) {
                     printf("%.200s() got multiple values for keyword "
                            "argument '%.400s'\n", 
-                           funcName, 
-                           key()->as<PyString>()->getValue());
+                           funcName,
+                           key->as<PyString>()->getValue());
                     exit(-1);
                 }
                 finalArgs->set(foundIndex, value);
@@ -959,9 +974,12 @@ void Interpreter::entryIntoNewFrame(
         }
 
         // 最后别忘了把扩展参数装载到finalArgs上去
-        if (posExArgs != nullptr) finalArgs->append(posExArgs);
-        if (keywordExArgs != nullptr) finalArgs->append(keywordExArgs);
-
+        if (posExArgs != nullptr) {
+            finalArgs->append(posExArgs->as<PyObject>());
+        }
+        if (keywordExArgs != nullptr) {
+            finalArgs->append(keywordExArgs->as<PyObject>());
+        }
     }
     // 对于C++内建函数，直接传参即可
     else {
@@ -999,7 +1017,7 @@ void Interpreter::entryIntoNewFrame(
         printf("Unknown function object!");
         exit(-1);
     }
-} 
+}
 
 // 退出并销毁当前栈桢，再把解释器执行上下文切换为caller的栈桢
 void Interpreter::destroyCurFrame() {

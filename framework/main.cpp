@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
     CodeObject* code = parser.parse();
     Universe::MainCode = code;
 
-    Universe::PyHeap->gc();
+    //Universe::PyHeap->gc();
 
     Interpreter* interpreter = interpreter->getInstance();
 

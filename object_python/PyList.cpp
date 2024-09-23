@@ -3,19 +3,18 @@
 #include "Universe.hpp"
 #include "Handle.hpp"
 
-PyList* PyList::createList(size_t n, bool isInMeta) {
-    Handle<PyList*> list = new(isInMeta)PyList();
-    list->isInMeta = isInMeta;
+PyList* PyList::createList(size_t n) {
+    Handle<PyList*> list = new PyList();
     list->setKlass(ListKlass::getInstance());
     Handle<ArrayList<PyObject*>*> container = 
-        ArrayList<PyObject*>::createArrayList(nullptr, n, isInMeta);
+        ArrayList<PyObject*>::createArrayList(nullptr, n);
     list->_container = container;
     return list;
 }
 
-PyList* PyList::copyList(Handle<PyList*> src, bool isInMeta) {
+PyList* PyList::copyList(Handle<PyList*> src) {
     size_t length = src->getLength();
-    Handle<PyList*> dst = PyList::createList(length, isInMeta);
+    Handle<PyList*> dst = PyList::createList(length);
     for (size_t i = 0; i < length; ++i) {
         dst->set(i, src->get(i));
     }

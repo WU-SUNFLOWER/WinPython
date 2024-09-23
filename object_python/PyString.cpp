@@ -6,21 +6,14 @@
 #include "Universe.hpp"
 
 PyString* PyString::createString(
-    const uint8_t* source, size_t len_src, bool isMeta
+    const uint8_t* source, size_t len_src
 ) {
 
-    Handle<PyString*> str = new (isMeta)PyString();
+    Handle<PyString*> str = new PyString();
     str->length = len_src;
     str->setKlass(StringKlass::getInstance());
-    str->isInMeta = isMeta;
     
-    uint8_t* ptr = nullptr;
-    if (isMeta) {
-        ptr = reinterpret_cast<uint8_t*>(Universe::PyHeap->allocateMeta(len_src + 1));
-    }
-    else {
-        ptr = reinterpret_cast<uint8_t*>(Universe::PyHeap->allocate(len_src + 1));
-    }
+    uint8_t* ptr = reinterpret_cast<uint8_t*>(Universe::PyHeap->allocate(len_src + 1));
     memcpy(ptr, source, sizeof(uint8_t) * len_src);
     ptr[len_src] = 0;
     str->ptr = ptr;
@@ -28,11 +21,10 @@ PyString* PyString::createString(
     return str;
 }
 
-PyString* PyString::createString(const char* str_source, bool isMeta) {
+PyString* PyString::createString(const char* str_source) {
     return createString(
         reinterpret_cast<const uint8_t*>(str_source),
-        strlen(str_source),
-        isMeta);
+        strlen(str_source));
 }
 
 uint8_t PyString::operator[](size_t index) {

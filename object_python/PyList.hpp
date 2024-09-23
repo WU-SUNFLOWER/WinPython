@@ -11,9 +11,9 @@ public:
 private:
     PyList() {}
 public:
-    static PyList* createList(size_t n = 8, bool isInMeta = false);
+    static PyList* createList(size_t n = 8);
 
-    static PyList* copyList(Handle<PyList*> src, bool isInMeta = false);
+    static PyList* copyList(Handle<PyList*> src);
     
     ArrayList<PyObject*>* getContainer() const {
         return _container;
@@ -21,7 +21,7 @@ public:
     size_t getLength() const {
         return _container->getLength();
     }
-    void append(PyObject* obj) {
+    void append(Handle<PyObject*> obj) {
         _container->push(obj);
     }
     PyObject* pop() {

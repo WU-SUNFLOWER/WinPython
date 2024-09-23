@@ -78,7 +78,7 @@ bool FrameObject::hasMoreCode() {
     return pc < _byteCodes->getLength();
 }
 
-void FrameObject::pushToStack(PyObject* object)
+void FrameObject::pushToStack(Handle<PyObject*> object)
 {
     _stack->append(object);
 }

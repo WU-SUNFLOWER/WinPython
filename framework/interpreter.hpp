@@ -46,7 +46,7 @@ public:
 
     void evalFrame();
 
-    void compareTwoPythonObjects(PyObject* lhs, PyObject* rhs, uint16_t);
+    void compareTwoPythonObjects(Handle<PyObject*> lhs, Handle<PyObject*> rhs, uint16_t);
 
     void makeFunction(int16_t defaultArgCount, bool isClosureFunc);
 

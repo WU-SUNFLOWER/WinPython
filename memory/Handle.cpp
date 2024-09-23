@@ -7,6 +7,9 @@
 #include "map.hpp"
 #include "PyRange.hpp"
 #include "PySuper.hpp"
+#include "PyFloat.hpp"
+#include "PyBool.hpp"
+#include "BoolKlass.hpp"
 
 template<class T>
 inline Handle<T>::Handle(T value) : LinkedList(), _value(value) {
@@ -66,6 +69,9 @@ template class Handle<PyString*>;
 template class Handle<PyTypeObject*>;
 template class Handle<PyRange*>;
 template class Handle<PySuper*>;
+template class Handle<PyFloat*>;
+template class Handle<PyBool*>;
+template class Handle<BoolKlass*>;
 template class Handle<CodeObject*>;
 template class Handle<FrameObject*>;
 template class Handle<Klass*>;

@@ -12,7 +12,7 @@
 
 template<typename T>
 ArrayList<T>* ArrayList<T>::createArrayList(
-    T defaultElem, int64_t n, bool isInMeta
+    T defaultElem, int64_t n
 ) {
     Handle<T> _defaultElem = defaultElem;
     Handle<ArrayList<T>*> object = new ArrayList<T>();
@@ -29,12 +29,10 @@ ArrayList<T>* ArrayList<T>::createArrayList(
     return object;
 }
 
-/*
 template <typename T>
 void* ArrayList<T>::operator new(size_t size) {
     return Universe::PyHeap->allocate(size);
 }
-*/
 
 template<typename T>
 void ArrayList<T>::expand(size_t targetLength) {

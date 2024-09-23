@@ -11,8 +11,8 @@ private:
     PyString() {};
 public:
     uint8_t* ptr = nullptr;
-    static PyString* createString(const char* str_source, bool isMeta = false);
-    static PyString* createString(const uint8_t* source, size_t len_src, bool isMeta = false);
+    static PyString* createString(const char* str_source);
+    static PyString* createString(const uint8_t* source, size_t len_src);
 
     const uint8_t* getValue() const {
         return ptr;

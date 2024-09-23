@@ -13,9 +13,6 @@ public:
     static PyBool* createBool(bool value);
 
     bool getValue() const { return value; }
-
-    void* operator new(size_t size);
-    void operator delete(void* p);
 };
 
 #endif
