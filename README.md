@@ -34,13 +34,13 @@ You can download the source code of official Python compiler [here](https://gith
 
 Then you will get a dll file. Please rename it to `WinPython.dll` and copy it to the same directory as the WinPython executable file you built, and finally you can run WinPython on your computer.
 
-# Test Cases
+## Test Cases
 
 I have made some test cases in the `test_cases` dictionary, which can test the basic features of WinPython. 
 
 If you want to run these test cases in bulk, the Python script `dev_tools/run_test_cases.py` will help. Of course, since WinPython only implements a subset of Python and doesn't support bootstrapping, you'll need to run this script with the official CPython 3.8 or higher version.
 
-# Logo
+## Logo
 
 [Professor Zhang Weiwei](https://en.wikipedia.org/wiki/Zhang_Weiwei_(professor)) is the brand spokesman for WinPython, and he believes that the world situation will change in favour of an Eastern country.
 
